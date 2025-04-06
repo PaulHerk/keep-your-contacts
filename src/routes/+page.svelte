@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { get_metadata, add_persons, get_person } from "$lib/index";
+    import { add_persons, get_persons } from "$lib/index";
     import { page } from "$app/state";
     import { onMount } from "svelte";
     import { browser } from "$app/environment";
@@ -13,23 +13,17 @@
         },
     ];
 
-    let metadata = { count: 0 };
     onMount(async () => {
         if (browser) {
             add_persons("John", "", "Berlin", "hi");
-            get_metadata().then((res) => (metadata = res));
+            get_persons().then((data) => {
+                console.log(data);
+            });
         }
         // console.log(put("test"));
     });
 </script>
 
-<p>hi {metadata.count}</p>
-{#each Array.from({ length: metadata.count }, (_, i) => i) as id}
-    <p>{id}</p>
-    {#await get_person(id) then person}
-        <p>{person.note}</p>
-    {/await}
-{/each}
 <div class="columnContainer">
     <div class="rowContainer">
         {#each Object.keys(list[0]) as header}

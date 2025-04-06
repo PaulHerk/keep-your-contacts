@@ -1,8 +1,5 @@
-use api::{add_person, get_metadata, retrieve, MyState};
-use axum::{
-    routing::{get, post},
-    Router,
-};
+use api::{add_person, retrieve, MyState};
+use axum::{routing::post, Router};
 use sqlx::PgPool;
 pub mod api;
 
@@ -20,8 +17,7 @@ async fn main(
 
     let state = MyState { pool };
     let router = Router::new()
-        .route("/persons", post(add_person).get(get_metadata::get_metadata))
-        .route("/persons/{id}", get(retrieve))
+        .route("/persons", post(add_person).get(retrieve))
         .with_state(state);
 
     Ok(router.into())

@@ -33,12 +33,10 @@ pub struct Person {
 }
 
 pub async fn retrieve(
-    Path(id): Path<i32>,
     State(state): State<MyState>,
 ) -> Result<impl IntoResponse, impl IntoResponse> {
-    match sqlx::query_as::<_, Person>("SELECT * FROM persons WHERE id = $1")
-        .bind(id)
-        .fetch_one(&state.pool)
+    match sqlx::query_as::<_, Person>("SELECT * FROM persons")
+        .fetch_all(&state.pool)
         .await
     {
         Ok(person) => Ok((StatusCode::OK, Json(person))),

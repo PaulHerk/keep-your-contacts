@@ -14,19 +14,19 @@ export let add_persons = async (first_name: String, last_name: String, city: Str
     return await response.json();
 }
 
-export let get_metadata = async () => {
-    const response = await fetch("http://localhost:8000/persons");
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
-    return await response.json();
+interface Person {
+    id: number;
+    first_name: string;
+    last_name: string;
+    city: string;
+    note: string;
 }
 
 // id starts at 0, but is increased by 1 in the backend
-export let get_person = async (id: number) => {
-    const response = await fetch(`http://localhost:8000/persons/${id + 1}`);
+export let get_persons = async () => {
+    const response = await fetch(`http://localhost:8000/persons`);
     if (!response.ok) {
         throw new Error("Network response was not ok");
     }
-    return await response.json();
+    return await response.json() as Person[];
 }
