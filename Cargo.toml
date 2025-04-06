@@ -1,20 +1,13 @@
 [package]
 name = "backend"
 version = "0.1.0"
-edition = "2024"
-
-[package.metadata.wasm-pack.profile.profiling]
-wasm-opt = false
-
-[lib]
-crate-type = ["cdylib", "rlib"]
+edition = "2021"
 
 [dependencies]
-wasm-bindgen = "0.2.100"
-console_error_panic_hook = "*"
-shuttle_runtime = "0.1.0"
-
-
-[dependencies.web-sys]
-version = "0.3.77"
-features = ["console"]
+axum = "0.8.1"
+shuttle-axum = "0.53.0"
+shuttle-runtime = "0.53.0"
+tokio = "1.28.2"
+shuttle-shared-db = { version = "0.53.0", features = ["postgres", "sqlx"] }
+sqlx = { version = "0.8.3", features = ["macros"] }
+serde = "1.0.219"
