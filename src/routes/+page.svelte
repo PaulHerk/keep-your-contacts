@@ -1,7 +1,9 @@
 <script lang="ts">
-    import { put } from "$lib/index";
+    import { get_metadata, add_persons, get_person } from "$lib/index";
     import { page } from "$app/state";
     import { onMount } from "svelte";
+    import { browser } from "$app/environment";
+
     let list = [
         {
             name: "John",
@@ -9,36 +11,25 @@
             position: "intern",
             city: "Berlin",
         },
-        {
-            name: "Doe",
-            known_from: "university",
-            position: "student",
-            city: "Munich",
-        },
-        {
-            name: "Alice",
-            known_from: "conference",
-            position: "manager",
-            city: "Hamburg",
-        },
-        {
-            name: "Bob",
-            known_from: "workshop",
-            position: "developer",
-            city: "Frankfurt",
-        },
-        {
-            name: "Eve",
-            known_from: "meetup",
-            position: "designer",
-            city: "Stuttgart",
-        },
     ];
-    onMount(() => {
-        console.log(put("test"));
+
+    let metadata = { count: 0 };
+    onMount(async () => {
+        if (browser) {
+            add_persons("John", "", "Berlin", "hi");
+            get_metadata().then((res) => (metadata = res));
+        }
+        // console.log(put("test"));
     });
 </script>
 
+<p>hi {metadata.count}</p>
+{#each Array.from({ length: metadata.count }, (_, i) => i) as id}
+    <p>{id}</p>
+    {#await get_person(id) then person}
+        <p>{person.note}</p>
+    {/await}
+{/each}
 <div class="columnContainer">
     <div class="rowContainer">
         {#each Object.keys(list[0]) as header}
