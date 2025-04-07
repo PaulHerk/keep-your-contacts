@@ -10,20 +10,16 @@ declare global {
 	}
 	interface Person {
 		id: number;
-
+		first_name: string;
+		last_name: string;
+		city: string;
+		note: string;
 	}
-	class NewPerson {
-		name: string;
-		age: number;
-		email: string;
-		phone: string;
-
-		constructor() {
-			this.name = "";
-			this.age = 0;
-			this.email = "";
-			this.phone = "";
-		}
+	interface NewPerson {
+		first_name: string;
+		last_name: string;
+		city: string;
+		note: string;
 	}
 }
 

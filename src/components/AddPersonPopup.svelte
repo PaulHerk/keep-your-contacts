@@ -4,7 +4,12 @@
     import { persons } from "../state.svelte";
 
     export let addPersonPopup: HTMLDialogElement;
-    let new_person: NewPerson = new NewPerson();
+    let new_person: NewPerson = {
+        first_name: "",
+        last_name: "",
+        city: "",
+        note: "",
+    };
 </script>
 
 <dialog bind:this={addPersonPopup}>
