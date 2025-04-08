@@ -1,5 +1,6 @@
 <script lang="ts">
     import { browser } from "$app/environment";
+    import { delete_person } from "$lib";
     import { persons } from "../state.svelte";
 
     let sortBy: keyof Person = $state("first_name");
@@ -10,30 +11,50 @@
             return a[sortBy] > b[sortBy] == sortAsc ? 1 : -1;
         }),
     );
+    $inspect(persons);
 </script>
+
+{#snippet sortingH1(header: string)}
+    <button
+        onclick={() => {
+            if (sortBy === (header as keyof Person)) {
+                sortAsc = !sortAsc;
+            }
+            sortBy = header as keyof Person;
+        }}
+    >
+        <div>
+            <p>
+                sort by
+                <b>{header}</b>
+            </p>
+        </div>
+    </button>
+{/snippet}
 
 {#if browser && persons.length > 0}
     <div class="columnContainer">
         <div class="rowContainer">
-            <!-- svelte-ignore event_directive_deprecated -->
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
-            {#each Object.keys(persons[0]) as header}
-                <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-                <h1
-                    on:click={() => {
-                        if (sortBy === (header as keyof Person)) {
-                            sortAsc = !sortAsc;
-                        }
-                        sortBy = header as keyof Person;
-                    }}
-                >
-                    {header}
-                </h1>
+            {@render sortingH1("added_date")}
+            {#each Object.keys(persons[0]).slice(1) as header}
+                {@render sortingH1(header)}
             {/each}
         </div>
-        {#each sortedPersons as person}
+        {#each sortedPersons as person, id}
             <div class="rowContainer">
-                {#each Object.values(person) as attribute}
+                <button
+                    onclick={() => {
+                        delete_person(person.id).then(() => {
+                            let index = persons.findIndex(
+                                (p) => p.id === person.id,
+                            );
+                            persons.splice(index, 1);
+                        });
+                    }}
+                >
+                    <p>Delete <b>{id}</b></p>
+                </button>
+                {#each Object.values(person).slice(1) as attribute}
                     <p>{attribute}</p>
                 {/each}
             </div>

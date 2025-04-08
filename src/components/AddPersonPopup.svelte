@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { add_persons } from "$lib";
+    import { add_person } from "$lib";
     import { persons } from "../state.svelte";
 
     export let addPersonPopup: HTMLDialogElement;
@@ -20,9 +20,9 @@
         />
     {/each}
     <button
-        on:click={() => {
+        onclick={() => {
             try {
-                add_persons(new_person).then((new_person) => {
+                add_person(new_person).then((new_person) => {
                     persons.push(new_person);
                 });
                 addPersonPopup.close();
@@ -31,14 +31,14 @@
             }
         }}
     >
-        Add Person
+        <h1>Add Person</h1>
     </button>
 
     <button
-        on:click={() => {
+        onclick={() => {
             addPersonPopup.close();
         }}
     >
-        Close
+        <h1>Close</h1>
     </button>
 </dialog>

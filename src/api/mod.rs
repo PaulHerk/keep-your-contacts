@@ -62,3 +62,16 @@ pub async fn add_person(
         Err(e) => Err((StatusCode::BAD_REQUEST, e.to_string())),
     }
 }
+
+pub async fn delete_person(
+    Path(id): Path<i32>,
+    State(state): State<MyState>,
+) -> Result<impl IntoResponse, impl IntoResponse> {
+    match sqlx::query!("DELETE FROM persons WHERE id = $1", id)
+        .execute(&state.pool)
+        .await
+    {
+        Ok(_) => Ok((StatusCode::OK, ())),
+        Err(e) => Err((StatusCode::BAD_REQUEST, e.to_string())),
+    }
+}

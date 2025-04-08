@@ -1,4 +1,4 @@
-use super::{MyState, Person};
+use super::MyState;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;

@@ -1,5 +1,5 @@
 // place files you want to import through the `$lib` alias in this folder.
-export let add_persons = async (newPerson: NewPerson) => {
+export let add_person = async (newPerson: NewPerson) => {
     const response = await fetch("http://localhost:8000/persons", {
         method: "POST",
         headers: {
@@ -21,4 +21,14 @@ export let get_persons = async () => {
         throw new Error("Network response was not ok");
     }
     return await response.json() as Person[];
+}
+
+export let delete_person = async (id: number) => {
+    const response = await fetch(`http://localhost:8000/persons/delete-person/${id}`, {
+        method: "DELETE",
+    });
+    if (!response.ok) {
+        throw new Error("Network response was not ok");
+    }
+    return id
 }
