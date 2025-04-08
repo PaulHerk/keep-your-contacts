@@ -1,16 +1,37 @@
 <script lang="ts">
     import { browser } from "$app/environment";
     import { persons } from "../state.svelte";
+
+    let sortBy: keyof Person = $state("first_name");
+    let sortAsc: boolean = $state(true);
+
+    let sortedPersons = $derived(
+        [...persons].sort((a, b) => {
+            return a[sortBy] > b[sortBy] == sortAsc ? 1 : -1;
+        }),
+    );
 </script>
 
 {#if browser && persons.length > 0}
     <div class="columnContainer">
         <div class="rowContainer">
+            <!-- svelte-ignore event_directive_deprecated -->
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
             {#each Object.keys(persons[0]) as header}
-                <h1>{header}</h1>
+                <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+                <h1
+                    on:click={() => {
+                        if (sortBy === (header as keyof Person)) {
+                            sortAsc = !sortAsc;
+                        }
+                        sortBy = header as keyof Person;
+                    }}
+                >
+                    {header}
+                </h1>
             {/each}
         </div>
-        {#each persons as person, index}
+        {#each sortedPersons as person}
             <div class="rowContainer">
                 {#each Object.values(person) as attribute}
                     <p>{attribute}</p>

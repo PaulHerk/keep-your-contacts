@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { browser } from "$app/environment";
     import { add_persons } from "$lib";
     import { persons } from "../state.svelte";
 
