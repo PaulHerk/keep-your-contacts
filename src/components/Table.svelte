@@ -11,54 +11,67 @@
             return a[sortBy] > b[sortBy] == sortAsc ? 1 : -1;
         }),
     );
-    $inspect(persons);
 </script>
 
-{#snippet sortingH1(header: string)}
+{#snippet sortingH1(header: string, attribute: keyof Person)}
     <button
         onclick={() => {
-            if (sortBy === (header as keyof Person)) {
+            if (sortBy === (attribute as keyof Person)) {
                 sortAsc = !sortAsc;
             }
-            sortBy = header as keyof Person;
+            sortBy = attribute as keyof Person;
         }}
     >
         <div>
             <p>
-                sort by
                 <b>{header}</b>
             </p>
+            {#if sortBy === attribute}
+                {sortAsc ? "↑" : "↓"}
+            {/if}
         </div>
     </button>
 {/snippet}
 
 {#if browser && persons.length > 0}
-    <div class="columnContainer">
-        <div class="rowContainer">
-            {@render sortingH1("added_date")}
-            {#each Object.keys(persons[0]).slice(1) as header}
-                {@render sortingH1(header)}
-            {/each}
-        </div>
-        {#each sortedPersons as person, id}
-            <div class="rowContainer">
-                <button
-                    onclick={() => {
-                        delete_person(person.id).then(() => {
-                            let index = persons.findIndex(
-                                (p) => p.id === person.id,
-                            );
-                            persons.splice(index, 1);
-                        });
-                    }}
-                >
-                    <p>Delete <b>{id}</b></p>
-                </button>
-                {#each Object.values(person).slice(1) as attribute}
-                    <p>{attribute}</p>
+    <div class="table-wrap">
+        <table class="table caption-bottom">
+            <thead>
+                <tr>
+                    <th>
+                        {@render sortingH1("First Added", "id")}
+                    </th>
+                    <th>{@render sortingH1("First Name", "first_name")}</th>
+                    <th>{@render sortingH1("Last Name", "last_name")}</th>
+                    <th>{@render sortingH1("City", "city")}</th>
+                    <th>{@render sortingH1("Notes", "note")}</th>
+                </tr>
+            </thead>
+            <tbody class="[&>tr]:hover:preset-tonal-primary">
+                {#each sortedPersons as person, id}
+                    <tr>
+                        <td>
+                            <button
+                                onclick={() => {
+                                    delete_person(person.id).then(() => {
+                                        let index = persons.findIndex(
+                                            (p) => p.id === person.id,
+                                        );
+                                        persons.splice(index, 1);
+                                    });
+                                }}
+                                class="btn preset-tonal-error"
+                            >
+                                <p>Delete <b>{id}</b></p>
+                            </button>
+                        </td>
+                        {#each Object.values(person).slice(1) as attribute}
+                            <td><p>{attribute}</p></td>
+                        {/each}
+                    </tr>
                 {/each}
-            </div>
-        {/each}
+            </tbody>
+        </table>
     </div>
 {/if}
 
