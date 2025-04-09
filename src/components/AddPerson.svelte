@@ -26,7 +26,7 @@
 <Modal
     open={openState}
     onOpenChange={(e) => (openState = e.open)}
-    triggerBase="btn preset-filled-tertiary-500"
+    triggerBase="btn btn-lg preset-filled-tertiary-500"
     contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
     backdropClasses="backdrop-blur-sm"
 >
@@ -70,35 +70,3 @@
         </footer>
     {/snippet}
 </Modal>
-
-<!-- <dialog bind:this={addPersonPopup}>
-    {#each Object.keys(new_person) as key}
-        <input
-            type="text"
-            placeholder={key}
-            bind:value={new_person[key as keyof NewPerson]}
-        />
-    {/each}
-    <button
-        onclick={() => {
-            try {
-                add_person(new_person).then((new_person) => {
-                    persons.push(new_person);
-                });
-                addPersonPopup.close();
-            } catch (e) {
-                console.error(e);
-            }
-        }}
-    >
-        <h1>Add Person</h1>
-    </button>
-
-    <button
-        onclick={() => {
-            addPersonPopup.close();
-        }}
-    >
-        <h1>Close</h1>
-    </button>
-</dialog> -->
