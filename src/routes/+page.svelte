@@ -6,7 +6,7 @@
     import { browser } from "$app/environment";
     import Table from "../components/Table.svelte";
     import { persons } from "../state.svelte";
-    import AddPersonPopup from "../components/AddPersonPopup.svelte";
+    import AddPerson from "../components/AddPerson.svelte";
 
     onMount(() => {
         if (browser) {
@@ -15,14 +15,13 @@
             });
         }
     });
-    let addPersonPopup: HTMLDialogElement;
 </script>
 
-<button
-    onclick={() => addPersonPopup.showModal()}
-    style="left: 40%; position: relative;"
-    ><h1>Add Person</h1>
-</button>
-<AddPersonPopup bind:addPersonPopup />
+<p
+    class="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-5xl font-extrabold text-transparent ..."
+>
+    Know Your Contacts
+</p>
 
 <Table />
+<AddPerson />

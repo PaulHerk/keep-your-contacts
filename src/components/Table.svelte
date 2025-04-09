@@ -2,6 +2,7 @@
     import { browser } from "$app/environment";
     import { delete_person } from "$lib";
     import { persons } from "../state.svelte";
+    import AddPerson from "./AddPerson.svelte";
 
     let sortBy: keyof Person = $state("first_name");
     let sortAsc: boolean = $state(true);
@@ -35,7 +36,7 @@
 
 {#if browser && persons.length > 0}
     <div class="table-wrap">
-        <table class="table caption-bottom">
+        <table class="table table-fixed">
             <thead>
                 <tr>
                     <th>
@@ -60,13 +61,13 @@
                                         persons.splice(index, 1);
                                     });
                                 }}
-                                class="btn preset-tonal-error"
+                                class="btn preset-outlined-primary-500"
                             >
-                                <p>Delete <b>{id}</b></p>
+                                <p>Edit <b>{id}</b></p>
                             </button>
                         </td>
                         {#each Object.values(person).slice(1) as attribute}
-                            <td><p>{attribute}</p></td>
+                            <td><p class="text-wrap">{attribute}</p></td>
                         {/each}
                     </tr>
                 {/each}
@@ -74,21 +75,3 @@
         </table>
     </div>
 {/if}
-
-<style>
-    .columnContainer {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        height: 100vh;
-        width: 90vw;
-        flex-direction: column;
-    }
-    .rowContainer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-direction: row;
-        width: 80vw;
-    }
-</style>
