@@ -1,0 +1,35 @@
+<script lang="ts">
+    import { delete_person } from "$lib";
+    import { Modal } from "@skeletonlabs/skeleton-svelte";
+    import { persons } from "../state.svelte";
+    let openState = $state(false);
+
+    let { personID } = $props();
+    function modalClose() {
+        openState = false;
+    }
+    let index = $derived(persons.findIndex((p) => p.id === personID));
+</script>
+
+<Modal
+    open={openState}
+    onOpenChange={(e) => (openState = e.open)}
+    triggerBase="btn btn-md preset-outlined-primary-500"
+    backdropClasses="backdrop-blur-sm"
+>
+    {#snippet trigger()}Edit{/snippet}
+    {#snippet content()}
+        <button
+            onclick={() => {
+                delete_person(personID).then(() => {
+                    persons.splice(index, 1);
+                });
+            }}
+            class="btn preset-outlined-primary-500"
+        >
+            <p>
+                Delete <b>{persons[index]?.first_name}</b>
+            </p>
+        </button>
+    {/snippet}
+</Modal>

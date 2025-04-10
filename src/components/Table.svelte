@@ -1,8 +1,7 @@
 <script lang="ts">
     import { browser } from "$app/environment";
-    import { delete_person } from "$lib";
     import { persons } from "../state.svelte";
-    import AddPerson from "./AddPerson.svelte";
+    import EditModal from "./EditModal.svelte";
 
     let sortBy: keyof Person = $state("first_name");
     let sortAsc: boolean = $state(true);
@@ -49,22 +48,10 @@
                 </tr>
             </thead>
             <tbody class="[&>tr]:hover:preset-tonal-primary">
-                {#each sortedPersons as person, id}
+                {#each sortedPersons as person}
                     <tr>
                         <td>
-                            <button
-                                onclick={() => {
-                                    delete_person(person.id).then(() => {
-                                        let index = persons.findIndex(
-                                            (p) => p.id === person.id,
-                                        );
-                                        persons.splice(index, 1);
-                                    });
-                                }}
-                                class="btn preset-outlined-primary-500"
-                            >
-                                <p>Edit <b>{id}</b></p>
-                            </button>
+                            <EditModal personID={person.id} />
                         </td>
                         {#each Object.values(person).slice(1) as attribute}
                             <td><p class="text-wrap">{attribute}</p></td>
