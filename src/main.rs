@@ -13,10 +13,13 @@ async fn main(
     )]
     pool: PgPool,
 ) -> shuttle_axum::ShuttleAxum {
-    sqlx::migrate!()
-        .run(&pool)
-        .await
-        .expect("Failed to run migrations");
+    sqlx::query(
+"CREATE TABLE IF NOT EXISTS persons (id serial PRIMARY KEY, first_name TEXT NOT NULL, last_name TEXT, city TEXT NOT NULL, note TEXT)")
+        .execute(&pool).await.expect("Failed to create table");
+    // sqlx::migrate!()
+    //     .run(&pool)
+    //     .await
+    //     .expect("Failed to run migrations");
 
     let state = MyState { pool };
     let router = Router::new()

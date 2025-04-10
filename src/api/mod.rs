@@ -67,7 +67,8 @@ pub async fn delete_person(
     Path(id): Path<i32>,
     State(state): State<MyState>,
 ) -> Result<impl IntoResponse, impl IntoResponse> {
-    match sqlx::query!("DELETE FROM persons WHERE id = $1", id)
+    match sqlx::query("DELETE FROM persons WHERE id = $1")
+        .bind(id)
         .execute(&state.pool)
         .await
     {
