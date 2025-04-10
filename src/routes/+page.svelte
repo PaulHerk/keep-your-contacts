@@ -9,7 +9,7 @@
     import AddPerson from "../components/AddPerson.svelte";
 
     onMount(() => {
-        if (browser) {
+        if (browser && persons.length === 0) {
             get_persons().then((data) => {
                 persons.push(...data);
             });

@@ -18,7 +18,7 @@
             >
         {/snippet}
         {#snippet tiles()}
-            <Navigation.Tile label="Persons" href="#/">
+            <Navigation.Tile label="Persons" href="/">
                 <ContactRound />
             </Navigation.Tile>
             <Navigation.Tile label="Map" href="/map">
