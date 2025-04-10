@@ -5,9 +5,6 @@
     import { Modal } from "@skeletonlabs/skeleton-svelte";
 
     let newPerson: NewPerson = $state(initializeNewPerson());
-    onMount(() => {
-        initializeNewPerson();
-    });
     function initializeNewPerson() {
         return {
             first_name: "",
@@ -21,6 +18,17 @@
 
     function modalClose() {
         openState = false;
+    }
+    function addPerson() {
+        try {
+            add_person(newPerson).then((new_person) => {
+                persons.push(new_person);
+            });
+            newPerson = initializeNewPerson();
+            modalClose();
+        } catch (e) {
+            console.error(e);
+        }
     }
 </script>
 
@@ -37,17 +45,19 @@
             <h2 class="h2">Add Person</h2>
         </header>
         <article>
-            {#each Object.keys(newPerson) as key}
-                <label class="label">
-                    <span class="label-text">{key}</span>
-                    <input
-                        class="input"
-                        type="text"
-                        placeholder={key}
-                        bind:value={newPerson[key as keyof NewPerson]}
-                    />
-                </label>
-            {/each}
+            <form class="flex flex-col gap-4 p-4">
+                {#each Object.keys(newPerson) as key}
+                    <label class="label">
+                        <span class="label-text">{key}</span>
+                        <input
+                            class="input"
+                            type="text"
+                            placeholder={key}
+                            bind:value={newPerson[key as keyof NewPerson]}
+                        />
+                    </label>
+                {/each}
+            </form>
         </article>
         <footer class="flex justify-end gap-4">
             <button type="button" class="btn preset-tonal" onclick={modalClose}
@@ -57,17 +67,15 @@
                 type="button"
                 class="btn preset-filled"
                 onclick={() => {
-                    try {
-                        add_person(newPerson).then((new_person) => {
-                            persons.push(new_person);
-                        });
-                        newPerson = initializeNewPerson();
-                        modalClose();
-                    } catch (e) {
-                        console.error(e);
-                    }
+                    addPerson();
                 }}>Confirm</button
             >
         </footer>
     {/snippet}
 </Modal>
+
+<svelte:window
+    onkeydown={(e) => {
+        if (e.key === "Enter") addPerson();
+    }}
+/>
