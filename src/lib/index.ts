@@ -1,5 +1,5 @@
-// let url = "http://localhost:8000/persons";
-let url = "https://keep-your-contacts-fkfz.shuttle.app/persons"
+let url = "http://localhost:8000/persons";
+// let url = "https://keep-your-contacts-fkfz.shuttle.app/persons"
 
 // place files you want to import through the `$lib` alias in this folder.
 export let add_person = async (newPerson: NewPerson) => {

@@ -13,12 +13,14 @@ declare global {
 		first_name: string;
 		last_name: string;
 		city: string;
+		job: string;
 		note: string;
 	}
 	interface NewPerson {
 		first_name: string;
 		last_name: string;
 		city: string;
+		job: string;
 		note: string;
 	}
 }

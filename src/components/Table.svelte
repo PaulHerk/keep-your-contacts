@@ -44,6 +44,7 @@
                     <th>{@render sortingH1("First Name", "first_name")}</th>
                     <th>{@render sortingH1("Last Name", "last_name")}</th>
                     <th>{@render sortingH1("City", "city")}</th>
+                    <th>{@render sortingH1("Job", "job")}</th>
                     <th>{@render sortingH1("Notes", "note")}</th>
                 </tr>
             </thead>

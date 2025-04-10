@@ -13,6 +13,7 @@
             first_name: "",
             last_name: "",
             city: "",
+            job: "",
             note: "",
         } as NewPerson;
     }

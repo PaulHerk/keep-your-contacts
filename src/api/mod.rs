@@ -19,6 +19,7 @@ pub struct PersonNew {
     pub first_name: String,
     pub last_name: String,
     pub city: String,
+    pub job: String,
     pub note: String,
 }
 
@@ -28,6 +29,7 @@ pub struct Person {
     pub first_name: String,
     pub last_name: String,
     pub city: String,
+    pub job: String,
     pub note: String,
     // pub born: String,
 }
@@ -49,12 +51,13 @@ pub async fn add_person(
     Json(data): Json<PersonNew>,
 ) -> Result<impl IntoResponse, impl IntoResponse> {
     match sqlx::query_as::<_, Person>(
-        "INSERT INTO persons (note, first_name, last_name, city) VALUES ($1, $2, $3, $4) RETURNING id, note, first_name, last_name, city",
+        "INSERT INTO persons (first_name, last_name, city, job, note) VALUES ($1, $2, $3, $4, $5) RETURNING id, note, first_name, last_name, city, job",
     )
-    .bind(&data.note)
     .bind(&data.first_name)
     .bind(&data.last_name)
     .bind(&data.city)
+    .bind(&data.job)
+    .bind(&data.note)
     .fetch_one(&state.pool)
     .await
     {
