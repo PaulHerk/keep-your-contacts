@@ -1,9 +1,11 @@
 use api::{add_person, delete_person, retrieve, MyState};
 use axum::{
+    http::{header::CONTENT_TYPE, Method},
     routing::{delete, post},
     Router,
 };
 use sqlx::PgPool;
+use tower_http::cors::{Any, CorsLayer};
 pub mod api;
 
 #[shuttle_runtime::main]
@@ -21,11 +23,18 @@ async fn main(
     //     .await
     //     .expect("Failed to run migrations");
 
+    // for cross-origin requests
+    let cors = CorsLayer::new()
+        .allow_methods([Method::GET, Method::POST])
+        .allow_origin(Any)
+        .allow_headers([CONTENT_TYPE]);
+
     let state = MyState { pool };
     let router = Router::new()
         .route("/persons", post(add_person).get(retrieve))
         .route("/persons/delete-person/{id}", delete(delete_person))
-        .with_state(state);
+        .with_state(state)
+        .layer(cors);
 
     Ok(router.into())
 }
