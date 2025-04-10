@@ -3,7 +3,7 @@ let url = "https://keep-your-contacts-fkfz.shuttle.app/persons"
 
 // place files you want to import through the `$lib` alias in this folder.
 export let add_person = async (newPerson: NewPerson) => {
-    const response = await fetch("${url}", {
+    const response = await fetch(`${url}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

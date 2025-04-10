@@ -1,20 +1,8 @@
 <script lang="ts">
-    import { get_persons } from "$lib/index";
     import "../components/Table.svelte";
     import "../style.css";
-    import { onMount } from "svelte";
-    import { browser } from "$app/environment";
     import Table from "../components/Table.svelte";
-    import { persons } from "../state.svelte";
     import AddPerson from "../components/AddPerson.svelte";
-
-    onMount(() => {
-        if (browser && persons.length === 0) {
-            get_persons().then((data) => {
-                persons.push(...data);
-            });
-        }
-    });
 </script>
 
 <div class="grid h-screen grid-rows-[auto_1fr_auto]">
