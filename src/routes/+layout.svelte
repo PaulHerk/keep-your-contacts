@@ -6,6 +6,7 @@
     import IconMenu from "@lucide/svelte/icons/menu";
     import IconSettings from "@lucide/svelte/icons/settings";
     import { ContactRound, Map } from "@lucide/svelte";
+    import { page } from "$app/state";
 </script>
 
 <div
@@ -18,10 +19,18 @@
             >
         {/snippet}
         {#snippet tiles()}
-            <Navigation.Tile label="Persons" href="/">
+            <Navigation.Tile
+                label="Persons"
+                href="/"
+                selected={page.url.pathname === "/"}
+            >
                 <ContactRound />
             </Navigation.Tile>
-            <Navigation.Tile label="Map" href="/map">
+            <Navigation.Tile
+                label="Map"
+                href="/map"
+                selected={page.url.pathname === "/map"}
+            >
                 <Map />
             </Navigation.Tile>
         {/snippet}

@@ -44,8 +44,8 @@
         <header class="flex justify-between">
             <h2 class="h2">Add Person</h2>
         </header>
-        <article>
-            <form class="flex flex-col gap-4 p-4">
+        <form class="flex flex-col gap-4 p-4" onsubmit={addPerson}>
+            <article>
                 {#each Object.keys(newPerson) as key}
                     <label class="label">
                         <span class="label-text">{key}</span>
@@ -53,29 +53,24 @@
                             class="input"
                             type="text"
                             placeholder={key}
+                            required={true}
                             bind:value={newPerson[key as keyof NewPerson]}
                         />
                     </label>
                 {/each}
-            </form>
-        </article>
-        <footer class="flex justify-end gap-4">
-            <button type="button" class="btn preset-tonal" onclick={modalClose}
-                >Cancel</button
-            >
-            <button
-                type="button"
-                class="btn preset-filled"
-                onclick={() => {
-                    addPerson();
-                }}>Confirm</button
-            >
-        </footer>
+            </article>
+            <footer class="flex justify-end gap-4">
+                <button
+                    type="button"
+                    class="btn preset-tonal"
+                    onclick={modalClose}>Cancel</button
+                >
+                <input
+                    type="submit"
+                    value="Confirm"
+                    class="btn preset-filled"
+                />
+            </footer>
+        </form>
     {/snippet}
 </Modal>
-
-<svelte:window
-    onkeydown={(e) => {
-        if (e.key === "Enter") addPerson();
-    }}
-/>
