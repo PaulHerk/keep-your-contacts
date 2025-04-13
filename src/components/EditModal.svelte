@@ -23,9 +23,10 @@
             onclick={() => {
                 delete_person(personID).then(() => {
                     persons.splice(index, 1);
+                    modalClose();
                 });
             }}
-            class="btn preset-outlined-primary-500"
+            class="btn preset-tonal-error"
         >
             <p>
                 Delete <b>{persons[index]?.first_name}</b>
