@@ -3,31 +3,53 @@
     import { persons } from "../state.svelte";
     import EditModal from "./EditModal.svelte";
 
-    let sortBy: keyof Person = $state("first_name");
-    let sortAsc: boolean = $state(true);
+    let sortByFirst: keyof Person = $state("first_name");
+    let sortBySec: keyof Person | null = $state("job");
+    let sortAscFirst: boolean = $state(true);
+    let sortAscSec: boolean = $state(true);
 
     let sortedPersons = $derived(
         [...persons].sort((a, b) => {
-            return a[sortBy] > b[sortBy] == sortAsc ? 1 : -1;
+            if (a[sortByFirst] === b[sortByFirst] && sortBySec) {
+                return a[sortBySec] > b[sortBySec] == sortAscSec ? 1 : -1;
+            }
+            return a[sortByFirst] > b[sortByFirst] == sortAscFirst ? 1 : -1;
         }),
     );
+
+    function sortPersons(attribute: keyof Person) {
+        if (sortByFirst === attribute) {
+            sortAscFirst = !sortAscFirst;
+        } else {
+            if (sortBySec === attribute) {
+                if (sortAscSec) sortAscSec = false;
+                else {
+                    sortAscSec = true;
+                    sortBySec = null;
+                    sortByFirst = attribute;
+                }
+            } else {
+                sortBySec = attribute;
+            }
+        }
+    }
 </script>
 
 {#snippet sortingH1(header: string, attribute: keyof Person)}
     <button
         onclick={() => {
-            if (sortBy === (attribute as keyof Person)) {
-                sortAsc = !sortAsc;
-            }
-            sortBy = attribute as keyof Person;
+            sortPersons(attribute);
         }}
     >
         <div>
             <p>
                 <b>{header}</b>
             </p>
-            {#if sortBy === attribute}
-                {sortAsc ? "↑" : "↓"}
+            {#if sortByFirst === attribute}
+                {sortAscFirst ? "1st ↑" : "1st ↓"}
+            {/if}
+            {#if sortBySec === attribute && sortAscSec !== null}
+                {sortAscSec ? "2nd ↑" : "2nd ↓"}
             {/if}
         </div>
     </button>
