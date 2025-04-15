@@ -4,7 +4,7 @@ use sqlx::{
         chrono::{DateTime, Local},
         Json,
     },
-    Decode, FromRow, PgPool,
+    FromRow, PgPool,
 };
 
 pub mod get_metadata;
@@ -40,6 +40,7 @@ pub struct Person {
     pub first_name: String,
     pub last_name: Option<String>,
     pub known_from_source_id: Option<i32>,
+    #[serde(skip_serializing)]
     pub coordinate: Option<Json<Coordinate>>,
     pub job_title: Option<String>,
     pub company: Option<String>,
