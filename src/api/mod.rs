@@ -1,81 +1,56 @@
-use axum::{
-    extract::{Path, State},
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
-};
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, PgPool};
+use sqlx::{
+    types::{
+        chrono::{DateTime, Local},
+        Json,
+    },
+    Decode, FromRow, PgPool,
+};
 
 pub mod get_metadata;
+pub mod retrieve;
 
 #[derive(Clone)]
 pub struct MyState {
     pub pool: PgPool,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct PersonNew {
     pub first_name: String,
-    pub last_name: String,
-    pub city: String,
-    pub job: String,
-    pub note: String,
+    pub last_name: Option<String>,
+    pub known_from_source_id: Option<i32>,
+    pub coordinate: Option<Coordinate>,
+    pub job_title: Option<String>,
+    pub company: Option<String>,
+    pub linkedin: Option<String>,
+    pub notes: Option<String>,
 }
 
-#[derive(Serialize, FromRow, Default)]
+#[derive(Serialize, Deserialize, Default, FromRow, Copy, Clone)]
+pub struct Coordinate {
+    pub langitude: f64,
+    pub latitude: f64,
+}
+
+#[derive(FromRow, Default, Serialize, Deserialize, Clone)]
+
 pub struct Person {
     pub id: i32,
     pub first_name: String,
-    pub last_name: String,
-    pub city: String,
-    pub job: String,
-    pub note: String,
-    // pub born: String,
+    pub last_name: Option<String>,
+    pub known_from_source_id: Option<i32>,
+    pub coordinate: Option<Json<Coordinate>>,
+    pub job_title: Option<String>,
+    pub company: Option<String>,
+    pub linkedin: Option<String>,
+    pub notes: Option<String>,
+    pub created_at: Option<DateTime<Local>>, // pub born: String,
 }
 
-pub async fn retrieve(
-    State(state): State<MyState>,
-) -> Result<impl IntoResponse, impl IntoResponse> {
-    match sqlx::query_as::<_, Person>("SELECT * FROM persons")
-        .fetch_all(&state.pool)
-        .await
-    {
-        Ok(person) => Ok((StatusCode::OK, Json(person))),
-        Err(e) => Err((StatusCode::BAD_REQUEST, e.to_string())),
-    }
-}
-
-pub async fn add_person(
-    State(state): State<MyState>,
-    Json(data): Json<PersonNew>,
-) -> Result<impl IntoResponse, impl IntoResponse> {
-    match sqlx::query_as::<_, Person>(
-        "INSERT INTO persons (first_name, last_name, city, job, note) VALUES ($1, $2, $3, $4, $5) RETURNING id, note, first_name, last_name, city, job",
-    )
-    .bind(&data.first_name)
-    .bind(&data.last_name)
-    .bind(&data.city)
-    .bind(&data.job)
-    .bind(&data.note)
-    .fetch_one(&state.pool)
-    .await
-    {
-        Ok(person) => Ok((StatusCode::CREATED, Json(person))),
-        Err(e) => Err((StatusCode::BAD_REQUEST, e.to_string())),
-    }
-}
-
-pub async fn delete_person(
-    Path(id): Path<i32>,
-    State(state): State<MyState>,
-) -> Result<impl IntoResponse, impl IntoResponse> {
-    match sqlx::query("DELETE FROM persons WHERE id = $1")
-        .bind(id)
-        .execute(&state.pool)
-        .await
-    {
-        Ok(_) => Ok((StatusCode::OK, ())),
-        Err(e) => Err((StatusCode::BAD_REQUEST, e.to_string())),
-    }
+#[derive(Serialize, FromRow, Default)]
+pub struct KnownFromSources {
+    pub source_id: i32,
+    pub source_name: String,
+    pub description: String,
 }

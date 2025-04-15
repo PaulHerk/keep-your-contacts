@@ -1,7 +1,7 @@
-use api::{add_person, delete_person, retrieve, MyState};
+use api::{retrieve::retrieve, MyState};
 use axum::{
     http::{header::CONTENT_TYPE, Method},
-    routing::{delete, post},
+    routing::{delete, get, post},
     Router,
 };
 use sqlx::PgPool;
@@ -31,8 +31,8 @@ async fn main(
 
     let state = MyState { pool };
     let router = Router::new()
-        .route("/persons", post(add_person).get(retrieve))
-        .route("/persons/delete-person/{id}", delete(delete_person))
+        .route("/persons", get(retrieve))
+        // .route("/persons/delete-person/{id}", delete(delete_person))
         .with_state(state)
         .layer(cors);
 

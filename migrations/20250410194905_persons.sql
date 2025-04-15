@@ -1,9 +1,44 @@
--- Add migration script here
-CREATE TABLE IF NOT EXISTS persons (
-  id serial PRIMARY KEY,
-  first_name TEXT NOT NULL,
-  last_name TEXT,
-  city TEXT NOT NULL,
-  job TEXT,
-  note TEXT
+CREATE TABLE KnownFromSources (
+    source_id SERIAL PRIMARY KEY,             -- Auto-incrementing integer PK
+    source_name VARCHAR(100) NOT NULL UNIQUE, -- Name of the source (e.g., 'Work')
+    description TEXT NULL                     -- Optional longer description
 );
+
+CREATE TABLE Persons (
+    id SERIAL PRIMARY KEY,             -- Auto-incrementing integer PK
+
+    -- === Name ===
+    first_name VARCHAR(100) NULL,
+    last_name VARCHAR(100) NULL,
+
+    known_from_source_id INT NULL,             -- Foreign Key to KnownFromSources
+
+    -- === Coordinates ===
+    coordinate JSONB NULL,
+    -- =========================================
+
+    -- === Job Information ===
+    job_title VARCHAR(150) NULL,
+    company VARCHAR(150) NULL,
+    linkedin VARCHAR(150) NULL,
+
+    -- === Extra Notes ===
+    notes TEXT NULL,
+
+    -- === Timestamp ===
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- Records creation time
+
+    -- === Foreign Key Constraint ===
+    CONSTRAINT fk_known_from
+        FOREIGN KEY (known_from_source_id)
+        REFERENCES KnownFromSources(source_id)
+        ON DELETE SET NULL  -- If the source is deleted, set this field to NULL
+        ON UPDATE CASCADE   -- If source_id changes (rare), update it here
+);
+
+-- === Indexes for Performance ===
+CREATE INDEX idx_persons_lastname ON Persons(last_name);
+CREATE INDEX idx_persons_coordinate ON Persons(coordinate);
+CREATE INDEX idx_persons_job ON Persons(job_title);
+CREATE INDEX idx_persons_company ON Persons(company);
+CREATE INDEX idx_persons_known_from ON Persons(known_from_source_id); -- Good for FK lookups
