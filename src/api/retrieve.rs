@@ -138,26 +138,6 @@ pub async fn retrieve(
     }
 }
 
-// pub async fn add_person(
-//     State(state): State<MyState>,
-//     Json(data): Json<PersonNew>,
-// ) -> Result<impl IntoResponse, impl IntoResponse> {
-//     match sqlx::query_as::<_, Person>(
-//         "INSERT INTO persons (first_name, last_name, city, job, note) VALUES ($1, $2, $3, $4, $5) RETURNING id, note, first_name, last_name, city, job",
-//     )
-//     .bind(&data.first_name)
-//     .bind(&data.last_name)
-//     .bind(&data.city)
-//     .bind(&data.job)
-//     .bind(&data.note)
-//     .fetch_one(&state.pool)
-//     .await
-//     {
-//         Ok(person) => Ok((StatusCode::CREATED, Json(person))),
-//         Err(e) => Err((StatusCode::BAD_REQUEST, e.to_string())),
-//     }
-// }
-
 // pub async fn delete_person(
 //     Path(id): Path<i32>,
 //     State(state): State<MyState>,

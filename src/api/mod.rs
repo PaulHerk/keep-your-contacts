@@ -7,7 +7,7 @@ use sqlx::{
     FromRow, PgPool,
 };
 
-pub mod get_metadata;
+pub mod add_person;
 pub mod retrieve;
 
 #[derive(Clone)]

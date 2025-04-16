@@ -1,4 +1,4 @@
-use api::{retrieve::retrieve, MyState};
+use api::{add_person::add_person, retrieve::retrieve, MyState};
 use axum::{
     http::{header::CONTENT_TYPE, Method},
     routing::{delete, get, post},
@@ -31,7 +31,7 @@ async fn main(
 
     let state = MyState { pool };
     let router = Router::new()
-        .route("/persons", get(retrieve))
+        .route("/persons", get(retrieve).post(add_person))
         // .route("/persons/delete-person/{id}", delete(delete_person))
         .with_state(state)
         .layer(cors);
