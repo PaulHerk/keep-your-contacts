@@ -5,7 +5,7 @@ use axum::{
     Json,
 };
 use reverse_geocoder::{Record, ReverseGeocoder};
-use sqlx::{Postgres, QueryBuilder};
+use sqlx::{Execute, Postgres, QueryBuilder};
 
 use super::*;
 
@@ -35,7 +35,7 @@ pub struct SimplePerson {
 #[derive(Deserialize, Serialize)]
 pub struct UserResponse<Fetched> {
     #[serde(flatten)]
-    fetched: Fetched,
+    person: Fetched,
     #[serde(flatten)]
     record: Option<Record>,
 }
@@ -67,7 +67,7 @@ fn get_record_from_coord(
     coord: Option<sqlx::types::Json<Coordinate>>,
 ) -> Option<Record> {
     return if let Some(coord) = coord {
-        Some(geocoder.search((coord.langitude, coord.latitude)).record).cloned()
+        Some(geocoder.search((coord.lon, coord.lat)).record).cloned()
     } else {
         None
     };
@@ -81,7 +81,10 @@ fn create_person_with_record<Person: PersonT + Clone>(
         .map(|person| {
             let record = get_record_from_coord(&geocoder, person.get_coord());
             let fetched = person.clone();
-            UserResponse { fetched, record }
+            UserResponse {
+                person: fetched,
+                record,
+            }
         })
         .collect()
 }
@@ -95,20 +98,22 @@ pub async fn retrieve(
         false => UserView::Simple,
     };
     let geocoder = ReverseGeocoder::new();
-    let mut query_end_builder: QueryBuilder<Postgres> = QueryBuilder::new("FROM persons OFFSET");
-    query_end_builder
+    let mut query: QueryBuilder<Postgres> = QueryBuilder::new(match view {
+        UserView::Simple => "SELECT id, first_name, last_name, coordinate",
+        UserView::Detailed => "SELECT *",
+    });
+    query
+        .push(" FROM persons OFFSET ")
         .push_bind(pagination.per_page * pagination.page)
-        .push("LIMIT")
+        .push(" LIMIT ")
         .push_bind(pagination.per_page);
-    let query_end = query_end_builder.sql();
 
     match view {
         UserView::Simple => {
-            match sqlx::query_as::<_, SimplePerson>(&format!(
-                "SELECT id, first_name, last_name, coordinate {query_end}",
-            ))
-            .fetch_all(&state.pool)
-            .await
+            match query
+                .build_query_as::<SimplePerson>()
+                .fetch_all(&state.pool)
+                .await
             {
                 Ok(persons) => {
                     let simple_persons_with_coords = create_person_with_record(persons, &geocoder);
@@ -121,7 +126,8 @@ pub async fn retrieve(
             }
         }
         UserView::Detailed => {
-            match sqlx::query_as::<_, Person>(&format!("SELECT * {query_end}"))
+            match query
+                .build_query_as::<Person>()
                 .fetch_all(&state.pool)
                 .await
             {

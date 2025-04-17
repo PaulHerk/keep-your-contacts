@@ -1,4 +1,4 @@
-use api::{add_person::add_person, retrieve::retrieve, MyState};
+use api::{get_persons::retrieve, post_person::add_person, MyState};
 use axum::{
     http::{header::CONTENT_TYPE, Method},
     routing::{delete, get, post},

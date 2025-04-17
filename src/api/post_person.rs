@@ -11,21 +11,33 @@ pub async fn add_person(
         "INSERT INTO persons (first_name, last_name, known_from_source_id, coordinate, job_title, company, linkedin, notes) VALUES (",
     );
 
+    let mut names = data.name.split_ascii_whitespace();
+    let first_name = names.next().unwrap_or_default();
+    let last_name: String = names.collect::<Vec<&str>>().join(" ");
+
     let mut field_separator = query_builder.separated(", ");
     field_separator
-        .push_bind(data.first_name)
-        .push_bind(data.last_name)
+        .push_bind(first_name)
+        .push_bind(last_name)
         .push_bind(data.known_from_source_id)
         .push_bind(data.coordinate.map(|coord| serde_json::json!(&coord)))
         .push_bind(data.job_title)
         .push_bind(data.company)
         .push_bind(data.linkedin)
         .push_bind(data.notes);
-    field_separator.push_unseparated(");");
+    field_separator.push_unseparated(") RETURNING id;");
 
-    println!("{}", query_builder.sql());
-    match query_builder.build().execute(&state.pool).await {
-        Ok(_) => Ok(StatusCode::CREATED),
+    #[derive(sqlx::FromRow)]
+    struct InsertedId {
+        id: i32,
+    }
+
+    match query_builder
+        .build_query_as::<InsertedId>()
+        .fetch_one(&state.pool)
+        .await
+    {
+        Ok(inserted_id) => Ok((StatusCode::CREATED, Json(inserted_id.id))),
         Err(e) => Err((StatusCode::BAD_REQUEST, e.to_string())),
     }
 }

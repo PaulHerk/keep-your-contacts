@@ -7,8 +7,8 @@ use sqlx::{
     FromRow, PgPool,
 };
 
-pub mod add_person;
-pub mod retrieve;
+pub mod get_persons;
+pub mod post_person;
 
 #[derive(Clone)]
 pub struct MyState {
@@ -17,8 +17,7 @@ pub struct MyState {
 
 #[derive(Deserialize, Default)]
 pub struct PersonNew {
-    pub first_name: String,
-    pub last_name: Option<String>,
+    pub name: String,
     pub known_from_source_id: Option<i32>,
     pub coordinate: Option<Coordinate>,
     pub job_title: Option<String>,
@@ -29,8 +28,8 @@ pub struct PersonNew {
 
 #[derive(Serialize, Deserialize, Default, FromRow, Copy, Clone)]
 pub struct Coordinate {
-    pub langitude: f64,
-    pub latitude: f64,
+    pub lon: f64,
+    pub lat: f64,
 }
 
 #[derive(FromRow, Default, Serialize, Deserialize, Clone)]
