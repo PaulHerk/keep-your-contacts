@@ -59,11 +59,7 @@ pub async fn register_user_handler(
     .await
     .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("DB error: {e}")))?;
 
-    let user_response = serde_json::json!({"data": serde_json::json!({
-        "user": FilteredUser::from_user(user)
-    })});
-
-    Ok(Json(user_response))
+    Ok(StatusCode::CREATED)
 }
 
 /// Authenticates user and issues a JWT token valid for 24 hours.

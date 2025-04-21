@@ -8,10 +8,19 @@ pub struct PersonNew {
     pub name: String,
     pub known_from_source_id: Option<i32>,
     pub coordinate: Option<Coordinate>,
-    pub job_title: Option<String>,
-    pub company: Option<String>,
-    pub linkedin: Option<String>,
-    pub notes: Option<String>,
+    #[serde(default)]
+    pub job_title: String,
+    #[serde(default)]
+    pub company: String,
+    #[serde(default)]
+    pub linkedin: String,
+    #[serde(default)]
+    pub notes: String,
+}
+
+#[derive(sqlx::FromRow)]
+struct InsertedId {
+    id: i32,
 }
 
 pub async fn add_person(
@@ -39,11 +48,6 @@ pub async fn add_person(
         .push_bind(data.linkedin)
         .push_bind(data.notes);
     field_separator.push_unseparated(") RETURNING id;");
-
-    #[derive(sqlx::FromRow)]
-    struct InsertedId {
-        id: i32,
-    }
 
     match query_builder
         .build_query_as::<InsertedId>()

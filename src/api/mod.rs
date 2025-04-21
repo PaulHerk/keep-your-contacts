@@ -5,12 +5,13 @@ use sqlx::{
         chrono::{DateTime, Local},
         Json,
     },
-    FromRow, PgPool,
+    Decode, FromRow, PgPool,
 };
 
 pub mod auth;
-pub mod get_persons;
+pub mod get_known_from_sources;
 pub mod post_person;
+pub mod retrieve_persons;
 
 #[derive(Clone)]
 pub struct MyState {
@@ -48,7 +49,7 @@ impl PersonTrait for Person {
     }
 }
 
-#[derive(Serialize, FromRow, Default)]
+#[derive(Deserialize, Serialize, FromRow, Default, Clone)]
 pub struct KnownFromSources {
     pub source_id: i32,
     pub source_name: String,
