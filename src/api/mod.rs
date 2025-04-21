@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use shuttle_runtime::SecretStore;
 use sqlx::{
     types::{
         chrono::{DateTime, Local},
@@ -7,12 +8,14 @@ use sqlx::{
     FromRow, PgPool,
 };
 
+pub mod auth;
 pub mod get_persons;
 pub mod post_person;
 
 #[derive(Clone)]
 pub struct MyState {
     pub pool: PgPool,
+    pub secrets: SecretStore,
 }
 
 #[derive(Deserialize, Default)]

@@ -1,15 +1,20 @@
-use api::{get_persons::retrieve, post_person::add_person, MyState};
+use api::{auth::create_auth_router, get_persons::retrieve, post_person::add_person, MyState};
 use axum::{
-    http::{header::CONTENT_TYPE, Method},
+    http::{
+        header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
+        Method,
+    },
     routing::{delete, get, post},
     Router,
 };
+use shuttle_runtime::SecretStore;
 use sqlx::PgPool;
 use tower_http::cors::{Any, CorsLayer};
 pub mod api;
 
 #[shuttle_runtime::main]
 async fn main(
+    #[shuttle_runtime::Secrets] secrets: SecretStore,
     #[shuttle_shared_db::Postgres(
         local_uri = "postgres://postgres:{secrets.PASSWORD}@localhost:5432/postgres"
     )]
@@ -27,11 +32,12 @@ async fn main(
     let cors = CorsLayer::new()
         .allow_methods([Method::GET, Method::POST])
         .allow_origin(Any)
-        .allow_headers([CONTENT_TYPE]);
+        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
 
-    let state = MyState { pool };
+    let state = MyState { pool, secrets };
     let router = Router::new()
         .route("/persons", get(retrieve).post(add_person))
+        .merge(create_auth_router(state.clone()))
         // .route("/persons/delete-person/{id}", delete(delete_person))
         .with_state(state)
         .layer(cors);

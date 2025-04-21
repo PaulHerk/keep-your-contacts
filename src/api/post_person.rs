@@ -1,11 +1,11 @@
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Form, Json};
 use sqlx::{Postgres, QueryBuilder};
 
 use super::{MyState, PersonNew};
 
 pub async fn add_person(
     State(state): State<MyState>,
-    Json(data): Json<PersonNew>,
+    Form(data): Form<PersonNew>,
 ) -> Result<impl IntoResponse, impl IntoResponse> {
     let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
         "INSERT INTO persons (first_name, last_name, known_from_source_id, coordinate, job_title, company, linkedin, notes) VALUES (",

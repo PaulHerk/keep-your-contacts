@@ -5,7 +5,7 @@ use axum::{
     Json,
 };
 use reverse_geocoder::{Record, ReverseGeocoder};
-use sqlx::{Execute, Postgres, QueryBuilder};
+use sqlx::{Postgres, QueryBuilder};
 
 use super::*;
 
