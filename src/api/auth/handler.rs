@@ -16,6 +16,8 @@ use crate::api::{auth::responses::FilteredUser, MyState};
 
 use super::{LoginUserSchema, RegisterUserSchema, TokenClaims, User};
 
+/// Creates a new user account with password hashing using Argon2.
+/// Prevents duplicate emails by checking existence first.
 pub async fn register_user_handler(
     State(data): State<MyState>,
     Json(body): Json<RegisterUserSchema>,
@@ -64,6 +66,8 @@ pub async fn register_user_handler(
     Ok(Json(user_response))
 }
 
+/// Authenticates user and issues a JWT token valid for 24 hours.
+/// Returns token via both JSON response and httpOnly cookie.
 pub async fn login_user_handler(
     State(data): State<MyState>,
     Json(body): Json<LoginUserSchema>,
@@ -120,6 +124,7 @@ pub async fn login_user_handler(
     Ok(response)
 }
 
+/// Invalidates the authentication by expiring the token cookie.
 pub async fn logout_handler() -> Result<impl IntoResponse, StatusCode> {
     let cookie = Cookie::build(("token", ""))
         .path("/")
@@ -134,6 +139,7 @@ pub async fn logout_handler() -> Result<impl IntoResponse, StatusCode> {
     Ok(response)
 }
 
+/// Returns the authenticated user's data, excluding sensitive fields.
 pub async fn get_me_handler(
     Extension(user): Extension<User>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {

@@ -3,6 +3,8 @@ use sqlx::types::chrono::{DateTime, Utc};
 
 use super::User;
 
+/// Sanitized user representation that excludes sensitive data like passwords.
+/// Used for all user-facing responses.
 #[allow(non_snake_case)]
 #[derive(Debug, Serialize)]
 pub struct FilteredUser {
@@ -13,6 +15,8 @@ pub struct FilteredUser {
     pub updatedAt: DateTime<Utc>,
 }
 
+/// Converts internal User model to public FilteredUser representation.
+/// Ensures sensitive data never leaves the system.
 impl FilteredUser {
     pub fn from_user(user: User) -> Self {
         FilteredUser {

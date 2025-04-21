@@ -18,6 +18,8 @@ mod handler;
 pub mod jwt_auth_middleware;
 mod responses;
 
+/// Database user model containing all fields including sensitive data.
+/// Only used within internal systems.
 #[derive(Deserialize, Serialize, FromRow, Clone)]
 pub struct User {
     pub id: Uuid,
@@ -30,12 +32,15 @@ pub struct User {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
+/// JWT claim structure for token payload.
+/// Contains user ID and timestamp information.
 #[derive(Deserialize, Serialize)]
 pub struct TokenClaims {
     pub sub: String,
     pub iat: usize,
     pub exp: usize,
 }
+
 #[derive(Deserialize)]
 pub struct RegisterUserSchema {
     pub name: String,
@@ -49,6 +54,8 @@ pub struct LoginUserSchema {
     pub password: String,
 }
 
+/// Router factory for all authentication endpoints.
+/// Applies JWT middleware to protected routes.
 pub fn create_auth_router(state: MyState) -> Router<MyState> {
     Router::new()
         .route("/auth/register", post(register_user_handler))

@@ -20,7 +20,7 @@ enum UserView {
     Detailed,
 }
 
-// two different views: simple and detailed, SimplePerson is just names and coords
+/// two different views: simple and detailed, SimplePerson is just names and coords
 #[derive(Deserialize, FromRow, Serialize, Clone)]
 pub struct SimplePerson {
     id: i32,
@@ -32,7 +32,7 @@ pub struct SimplePerson {
     coordinate: Option<sqlx::types::Json<Coordinate>>,
 }
 
-// this is needed for the coordinate record that gets appened to the response
+/// needed for the coordinate record that gets appened to the response
 #[derive(Deserialize, Serialize)]
 pub struct UserResponse<Fetched> {
     #[serde(flatten)]
@@ -130,17 +130,3 @@ pub async fn retrieve(
         }
     }
 }
-
-// pub async fn delete_person(
-//     Path(id): Path<i32>,
-//     State(state): State<MyState>,
-// ) -> Result<impl IntoResponse, impl IntoResponse> {
-//     match sqlx::query("DELETE FROM persons WHERE id = $1")
-//         .bind(id)
-//         .execute(&state.pool)
-//         .await
-//     {
-//         Ok(_) => Ok((StatusCode::OK, ())),
-//         Err(e) => Err((StatusCode::BAD_REQUEST, e.to_string())),
-//     }
-// }
