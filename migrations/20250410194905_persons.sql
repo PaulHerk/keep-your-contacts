@@ -1,3 +1,17 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE Users (
+        id UUID NOT NULL PRIMARY KEY DEFAULT (uuid_generate_v4()),
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(100) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX users_email_idx ON Users(email);
+
+
 CREATE TABLE KnownFromSources (
     source_id SERIAL PRIMARY KEY,             -- Auto-incrementing integer PK
     source_name VARCHAR(100) NOT NULL UNIQUE, -- Name of the source (e.g., 'Work')
@@ -6,6 +20,8 @@ CREATE TABLE KnownFromSources (
 
 CREATE TABLE Persons (
     id SERIAL PRIMARY KEY,             -- Auto-incrementing integer PK
+
+    user_id UUID NOT NULL,
 
     -- === Name ===
     first_name VARCHAR(100) NULL,
@@ -28,12 +44,17 @@ CREATE TABLE Persons (
     -- === Timestamp ===
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- Records creation time
 
-    -- === Foreign Key Constraint ===
+    -- === Foreign Key Constraints ===
     CONSTRAINT fk_known_from
         FOREIGN KEY (known_from_source_id)
         REFERENCES KnownFromSources(source_id)
         ON DELETE SET NULL  -- If the source is deleted, set this field to NULL
-        ON UPDATE CASCADE   -- If source_id changes (rare), update it here
+        ON UPDATE CASCADE,   -- If source_id changes (rare), update it here
+
+    CONSTRAINT fk_user
+        FOREIGN KEY (user_id)
+        REFERENCES Users(id)
+        ON UPDATE CASCADE
 );
 
 -- === Indexes for Performance ===

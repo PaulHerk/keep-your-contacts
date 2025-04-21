@@ -21,7 +21,7 @@ pub async fn register_user_handler(
     Json(body): Json<RegisterUserSchema>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let user_exists: Option<bool> =
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)")
+        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM Users WHERE email = $1)")
             .bind(body.email.to_owned().to_ascii_lowercase())
             .fetch_one(&data.pool)
             .await
@@ -48,7 +48,7 @@ pub async fn register_user_handler(
         .map(|hash| hash.to_string())?;
 
     let user = sqlx::query_as::<_, User>(
-        "INSERT INTO users (name,email,password) VALUES ($1, $2, $3) RETURNING *",
+        "INSERT INTO Users (name,email,password) VALUES ($1, $2, $3) RETURNING *",
     )
     .bind(body.name.to_string())
     .bind(body.email.to_string().to_ascii_lowercase())
@@ -68,7 +68,7 @@ pub async fn login_user_handler(
     State(data): State<MyState>,
     Json(body): Json<LoginUserSchema>,
 ) -> Result<impl IntoResponse, impl IntoResponse> {
-    let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE name = $1")
+    let user = sqlx::query_as::<_, User>("SELECT * FROM Users WHERE name = $1")
         .bind(body.name.to_ascii_lowercase())
         .fetch_optional(&data.pool)
         .await

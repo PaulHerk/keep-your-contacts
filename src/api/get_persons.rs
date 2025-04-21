@@ -1,13 +1,12 @@
 use axum::{
     extract::{Query, State},
     http::StatusCode,
-    response::IntoResponse,
-    Json,
+    Extension, Json,
 };
 use reverse_geocoder::{Record, ReverseGeocoder};
 use sqlx::{Postgres, QueryBuilder};
 
-use super::*;
+use super::{auth::User, *};
 
 #[derive(Deserialize)]
 pub struct Pagination {
@@ -21,6 +20,7 @@ enum UserView {
     Detailed,
 }
 
+// two different views: simple and detailed, SimplePerson is just names and coords
 #[derive(Deserialize, FromRow, Serialize, Clone)]
 pub struct SimplePerson {
     id: i32,
@@ -32,6 +32,7 @@ pub struct SimplePerson {
     coordinate: Option<sqlx::types::Json<Coordinate>>,
 }
 
+// this is needed for the coordinate record that gets appened to the response
 #[derive(Deserialize, Serialize)]
 pub struct UserResponse<Fetched> {
     #[serde(flatten)]
@@ -47,16 +48,7 @@ pub enum UserQueryResult {
     Detailed(Vec<UserResponse<Person>>),
 }
 
-trait PersonT {
-    fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>>;
-}
-
-impl PersonT for SimplePerson {
-    fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>> {
-        self.coordinate
-    }
-}
-impl PersonT for Person {
+impl PersonTrait for SimplePerson {
     fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>> {
         self.coordinate
     }
@@ -72,7 +64,7 @@ fn get_record_from_coord(
         None
     };
 }
-fn create_person_with_record<Person: PersonT + Clone>(
+fn create_person_with_record<Person: PersonTrait + Clone>(
     persons: Vec<Person>,
     geocoder: &ReverseGeocoder,
 ) -> Vec<UserResponse<Person>> {
@@ -91,8 +83,9 @@ fn create_person_with_record<Person: PersonT + Clone>(
 
 pub async fn retrieve(
     pagination: Query<Pagination>,
+    Extension(user): Extension<User>,
     State(state): State<MyState>,
-) -> Result<(axum::http::StatusCode, Json<UserQueryResult>), impl IntoResponse> {
+) -> Result<(StatusCode, Json<UserQueryResult>), (StatusCode, String)> {
     let view = match pagination.detailed.unwrap_or(false) {
         true => UserView::Detailed,
         false => UserView::Simple,
@@ -103,43 +96,37 @@ pub async fn retrieve(
         UserView::Detailed => "SELECT *",
     });
     query
-        .push(" FROM persons OFFSET ")
+        .push(" FROM persons WHERE user_id = ")
+        .push_bind(user.id)
+        .push(" OFFSET ")
         .push_bind(pagination.per_page * pagination.page)
         .push(" LIMIT ")
         .push_bind(pagination.per_page);
 
     match view {
         UserView::Simple => {
-            match query
+            let persons = query
                 .build_query_as::<SimplePerson>()
                 .fetch_all(&state.pool)
                 .await
-            {
-                Ok(persons) => {
-                    let simple_persons_with_coords = create_person_with_record(persons, &geocoder);
-                    return Ok((
-                        StatusCode::OK,
-                        Json(UserQueryResult::Simple(simple_persons_with_coords)),
-                    ));
-                }
-                Err(e) => Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
-            }
+                .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("DB error: {e}")))?;
+            let simple_persons_with_coords = create_person_with_record(persons, &geocoder);
+            Ok((
+                StatusCode::OK,
+                Json(UserQueryResult::Simple(simple_persons_with_coords)),
+            ))
         }
         UserView::Detailed => {
-            match query
+            let persons = query
                 .build_query_as::<Person>()
                 .fetch_all(&state.pool)
                 .await
-            {
-                Ok(persons) => {
-                    let persons_with_coords = create_person_with_record(persons, &geocoder);
-                    return Ok((
-                        StatusCode::OK,
-                        Json(UserQueryResult::Detailed(persons_with_coords)),
-                    ));
-                }
-                Err(e) => Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
-            }
+                .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("DB error: {e}")))?;
+            let persons_with_coords = create_person_with_record(persons, &geocoder);
+            Ok((
+                StatusCode::OK,
+                Json(UserQueryResult::Detailed(persons_with_coords)),
+            ))
         }
     }
 }

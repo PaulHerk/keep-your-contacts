@@ -18,17 +18,6 @@ pub struct MyState {
     pub secrets: SecretStore,
 }
 
-#[derive(Deserialize, Default)]
-pub struct PersonNew {
-    pub name: String,
-    pub known_from_source_id: Option<i32>,
-    pub coordinate: Option<Coordinate>,
-    pub job_title: Option<String>,
-    pub company: Option<String>,
-    pub linkedin: Option<String>,
-    pub notes: Option<String>,
-}
-
 #[derive(Serialize, Deserialize, Default, FromRow, Copy, Clone)]
 pub struct Coordinate {
     pub lon: f64,
@@ -49,6 +38,14 @@ pub struct Person {
     pub linkedin: Option<String>,
     pub notes: Option<String>,
     pub created_at: Option<DateTime<Local>>, // pub born: String,
+}
+trait PersonTrait {
+    fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>>;
+}
+impl PersonTrait for Person {
+    fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>> {
+        self.coordinate
+    }
 }
 
 #[derive(Serialize, FromRow, Default)]

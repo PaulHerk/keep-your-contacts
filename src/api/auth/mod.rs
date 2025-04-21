@@ -15,7 +15,7 @@ use self::handler::*;
 use super::MyState;
 
 mod handler;
-mod jwt_auth_middleware;
+pub mod jwt_auth_middleware;
 mod responses;
 
 #[derive(Deserialize, Serialize, FromRow, Clone)]
