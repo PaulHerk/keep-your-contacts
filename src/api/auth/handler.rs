@@ -17,14 +17,14 @@ use crate::api::{auth::responses::FilteredUser, MyState};
 use super::{LoginUserSchema, RegisterUserSchema, TokenClaims, User};
 
 /// Creates a new user account with password hashing using Argon2.
-/// Prevents duplicate emails by checking existence first.
+/// Prevents duplicate names by checking existence first.
 pub async fn register_user_handler(
     State(data): State<MyState>,
     Json(body): Json<RegisterUserSchema>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let user_exists: Option<bool> =
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM Users WHERE email = $1)")
-            .bind(body.email.to_owned().to_ascii_lowercase())
+        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM Users WHERE name = $1)")
+            .bind(body.name.to_owned().to_ascii_lowercase())
             .fetch_one(&data.pool)
             .await
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("DB error: {e}")))?;
@@ -59,7 +59,7 @@ pub async fn register_user_handler(
     .await
     .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("DB error: {e}")))?;
 
-    let user_response = serde_json::json!({"status": "success","data": serde_json::json!({
+    let user_response = serde_json::json!({"data": serde_json::json!({
         "user": FilteredUser::from_user(user)
     })});
 
@@ -82,7 +82,7 @@ pub async fn login_user_handler(
                 format!("DB error: {}", e),
             )
         })?
-        .ok_or_else(|| (StatusCode::BAD_REQUEST, "Invalid name/password".to_string()))?;
+        .ok_or_else(|| (StatusCode::BAD_REQUEST, "Invalid name".to_string()))?;
 
     let is_valid = match PasswordHash::new(&user.password) {
         Ok(parsed_hash) => Argon2::default()
@@ -92,7 +92,7 @@ pub async fn login_user_handler(
     };
 
     if !is_valid {
-        return Err((StatusCode::BAD_REQUEST, "Invalid name/password".to_string()));
+        return Err((StatusCode::BAD_REQUEST, "Invalid password".to_string()));
     }
 
     let now = chrono::Utc::now();
