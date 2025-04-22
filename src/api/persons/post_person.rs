@@ -25,7 +25,7 @@ struct InsertedId {
     id: i32,
 }
 
-pub async fn add_person(
+pub async fn create_person(
     State(state): State<MyState>,
     Extension(user): Extension<User>,
     Json(data): Json<PersonNew>,

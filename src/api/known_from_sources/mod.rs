@@ -5,7 +5,8 @@ use axum::{
     Router,
 };
 use known_from_sources_routes::{
-    delete_known_from_source, get_known_from_sources, update_known_from_source,
+    create_known_from_source, delete_known_from_source, get_known_from_sources,
+    update_known_from_source,
 };
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
@@ -21,7 +22,10 @@ pub struct KnownFromSources {
 
 pub fn create_known_from_sources_router() -> Router<MyState> {
     Router::new()
-        .route("/known-from-sources", get(get_known_from_sources))
+        .route(
+            "/known-from-sources",
+            get(get_known_from_sources).post(create_known_from_source),
+        )
         .route(
             "/known-from-sources/{source_id}",
             put(update_known_from_source).delete(delete_known_from_source),
