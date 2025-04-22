@@ -1,59 +1,30 @@
-use serde::{Deserialize, Serialize};
 use shuttle_runtime::SecretStore;
-use sqlx::{
-    types::{
-        chrono::{DateTime, Local},
-        Json,
-    },
-    FromRow, PgPool,
-};
+use sqlx::PgPool;
 
 pub mod auth;
 pub mod errors;
-pub mod known_from_sources_routes;
-pub mod post_person;
-pub mod retrieve_persons;
-pub mod update_person;
+pub mod known_from_sources;
+pub mod persons;
 
 #[derive(Clone)]
 pub struct MyState {
     pub pool: PgPool,
-    pub secrets: SecretStore,
+    pub secrets: Secrets,
 }
 
-#[derive(Serialize, Deserialize, Default, FromRow, Copy, Clone)]
-pub struct Coordinate {
-    pub lon: f64,
-    pub lat: f64,
+#[derive(Clone)]
+pub struct Secrets {
+    jwt_secret: String,
+    login_expired: u8, // in hours
 }
 
-#[derive(FromRow, Default, Serialize, Deserialize, Clone)]
-
-pub struct Person {
-    pub id: i32,
-    pub first_name: String,
-    pub last_name: String,
-    pub known_from_source_id: Option<i32>,
-    #[serde(skip_serializing)]
-    pub coordinate: Option<Json<Coordinate>>,
-    pub job_title: String,
-    pub company: String,
-    pub linkedin: String,
-    pub notes: String,
-    pub created_at: DateTime<Local>, // pub born: String,
-}
-trait PersonTrait {
-    fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>>;
-}
-impl PersonTrait for Person {
-    fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>> {
-        self.coordinate
+impl Secrets {
+    pub fn from_secret_store(secret_store: SecretStore) -> Self {
+        let jwt_secret = secret_store.get("JWT_SECRET").unwrap();
+        let login_expired = secret_store.get("LOGIN_EXPIRED").unwrap().parse().unwrap();
+        Self {
+            jwt_secret,
+            login_expired,
+        }
     }
-}
-
-#[derive(Deserialize, Serialize, FromRow, Default, Clone)]
-pub struct KnownFromSources {
-    pub source_id: i32,
-    pub source_name: String,
-    pub description: String,
 }

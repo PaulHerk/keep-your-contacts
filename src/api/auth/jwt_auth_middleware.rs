@@ -40,7 +40,7 @@ pub async fn auth(
     // Decode and validate the JWT token
     let claims = decode::<TokenClaims>(
         &token,
-        &DecodingKey::from_secret(state.secrets.get("JWT_SECRET").unwrap().as_ref()),
+        &DecodingKey::from_secret(state.secrets.jwt_secret.as_ref()),
         &Validation::default(),
     )
     .map_err(|_| Error::InvalidToken)?

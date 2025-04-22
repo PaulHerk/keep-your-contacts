@@ -5,7 +5,9 @@ use axum::{
 };
 use serde::Deserialize;
 
-use super::{auth::User, errors::Error, KnownFromSources, MyState};
+use crate::api::{auth::User, errors::Error, MyState};
+
+use super::KnownFromSources;
 
 pub async fn get_known_from_sources(
     Extension(user): Extension<User>,

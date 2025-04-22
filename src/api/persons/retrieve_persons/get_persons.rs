@@ -6,11 +6,16 @@ use axum::{
 use reverse_geocoder::{Record, ReverseGeocoder};
 use sqlx::{Postgres, QueryBuilder};
 
-use crate::api::{auth::User, errors::Error, Coordinate, MyState, Person, PersonTrait};
+use crate::api::{
+    auth::User,
+    errors::Error,
+    persons::{Coordinate, Person},
+    MyState,
+};
 
 use super::{
-    filter_persons::filter_person_query, PaginationFilterQuery, SimplePerson, UserQueryResult,
-    UserResponse, UserView,
+    filter_persons::filter_person_query, PaginationFilterQuery, PersonTrait, SimplePerson,
+    UserQueryResult, UserResponse, UserView,
 };
 
 fn get_record_from_coord(

@@ -37,7 +37,7 @@ pub async fn register_user_handler(
 
     let salt = SaltString::generate(&mut OsRng);
     let hashed_password = Argon2::default()
-        .hash_password(body.password.as_bytes(), &salt)
+        .hash_password(body.password.as_ref(), &salt)
         .map_err(|e| Error::HashingError(e))
         .map(|hash| hash.to_string())?;
 
@@ -69,7 +69,7 @@ pub async fn login_user_handler(
 
     let is_valid = match PasswordHash::new(&user.password) {
         Ok(parsed_hash) => Argon2::default()
-            .verify_password(body.password.as_bytes(), &parsed_hash)
+            .verify_password(body.password.as_ref(), &parsed_hash)
             .map_or(false, |_| true),
         Err(_) => false,
     };
@@ -80,7 +80,8 @@ pub async fn login_user_handler(
 
     let now = chrono::Utc::now();
     let iat = now.timestamp() as usize;
-    let exp = (now + chrono::Duration::hours(24)).timestamp() as usize;
+    let exp =
+        (now + chrono::Duration::hours(data.secrets.login_expired as i64)).timestamp() as usize;
     let claims: TokenClaims = TokenClaims {
         sub: user.id.to_string(),
         exp,
@@ -90,13 +91,13 @@ pub async fn login_user_handler(
     let token = encode(
         &Header::default(),
         &claims,
-        &EncodingKey::from_secret(data.secrets.get("JWT_SECRET").unwrap().as_bytes()),
+        &EncodingKey::from_secret(data.secrets.jwt_secret.as_bytes()),
     )
     .unwrap();
 
     let cookie = Cookie::build(("token", token.to_owned()))
         .path("/")
-        .max_age(time::Duration::hours(24))
+        .max_age(time::Duration::hours(data.secrets.login_expired as i64))
         .same_site(SameSite::Lax)
         .http_only(true);
 

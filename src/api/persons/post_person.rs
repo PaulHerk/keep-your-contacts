@@ -2,7 +2,9 @@ use axum::{extract::State, http::StatusCode, response::IntoResponse, Extension, 
 use serde::Deserialize;
 use sqlx::{Postgres, QueryBuilder};
 
-use super::{auth::User, Coordinate, MyState};
+use crate::api::{auth::User, MyState};
+
+use super::Coordinate;
 #[derive(Deserialize, Default)]
 pub struct PersonNew {
     pub name: String,

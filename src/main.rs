@@ -1,21 +1,15 @@
 use api::{
-    auth::{self, create_auth_router, jwt_auth_middleware::auth},
-    known_from_sources_routes::{
-        delete_known_from_source, get_known_from_sources, update_known_from_source,
-    },
-    post_person::add_person,
-    retrieve_persons::{filter_persons::filter_person_query, get_persons::retrieve},
-    update_person::{delete_person, update_person},
-    MyState,
+    auth::{create_auth_router, jwt_auth_middleware::auth},
+    known_from_sources::create_known_from_sources_router,
+    persons::create_persons_router,
+    MyState, Secrets,
 };
 use axum::{
     http::{
         header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
         Method,
     },
-    middleware,
-    routing::{delete, get, post, put},
-    Router,
+    middleware, Router,
 };
 use shuttle_runtime::SecretStore;
 use sqlx::PgPool;
@@ -24,7 +18,7 @@ pub mod api;
 
 #[shuttle_runtime::main]
 async fn main(
-    #[shuttle_runtime::Secrets] secrets: SecretStore,
+    #[shuttle_runtime::Secrets] secret_store: SecretStore,
     #[shuttle_shared_db::Postgres(
         local_uri = "postgres://postgres:{secrets.PASSWORD}@localhost:5432/postgres"
     )]
@@ -33,6 +27,7 @@ async fn main(
     //     sqlx::query(
     // "CREATE TABLE IF NOT EXISTS persons (id serial PRIMARY KEY, first_name TEXT NOT NULL, last_name TEXT, city TEXT NOT NULL, job TEXT, note TEXT)")
     //         .execute(&pool).await.expect("Failed to create table");
+    let secrets = Secrets::from_secret_store(secret_store);
     sqlx::migrate!()
         .run(&pool)
         .await
@@ -46,20 +41,10 @@ async fn main(
 
     let state = MyState { pool, secrets };
     let router = Router::new()
-        .route("/persons", get(retrieve).post(add_person))
-        .route(
-            "/persons/{person_id}",
-            put(update_person).delete(delete_person),
-        )
-        // .route("/persons/search", get(search_persons))
-        .route("/known-from-sources", get(get_known_from_sources))
-        .route(
-            "/known_from_source/{source_id}",
-            put(update_known_from_source).delete(delete_known_from_source),
-        )
+        .merge(create_persons_router())
+        .merge(create_known_from_sources_router())
         .route_layer(middleware::from_fn_with_state(state.clone(), auth))
         .merge(create_auth_router(state.clone()))
-        // .route("/persons/delete-person/{id}", delete(delete_person))
         .with_state(state)
         .layer(cors);
 

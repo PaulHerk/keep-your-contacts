@@ -6,7 +6,9 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{auth::User, errors::Error, Coordinate, MyState, Person};
+use crate::api::{auth::User, errors::Error, MyState};
+
+use super::{Coordinate, Person};
 #[derive(Serialize, Deserialize, Default)]
 pub struct UpdatePerson {
     pub last_name: Option<String>,
