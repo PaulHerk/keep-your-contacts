@@ -4,12 +4,21 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = "0.8.1"
+axum ={ version = "0.8.3", features = ["query", "json", "macros"] }
 shuttle-axum = "0.53.0"
 shuttle-runtime = "0.53.0"
-tokio = "1.28.2"
+tokio = { version = "1.44.2", features = ["full"] }
 shuttle-shared-db = { version = "0.53.0", features = ["postgres", "sqlx"] }
-sqlx = { version = "0.8.3", features = ["macros"] }
-serde = "1.0.219"
+sqlx = { version = "0.8.5", features = ["macros", "chrono", "postgres", "json", "runtime-async-std-native-tls", "uuid"] }
+serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 tower-http = { version = "0.6.2", features = ["cors"] }
+reverse_geocoder = "4.1.1"
+axum-extra = { version = "0.10.1", features = ["cookie", "typed-header"] }
+time = "0.3.41"
+chrono = { version = "0.4.40", features = ["serde"] }
+dotenv = "0.15.0"
+uuid = { version = "1.16.0", features = ["serde", "v4"] }
+jsonwebtoken = "9.3.1"
+argon2 = "0.5.3"
+rand_core = { version = "0.9.3", features = ["std"] }

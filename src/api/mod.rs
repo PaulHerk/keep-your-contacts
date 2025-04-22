@@ -1,81 +1,30 @@
-use axum::{
-    extract::{Path, State},
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
-};
-use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, PgPool};
+use shuttle_runtime::SecretStore;
+use sqlx::PgPool;
 
-pub mod get_metadata;
+pub mod auth;
+pub mod errors;
+pub mod known_from_sources;
+pub mod persons;
 
 #[derive(Clone)]
 pub struct MyState {
     pub pool: PgPool,
+    pub secrets: Secrets,
 }
 
-#[derive(Deserialize)]
-pub struct PersonNew {
-    pub first_name: String,
-    pub last_name: String,
-    pub city: String,
-    pub job: String,
-    pub note: String,
+#[derive(Clone)]
+pub struct Secrets {
+    jwt_secret: String,
+    login_expired: u8, // in hours
 }
 
-#[derive(Serialize, FromRow, Default)]
-pub struct Person {
-    pub id: i32,
-    pub first_name: String,
-    pub last_name: String,
-    pub city: String,
-    pub job: String,
-    pub note: String,
-    // pub born: String,
-}
-
-pub async fn retrieve(
-    State(state): State<MyState>,
-) -> Result<impl IntoResponse, impl IntoResponse> {
-    match sqlx::query_as::<_, Person>("SELECT * FROM persons")
-        .fetch_all(&state.pool)
-        .await
-    {
-        Ok(person) => Ok((StatusCode::OK, Json(person))),
-        Err(e) => Err((StatusCode::BAD_REQUEST, e.to_string())),
-    }
-}
-
-pub async fn add_person(
-    State(state): State<MyState>,
-    Json(data): Json<PersonNew>,
-) -> Result<impl IntoResponse, impl IntoResponse> {
-    match sqlx::query_as::<_, Person>(
-        "INSERT INTO persons (first_name, last_name, city, job, note) VALUES ($1, $2, $3, $4, $5) RETURNING id, note, first_name, last_name, city, job",
-    )
-    .bind(&data.first_name)
-    .bind(&data.last_name)
-    .bind(&data.city)
-    .bind(&data.job)
-    .bind(&data.note)
-    .fetch_one(&state.pool)
-    .await
-    {
-        Ok(person) => Ok((StatusCode::CREATED, Json(person))),
-        Err(e) => Err((StatusCode::BAD_REQUEST, e.to_string())),
-    }
-}
-
-pub async fn delete_person(
-    Path(id): Path<i32>,
-    State(state): State<MyState>,
-) -> Result<impl IntoResponse, impl IntoResponse> {
-    match sqlx::query("DELETE FROM persons WHERE id = $1")
-        .bind(id)
-        .execute(&state.pool)
-        .await
-    {
-        Ok(_) => Ok((StatusCode::OK, ())),
-        Err(e) => Err((StatusCode::BAD_REQUEST, e.to_string())),
+impl Secrets {
+    pub fn from_secret_store(secret_store: SecretStore) -> Self {
+        let jwt_secret = secret_store.get("JWT_SECRET").unwrap();
+        let login_expired = secret_store.get("LOGIN_EXPIRED").unwrap().parse().unwrap();
+        Self {
+            jwt_secret,
+            login_expired,
+        }
     }
 }
