@@ -4,7 +4,7 @@ use argon2::{
 };
 use axum::{
     extract::State,
-    http::{header, Response, StatusCode},
+    http::{header, response::Parts, HeaderValue, Response, StatusCode},
     response::IntoResponse,
     Extension, Json,
 };
@@ -101,11 +101,14 @@ pub async fn login_user_handler(
         .same_site(SameSite::Lax)
         .http_only(true);
 
-    let mut response = Response::new(json!({"status": "success", "token": token}).to_string());
-    response
-        .headers_mut()
-        .insert(header::SET_COOKIE, cookie.to_string().parse().unwrap());
-    Ok(response)
+    Ok((
+        StatusCode::ACCEPTED,
+        [(
+            header::SET_COOKIE,
+            cookie.to_string().parse::<HeaderValue>().unwrap(),
+        )],
+        format!("Token: {}", token),
+    ))
 }
 
 /// Invalidates the authentication by expiring the token cookie.
@@ -116,21 +119,16 @@ pub async fn logout_handler() -> Result<impl IntoResponse, Error> {
         .same_site(SameSite::Lax)
         .http_only(true);
 
-    let mut response = Response::new(json!({"status": "success"}).to_string());
-    response
-        .headers_mut()
-        .insert(header::SET_COOKIE, cookie.to_string().parse().unwrap());
-    Ok(response)
+    Ok((
+        StatusCode::OK,
+        [(
+            header::SET_COOKIE,
+            cookie.to_string().parse::<HeaderValue>().unwrap(),
+        )],
+    ))
 }
 
 /// Returns the authenticated user's data, excluding sensitive fields.
 pub async fn get_me_handler(Extension(user): Extension<User>) -> Result<impl IntoResponse, Error> {
-    let json_response = serde_json::json!({
-        "status":  "success",
-        "data": serde_json::json!({
-            "user": FilteredUser::from_user(user)
-        })
-    });
-
-    Ok(Json(json_response))
+    Ok(Json(FilteredUser::from_user(user)))
 }
