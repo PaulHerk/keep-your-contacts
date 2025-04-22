@@ -4,6 +4,7 @@ use axum::{http::StatusCode, response::IntoResponse};
 pub enum Error {
     DBError(sqlx::Error),
     PersonNotFound,
+    KnownFromSourceNotFound,
     HashingError(password_hash::Error),
     UserAlreadyExists,
     InvalidLoginName,
@@ -22,6 +23,10 @@ impl IntoResponse for Error {
                 format!("Error while hashing password: {e}"),
             ),
             Error::PersonNotFound => (StatusCode::NOT_FOUND, format!("This person was not found.")),
+            Error::KnownFromSourceNotFound => (
+                StatusCode::NOT_FOUND,
+                format!("This known from source was not found."),
+            ),
             Error::UserAlreadyExists => (
                 StatusCode::CONFLICT,
                 format!("A user with that name already exists."),

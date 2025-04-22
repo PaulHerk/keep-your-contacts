@@ -6,7 +6,7 @@ use super::User;
 /// Sanitized user representation that excludes sensitive data like passwords.
 /// Used for all user-facing responses.
 #[allow(non_snake_case)]
-#[derive(Debug, Serialize)]
+#[derive(Serialize)]
 pub struct FilteredUser {
     pub id: String,
     pub name: String,
@@ -29,12 +29,12 @@ impl FilteredUser {
     }
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize)]
 pub struct UserData {
     pub user: FilteredUser,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize)]
 pub struct UserResponse {
     pub status: String,
     pub data: UserData,

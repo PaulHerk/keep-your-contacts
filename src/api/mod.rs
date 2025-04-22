@@ -10,7 +10,7 @@ use sqlx::{
 
 pub mod auth;
 pub mod errors;
-pub mod get_known_from_sources;
+pub mod known_from_sources_routes;
 pub mod post_person;
 pub mod retrieve_persons;
 pub mod update_person;
