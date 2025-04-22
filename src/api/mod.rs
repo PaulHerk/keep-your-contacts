@@ -12,6 +12,7 @@ pub mod auth;
 pub mod get_known_from_sources;
 pub mod post_person;
 pub mod retrieve_persons;
+pub mod update_person;
 
 #[derive(Clone)]
 pub struct MyState {
@@ -30,15 +31,15 @@ pub struct Coordinate {
 pub struct Person {
     pub id: i32,
     pub first_name: String,
-    pub last_name: Option<String>,
+    pub last_name: String,
     pub known_from_source_id: Option<i32>,
     #[serde(skip_serializing)]
     pub coordinate: Option<Json<Coordinate>>,
-    pub job_title: Option<String>,
-    pub company: Option<String>,
-    pub linkedin: Option<String>,
-    pub notes: Option<String>,
-    pub created_at: Option<DateTime<Local>>, // pub born: String,
+    pub job_title: String,
+    pub company: String,
+    pub linkedin: String,
+    pub notes: String,
+    pub created_at: DateTime<Local>, // pub born: String,
 }
 trait PersonTrait {
     fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>>;
