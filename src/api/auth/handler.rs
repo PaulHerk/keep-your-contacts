@@ -12,7 +12,7 @@ use axum_extra::extract::cookie::{Cookie, SameSite};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde_json::json;
 
-use crate::api::{auth::responses::FilteredUser, MyState};
+use crate::api::{auth::responses::FilteredUser, errors::Error, MyState};
 
 use super::{LoginUserSchema, RegisterUserSchema, TokenClaims, User};
 
@@ -21,32 +21,24 @@ use super::{LoginUserSchema, RegisterUserSchema, TokenClaims, User};
 pub async fn register_user_handler(
     State(data): State<MyState>,
     Json(body): Json<RegisterUserSchema>,
-) -> Result<impl IntoResponse, (StatusCode, String)> {
+) -> Result<impl IntoResponse, Error> {
     let user_exists: Option<bool> =
         sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM Users WHERE name = $1)")
             .bind(body.name.to_owned().to_ascii_lowercase())
             .fetch_one(&data.pool)
             .await
-            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("DB error: {e}")))?;
+            .map_err(|e| Error::DBError(e))?;
 
     if let Some(exists) = user_exists {
         if exists {
-            return Err((
-                StatusCode::CONFLICT,
-                "User with that name already exists".to_string(),
-            ));
+            return Err(Error::UserAlreadyExists);
         }
     }
 
     let salt = SaltString::generate(&mut OsRng);
     let hashed_password = Argon2::default()
         .hash_password(body.password.as_bytes(), &salt)
-        .map_err(|e| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Error while hashing password: {}", e),
-            )
-        })
+        .map_err(|e| Error::HashingError(e))
         .map(|hash| hash.to_string())?;
 
     let user = sqlx::query_as::<_, User>(
@@ -57,7 +49,7 @@ pub async fn register_user_handler(
     .bind(hashed_password)
     .fetch_one(&data.pool)
     .await
-    .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("DB error: {e}")))?;
+    .map_err(|e| Error::DBError(e))?;
 
     Ok(StatusCode::CREATED)
 }
@@ -67,18 +59,13 @@ pub async fn register_user_handler(
 pub async fn login_user_handler(
     State(data): State<MyState>,
     Json(body): Json<LoginUserSchema>,
-) -> Result<impl IntoResponse, impl IntoResponse> {
+) -> Result<impl IntoResponse, Error> {
     let user = sqlx::query_as::<_, User>("SELECT * FROM Users WHERE name = $1")
         .bind(body.name.to_ascii_lowercase())
         .fetch_optional(&data.pool)
         .await
-        .map_err(|e| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("DB error: {}", e),
-            )
-        })?
-        .ok_or_else(|| (StatusCode::BAD_REQUEST, "Invalid name".to_string()))?;
+        .map_err(|e| Error::DBError(e))?
+        .ok_or_else(|| Error::InvalidLoginName)?;
 
     let is_valid = match PasswordHash::new(&user.password) {
         Ok(parsed_hash) => Argon2::default()
@@ -88,7 +75,7 @@ pub async fn login_user_handler(
     };
 
     if !is_valid {
-        return Err((StatusCode::BAD_REQUEST, "Invalid password".to_string()));
+        return Err(Error::InvalidPassword);
     }
 
     let now = chrono::Utc::now();
@@ -121,7 +108,7 @@ pub async fn login_user_handler(
 }
 
 /// Invalidates the authentication by expiring the token cookie.
-pub async fn logout_handler() -> Result<impl IntoResponse, StatusCode> {
+pub async fn logout_handler() -> Result<impl IntoResponse, Error> {
     let cookie = Cookie::build(("token", ""))
         .path("/")
         .max_age(time::Duration::hours(-1))
@@ -136,9 +123,7 @@ pub async fn logout_handler() -> Result<impl IntoResponse, StatusCode> {
 }
 
 /// Returns the authenticated user's data, excluding sensitive fields.
-pub async fn get_me_handler(
-    Extension(user): Extension<User>,
-) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
+pub async fn get_me_handler(Extension(user): Extension<User>) -> Result<impl IntoResponse, Error> {
     let json_response = serde_json::json!({
         "status":  "success",
         "data": serde_json::json!({

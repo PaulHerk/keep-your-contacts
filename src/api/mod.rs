@@ -5,10 +5,11 @@ use sqlx::{
         chrono::{DateTime, Local},
         Json,
     },
-    Decode, FromRow, PgPool,
+    FromRow, PgPool,
 };
 
 pub mod auth;
+pub mod errors;
 pub mod get_known_from_sources;
 pub mod post_person;
 pub mod retrieve_persons;

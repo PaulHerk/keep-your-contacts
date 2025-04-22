@@ -6,7 +6,7 @@ use axum::{
 use reverse_geocoder::{Record, ReverseGeocoder};
 use sqlx::{Postgres, QueryBuilder};
 
-use crate::api::{auth::User, Coordinate, MyState, Person, PersonTrait};
+use crate::api::{auth::User, errors::Error, Coordinate, MyState, Person, PersonTrait};
 
 use super::{
     filter_persons::filter_person_query, PaginationFilterQuery, SimplePerson, UserQueryResult,
@@ -44,7 +44,7 @@ pub async fn retrieve(
     Extension(user): Extension<User>,
     Query(url_query): Query<PaginationFilterQuery>,
     State(state): State<MyState>,
-) -> Result<(StatusCode, Json<UserQueryResult>), (StatusCode, String)> {
+) -> Result<(StatusCode, Json<UserQueryResult>), Error> {
     let view = match url_query.detailed.unwrap_or(false) {
         true => UserView::Detailed,
         false => UserView::Simple,
@@ -70,7 +70,7 @@ pub async fn retrieve(
                 .build_query_as::<SimplePerson>()
                 .fetch_all(&state.pool)
                 .await
-                .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("DB error: {e}")))?;
+                .map_err(|e| Error::DBError(e))?;
             let simple_persons_with_coords = create_person_with_record(persons, &geocoder);
             Ok((
                 StatusCode::OK,
@@ -82,7 +82,7 @@ pub async fn retrieve(
                 .build_query_as::<Person>()
                 .fetch_all(&state.pool)
                 .await
-                .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("DB error: {e}")))?;
+                .map_err(|e| Error::DBError(e))?;
             let persons_with_coords = create_person_with_record(persons, &geocoder);
             Ok((
                 StatusCode::OK,
