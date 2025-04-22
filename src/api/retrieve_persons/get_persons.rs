@@ -18,7 +18,7 @@ fn get_record_from_coord(
     coord: Option<sqlx::types::Json<Coordinate>>,
 ) -> Option<Record> {
     return if let Some(coord) = coord {
-        Some(geocoder.search((coord.lon, coord.lat)).record).cloned()
+        Some(geocoder.search((coord.lat, coord.lon)).record).cloned()
     } else {
         None
     };
