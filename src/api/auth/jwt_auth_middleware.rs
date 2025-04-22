@@ -20,7 +20,7 @@ pub async fn auth(
     mut req: Request<Body>,
     next: Next,
 ) -> Result<impl IntoResponse, Error> {
-    // Extract token from cookie or Bearer header
+    // Extract token from cookie or Bearer header, TypedHeader not used since auth-header isn't required
     let token = cookie_jar
         .get("token")
         .map(|cookie| cookie.value().to_string())

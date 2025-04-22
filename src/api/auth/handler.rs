@@ -4,13 +4,15 @@ use argon2::{
 };
 use axum::{
     extract::State,
-    http::{header, response::Parts, HeaderValue, Response, StatusCode},
-    response::IntoResponse,
+    http::StatusCode,
+    response::{IntoResponse, Redirect},
     Extension, Json,
 };
-use axum_extra::extract::cookie::{Cookie, SameSite};
+use axum_extra::extract::{
+    cookie::{Cookie, SameSite},
+    CookieJar,
+};
 use jsonwebtoken::{encode, EncodingKey, Header};
-use serde_json::json;
 
 use crate::api::{auth::responses::FilteredUser, errors::Error, MyState};
 
@@ -41,7 +43,7 @@ pub async fn register_user_handler(
         .map_err(|e| Error::HashingError(e))
         .map(|hash| hash.to_string())?;
 
-    let user = sqlx::query_as::<_, User>(
+    sqlx::query_as::<_, User>(
         "INSERT INTO Users (name,email,password) VALUES ($1, $2, $3) RETURNING *",
     )
     .bind(body.name.to_string())
@@ -51,13 +53,14 @@ pub async fn register_user_handler(
     .await
     .map_err(|e| Error::DBError(e))?;
 
-    Ok(StatusCode::CREATED)
+    Ok((StatusCode::CREATED, Redirect::to("/auth/login")))
 }
 
 /// Authenticates user and issues a JWT token valid for 24 hours.
 /// Returns token via both JSON response and httpOnly cookie.
 pub async fn login_user_handler(
     State(data): State<MyState>,
+    jar: CookieJar,
     Json(body): Json<LoginUserSchema>,
 ) -> Result<impl IntoResponse, Error> {
     let user = sqlx::query_as::<_, User>("SELECT * FROM Users WHERE name = $1")
@@ -103,29 +106,20 @@ pub async fn login_user_handler(
 
     Ok((
         StatusCode::ACCEPTED,
-        [(
-            header::SET_COOKIE,
-            cookie.to_string().parse::<HeaderValue>().unwrap(),
-        )],
-        format!("Token: {}", token),
+        jar.add(cookie.clone()),
+        Redirect::to("/persons/"),
     ))
 }
 
 /// Invalidates the authentication by expiring the token cookie.
-pub async fn logout_handler() -> Result<impl IntoResponse, Error> {
+pub async fn logout_handler(jar: CookieJar) -> Result<impl IntoResponse, Error> {
     let cookie = Cookie::build(("token", ""))
         .path("/")
         .max_age(time::Duration::hours(-1))
         .same_site(SameSite::Lax)
         .http_only(true);
 
-    Ok((
-        StatusCode::OK,
-        [(
-            header::SET_COOKIE,
-            cookie.to_string().parse::<HeaderValue>().unwrap(),
-        )],
-    ))
+    Ok((StatusCode::OK, jar.add(cookie)))
 }
 
 /// Returns the authenticated user's data, excluding sensitive fields.
