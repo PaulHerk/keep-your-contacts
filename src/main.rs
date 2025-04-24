@@ -13,7 +13,7 @@ use axum::{
 };
 use shuttle_runtime::SecretStore;
 use sqlx::PgPool;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 pub mod api;
 
 #[shuttle_runtime::main]
