@@ -6,19 +6,20 @@
     import type { PageProps } from "./$types";
     import { api_get } from "$lib";
     import { persons } from "./store";
-
+    import { api_url } from "../state.svelte";
     let { data }: PageProps = $props();
+
     let page = $state(0);
     let per_page = $state(10);
     let detailed = $state(false);
 
     $effect(() => {
-        // console.log("aslas");
         api_get(
-            `/persons?page=${page}&per_page=${per_page}&detailed=${detailed}`,
+            `${api_url}/persons?page=${page}&per_page=${per_page}&detailed=${detailed}`,
             {},
         )
-            .then((p: Person[]) => {
+            .then(async (response) => {
+                const p = await response.json();
                 console.log("aslas: ", p);
                 persons.set(p);
             })
