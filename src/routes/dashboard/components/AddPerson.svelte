@@ -1,7 +1,4 @@
 <script lang="ts">
-    import { add_person } from "$lib";
-    import { onMount } from "svelte";
-    import { persons } from "../state.svelte";
     import { Modal } from "@skeletonlabs/skeleton-svelte";
 
     let newPerson: NewPerson = $state(initializeNewPerson());
@@ -21,9 +18,10 @@
     }
     function addPerson() {
         try {
-            add_person(newPerson).then((new_person) => {
-                persons.push(new_person);
-            });
+            // add_person(newPerson).then((new_person) => {
+            //     persons.push(new_person);
+            // });
+            console.log("Person added!!");
             newPerson = initializeNewPerson();
             modalClose();
         } catch (e) {

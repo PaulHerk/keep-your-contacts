@@ -104,11 +104,7 @@ pub async fn login_user_handler(
         .same_site(SameSite::Lax)
         .http_only(true);
 
-    Ok((
-        StatusCode::ACCEPTED,
-        jar.add(cookie.clone()),
-        Redirect::to("/persons/"),
-    ))
+    Ok((StatusCode::ACCEPTED, jar.add(cookie.clone())))
 }
 
 /// Invalidates the authentication by expiring the token cookie.

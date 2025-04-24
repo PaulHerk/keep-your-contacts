@@ -7,6 +7,8 @@
     import IconSettings from "@lucide/svelte/icons/settings";
     import { ContactRound, Map } from "@lucide/svelte";
     import { page } from "$app/state";
+    import { onMount, setContext } from "svelte";
+    import { api_get } from "$lib";
 </script>
 
 <div
