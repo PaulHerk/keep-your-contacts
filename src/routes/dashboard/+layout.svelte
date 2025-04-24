@@ -12,7 +12,7 @@
 </script>
 
 <div
-    class="card border-surface-100-900 grid h-[640px] w-full grid-cols-[auto_1fr] border-[1px]"
+    class="card border-surface-100-900 grid h-[640px] w-full grid-cols-[auto_1fr]"
 >
     <!-- Component -->
     <Navigation.Rail>
@@ -23,15 +23,15 @@
         {#snippet tiles()}
             <Navigation.Tile
                 label="Persons"
-                href="/"
-                selected={page.url.pathname === "/"}
+                href="/dashboard"
+                selected={page.url.pathname === "/dashboard"}
             >
                 <ContactRound />
             </Navigation.Tile>
             <Navigation.Tile
                 label="Map"
-                href="/map"
-                selected={page.url.pathname === "/map"}
+                href="/dashboard/map"
+                selected={page.url.pathname === "/dashboard/map"}
             >
                 <Map />
             </Navigation.Tile>
