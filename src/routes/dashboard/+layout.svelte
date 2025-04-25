@@ -1,51 +1,50 @@
 <script lang="ts">
-    let { children } = $props();
+  let { children } = $props();
 
-    import { Navigation } from "@skeletonlabs/skeleton-svelte";
-    // Icons
-    import IconMenu from "@lucide/svelte/icons/menu";
-    import IconSettings from "@lucide/svelte/icons/settings";
-    import { ContactRound, Map } from "@lucide/svelte";
-    import { page } from "$app/state";
-    import { onMount, setContext } from "svelte";
-    import { api_get } from "$lib";
+  import { Navigation } from "@skeletonlabs/skeleton-svelte";
+  // Icons
+  import IconMenu from "@lucide/svelte/icons/menu";
+  import IconSettings from "@lucide/svelte/icons/settings";
+  import { ContactRound, Map } from "@lucide/svelte";
+  import { page } from "$app/state";
+  import { onMount, setContext } from "svelte";
+  import { api_request } from "$lib";
 </script>
 
 <div
-    class="card border-surface-100-900 grid h-[640px] w-full grid-cols-[auto_1fr]"
+  class="card border-surface-100-900 grid h-[640px] w-full grid-cols-[auto_1fr]"
 >
-    <!-- Component -->
-    <Navigation.Rail>
-        {#snippet header()}
-            <Navigation.Tile href="#" title="Menu"><IconMenu /></Navigation.Tile
-            >
-        {/snippet}
-        {#snippet tiles()}
-            <Navigation.Tile
-                label="Persons"
-                href="/dashboard"
-                selected={page.url.pathname === "/dashboard"}
-            >
-                <ContactRound />
-            </Navigation.Tile>
-            <Navigation.Tile
-                label="Map"
-                href="/dashboard/map"
-                selected={page.url.pathname === "/dashboard/map"}
-            >
-                <Map />
-            </Navigation.Tile>
-        {/snippet}
-        {#snippet footer()}
-            <Navigation.Tile
-                labelExpanded="Settings"
-                href="#settings"
-                title="settings"><IconSettings /></Navigation.Tile
-            >
-        {/snippet}
-    </Navigation.Rail>
-    <!-- Content -->
-    <div class="flex items-center justify-center">
-        {@render children()}
-    </div>
+  <!-- Component -->
+  <Navigation.Rail>
+    {#snippet header()}
+      <Navigation.Tile href="#" title="Menu"><IconMenu /></Navigation.Tile>
+    {/snippet}
+    {#snippet tiles()}
+      <Navigation.Tile
+        label="Persons"
+        href="/dashboard"
+        selected={page.url.pathname === "/dashboard"}
+      >
+        <ContactRound />
+      </Navigation.Tile>
+      <Navigation.Tile
+        label="Map"
+        href="/dashboard/map"
+        selected={page.url.pathname === "/dashboard/map"}
+      >
+        <Map />
+      </Navigation.Tile>
+    {/snippet}
+    {#snippet footer()}
+      <Navigation.Tile
+        labelExpanded="Settings"
+        href="#settings"
+        title="settings"><IconSettings /></Navigation.Tile
+      >
+    {/snippet}
+  </Navigation.Rail>
+  <!-- Content -->
+  <div class="flex items-center justify-center">
+    {@render children()}
+  </div>
 </div>

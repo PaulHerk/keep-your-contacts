@@ -85,7 +85,11 @@
               <td><p class="text-wrap">{person.job_title}</p></td>
               <td><p class="text-wrap">{person.notes}</p></td>
             {/if}
-            <td><p class="text-wrap">{regionNames.of(person.record.cc)}</p></td>
+            <td
+              ><p class="text-wrap">
+                {regionNames.of(person.record?.cc ?? "")}
+              </p></td
+            >
           </tr>
         {/each}
       </tbody>

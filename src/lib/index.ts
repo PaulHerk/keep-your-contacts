@@ -1,20 +1,23 @@
 // let url = "https://keep-your-contacts-fkfz.shuttle.app/persons"
 
 import { error, redirect } from "@sveltejs/kit";
-import { api_url } from "../routes/state.svelte";
 import { goto } from "$app/navigation";
 
-async function request(url: string, options: RequestInit = {}) {
+async function request(
+  fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> {
   const fetchOptions: RequestInit = {
     credentials: "include",
     headers: {
-      "Content-Type": "application/json", // Form request use svelte's fetch function that includes credentials?
+      "Content-Type": "application/json",
       ...options.headers,
     },
     ...options,
   };
   try {
-    const response = await fetch(url, fetchOptions);
+    const response: Response = await fetch(url, fetchOptions);
     if (response.ok) {
       return response;
     } else {
@@ -67,6 +70,11 @@ async function request(url: string, options: RequestInit = {}) {
 //     return id
 // }
 
-export const api_get = async (url: string, options: RequestInit) => {
-  return request(url, { method: "GET", ...options });
+export const api_url = "http://localhost:8000";
+export const api_request = async (
+  fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
+  url: string,
+  options: RequestInit = {}
+) => {
+  return request(fetch, api_url + url, { method: "GET", ...options });
 };

@@ -4,11 +4,10 @@
   import Table from "./components/Table.svelte";
   import AddPerson from "./components/AddPerson.svelte";
   import type { PageProps } from "./$types";
-  import { api_get } from "$lib";
+  import { api_request } from "$lib";
   import { persons } from "./store";
-  import { api_url } from "../state.svelte";
 
-  let { data }: PageProps = $props();
+  let { data, form }: PageProps = $props();
 
   let windowInnerWidth = $state(0);
   let page = $state(0);
@@ -16,9 +15,11 @@
   let detailed = $derived(windowInnerWidth > 800);
 
   $effect(() => {
-    api_get(
-      `${api_url}/persons?page=${page}&per_page=${per_page}&detailed=${detailed}`,
-      {}
+    form?.success && form?.newPersonId; // if form is successful and new person id is present this will fetch all persons again
+    // TODO: not fetch all persons again, but only the new one
+    api_request(
+      fetch,
+      `/persons?page=${page}&per_page=${per_page}&detailed=${detailed}`
     )
       .then(async (response) => {
         const p = await response.json();

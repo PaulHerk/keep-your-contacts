@@ -1,74 +1,57 @@
 <script lang="ts">
-    import { Modal } from "@skeletonlabs/skeleton-svelte";
+  import { Modal } from "@skeletonlabs/skeleton-svelte";
+  import { enhance } from "$app/forms";
+  import type { PageProps } from "../$types";
 
-    let newPerson: NewPerson = $state(initializeNewPerson());
-    function initializeNewPerson() {
-        return {
-            first_name: "",
-            last_name: "",
-            city: "",
-            job: "",
-            note: "",
-        } as NewPerson;
-    }
-    let openState = $state(false);
+  let newPerson: NewPerson | undefined = $state();
+  let openState = $state(false);
 
-    function modalClose() {
-        openState = false;
-    }
-    function addPerson() {
-        try {
-            // add_person(newPerson).then((new_person) => {
-            //     persons.push(new_person);
-            // });
-            console.log("Person added!!");
-            newPerson = initializeNewPerson();
-            modalClose();
-        } catch (e) {
-            console.error(e);
-        }
-    }
+  function modalClose() {
+    openState = false;
+  }
 </script>
 
+{#snippet input(key: keyof NewPerson, required = false)}
+  <label class="label">
+    <span class="label-text">{key}</span>
+    <input class="input" type="text" placeholder={key} name={key} {required} />
+  </label>
+{/snippet}
+
 <Modal
-    open={openState}
-    onOpenChange={(e) => (openState = e.open)}
-    triggerBase="btn btn-lg preset-filled-tertiary-500"
-    contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
-    backdropClasses="backdrop-blur-sm"
+  open={openState}
+  onOpenChange={(e) => (openState = e.open)}
+  triggerBase="btn btn-lg preset-filled-tertiary-500"
+  contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
+  backdropClasses="backdrop-blur-sm"
 >
-    {#snippet trigger()}Add Person{/snippet}
-    {#snippet content()}
-        <header class="flex justify-between">
-            <h2 class="h2">Add Person</h2>
-        </header>
-        <form class="flex flex-col gap-4 p-4" onsubmit={addPerson}>
-            <article>
-                {#each Object.keys(newPerson) as key}
-                    <label class="label">
-                        <span class="label-text">{key}</span>
-                        <input
-                            class="input"
-                            type="text"
-                            placeholder={key}
-                            required={true}
-                            bind:value={newPerson[key as keyof NewPerson]}
-                        />
-                    </label>
-                {/each}
-            </article>
-            <footer class="flex justify-end gap-4">
-                <button
-                    type="button"
-                    class="btn preset-tonal"
-                    onclick={modalClose}>Cancel</button
-                >
-                <input
-                    type="submit"
-                    value="Confirm"
-                    class="btn preset-filled"
-                />
-            </footer>
-        </form>
-    {/snippet}
+  {#snippet trigger()}Add Person{/snippet}
+  {#snippet content()}
+    <header class="flex justify-between">
+      <h2 class="h2">Add Person</h2>
+    </header>
+    <form
+      class="flex flex-col gap-4 p-4"
+      method="POST"
+      action="?/addPerson"
+      use:enhance
+    >
+      <article>
+        {@render input("name", true)}
+        <!-- {@render input("known_from_source_id")} -->
+        <!-- {@render input("coordinate")} -->
+        {@render input("job_title")}
+        {@render input("company")}
+        {@render input("linkedin")}
+        {@render input("notes")}
+      </article>
+      <footer class="flex justify-end gap-4">
+        <button type="button" class="btn preset-tonal" onclick={modalClose}
+          >Cancel</button
+        >
+        <input type="submit" value="Confirm" class="btn preset-filled" />
+        <!-- <button class="btn preset-filled">Confirm</button> -->
+      </footer>
+    </form>
+  {/snippet}
 </Modal>

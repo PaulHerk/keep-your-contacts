@@ -28,7 +28,7 @@ declare global {
     linkedin: string;
     notes: string;
     createdAt: string;
-    record: Record;
+    record: Record?;
   }
   interface Record {
     lat: number;
@@ -38,12 +38,19 @@ declare global {
     admin2: string;
     cc: string;
   }
+
+  interface Coordinate {
+    lat: number;
+    lon: number;
+  }
   interface NewPerson {
-    first_name: string;
-    last_name: string;
-    city: string;
-    job: string;
-    note: string;
+    name: string;
+    known_from_source_id: number?;
+    coordinate: Coordinate?;
+    job_title: string?;
+    company: string?;
+    linkedin: string?;
+    notes: string?;
   }
 }
 

@@ -107,7 +107,7 @@ pub async fn login_user_handler(
     Ok((
         StatusCode::ACCEPTED,
         jar.add(cookie.clone()),
-        cookie.clone().to_string(),
+        cookie.clone().to_string(), // I have to return the cookie in the body since svelte doesn't evalute set-cookie headers so I have to do this manually in the login form request. https://svelte.dev/docs/kit/load#Cookies
     ))
 }
 

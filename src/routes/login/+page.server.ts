@@ -1,6 +1,5 @@
-import { api_get } from "$lib";
+import { api_request, api_url } from "$lib";
 import { redirect } from "@sveltejs/kit";
-import { api_url } from "../state.svelte";
 import * as setCookieParser from "set-cookie-parser";
 import { fail } from "@sveltejs/kit";
 
@@ -15,49 +14,51 @@ export const load: PageServerLoad = async ({ locals, request }) => {
 };
 
 export const actions = {
-  login: async ({ request, fetch, cookies }) => {
+  login: async ({ request, fetch, cookies, locals }) => {
     const data = await request.formData();
     const name = data.get("name");
     const password = data.get("password");
 
-    console.log(name, password);
-
     try {
       const response = await fetch(api_url + "/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, password }),
       });
-      if (response.ok) {
-        const token = await response.text();
-        const { name, value, path, sameSite, ...options } =
-          setCookieParser.parseString(token);
-        cookies.set(name, value, {
-          path: path ? path : "/",
-          sameSite: sameSite as boolean | "lax" | "strict" | "none" | undefined,
-          ...options,
+
+      if (!response.ok) {
+        let wrongCredentials = response.status === 400;
+        return fail(response.status, {
+          wrongCredentials,
         });
-        return redirect(307, "/dashboard");
-      } else if (response.status === 400) {
-        return fail(400, { wrongCredentials: true });
-      } else {
-        return { success: false, message: await response.text() };
       }
+
+      const token = await response.text();
+      const {
+        name: cookieName,
+        value,
+        path,
+        sameSite,
+        ...options
+      } = setCookieParser.parseString(token);
+      cookies.set(cookieName, value, {
+        path: path ? path : "/",
+        sameSite: sameSite as boolean | "lax" | "strict" | "none" | undefined,
+        ...options,
+      });
     } catch (e) {
-      return {
-        success: false,
-        message:
-          "Something went wrong that is not your fault.: " + JSON.stringify(e),
-      };
+      console.error("Login failed:", e);
+      return fail(500, {
+        message: "An unexpected error occurred",
+      });
     }
+    return redirect(307, "/dashboard"); // this will redirect to the dashboard if the login was successful since errors would have been caught above
   },
   register: async ({ fetch, request }) => {
     const data = await request.formData();
     const name = data.get("name");
     const email = data.get("email");
-    if (!email) return fail(400, { email, missing: true });
+    if (!email) return fail(400, { emailMissing: true });
     const password = data.get("password");
 
     console.log(name, password);
@@ -75,7 +76,7 @@ export const actions = {
         // locals.user = user;
         return { success: true, message: "Registered! You can now Log In." };
       } else if (response.status === 409) {
-        return fail(409, { name, userTaken: true });
+        return fail(409, { userTaken: true });
       } else {
         return { success: false, message: await response.text() };
       }
