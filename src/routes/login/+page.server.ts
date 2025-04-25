@@ -39,7 +39,7 @@ export const actions = {
           sameSite: sameSite as boolean | "lax" | "strict" | "none" | undefined,
           ...options,
         });
-        return { success: true, message: "success" };
+        return redirect(307, "/dashboard");
       } else if (response.status === 400) {
         return fail(400, { wrongCredentials: true });
       } else {

@@ -34,6 +34,7 @@ pub struct Person {
     pub company: String,
     pub linkedin: String,
     pub notes: String,
+    #[serde(rename = "createdAt")]
     pub created_at: DateTime<Local>, // pub born: String,
 }
 pub trait PersonTrait {

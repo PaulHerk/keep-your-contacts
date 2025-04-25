@@ -27,7 +27,7 @@ declare global {
     company: string;
     linkedin: string;
     notes: string;
-    created_at: string;
+    createdAt: string;
     record: Record;
   }
   interface Record {

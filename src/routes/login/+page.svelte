@@ -1,5 +1,6 @@
 <script lang="ts">
     import { browser } from "$app/environment";
+    import { enhance } from "$app/forms";
     import { goto } from "$app/navigation";
     import type { PageProps } from "./$types";
 
@@ -7,7 +8,7 @@
     if (form?.success && browser) goto("/dashboard");
 </script>
 
-<form method="POST" action="?/login">
+<form method="POST" action="?/login" use:enhance>
     {#if form?.wrongCredentials}
         <p class="error">Wrong credentials!</p>
     {/if}
@@ -21,7 +22,7 @@
     </label>
     <label>
         Email
-        <input name="email" type="email" value={form?.email ?? ""} />
+        <input name="email" type="email" />
     </label>
     <label>
         Password
