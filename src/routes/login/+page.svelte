@@ -1,26 +1,38 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { api_url } from "../state.svelte";
-    import { api_get } from "$lib";
+    import { browser } from "$app/environment";
+    import { goto } from "$app/navigation";
+    import type { PageProps } from "./$types";
 
-    const login = async (name: String, password: String) => {
-        try {
-            const response = await api_get(api_url + "/auth/login", {
-                method: "POST",
-                body: JSON.stringify({ name, password }),
-            });
-            if (response.ok) {
-                console.error(await response.text(), response.headers);
-            } else if (response.status === 400) {
-                console.error(response.text, "f");
-            } else {
-                console.error(response.status, "ff");
-            }
-        } catch (e) {
-            console.error("asfi", e);
-        }
-    };
-    onMount(async () => {
-        await login("richard", "very");
-    });
+    let { form }: PageProps = $props();
+    if (form?.success && browser) goto("/dashboard");
 </script>
+
+<form method="POST" action="?/login">
+    {#if form?.wrongCredentials}
+        <p class="error">Wrong credentials!</p>
+    {/if}
+    {#if form?.missing}
+        <p class="error">Email is missing!</p>{/if}
+    {#if form?.userTaken}
+        <p class="error">This user already exists!</p>{/if}
+    <label>
+        Name
+        <input name="name" type="text" required />
+    </label>
+    <label>
+        Email
+        <input name="email" type="email" value={form?.email ?? ""} />
+    </label>
+    <label>
+        Password
+        <input name="password" type="password" required />
+    </label>
+    <button>Log in</button>
+    <button formaction="?/register">Register</button>
+</form>
+
+{#if form && !form.success}
+    <b>{form.message}</b>
+{:else if form && form.success}
+    <b>{form.message}</b>
+{/if}

@@ -70,10 +70,3 @@ async function request(url: string, options: RequestInit = {}) {
 export const api_get = async (url: string, options: RequestInit) => {
   return request(url, { method: "GET", ...options });
 };
-export const api_post = (url: string, body: object, options: RequestInit) => {
-  return request(url, {
-    method: "POST",
-    body: JSON.stringify(body),
-    ...options,
-  });
-};

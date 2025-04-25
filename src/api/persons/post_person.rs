@@ -1,4 +1,4 @@
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Extension, Form, Json};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Extension, Json};
 use serde::Deserialize;
 use sqlx::{Postgres, QueryBuilder};
 
@@ -28,7 +28,7 @@ struct InsertedId {
 pub async fn create_person(
     State(state): State<MyState>,
     Extension(user): Extension<User>,
-    Form(data): Form<PersonNew>,
+    Json(data): Json<PersonNew>,
 ) -> Result<impl IntoResponse, impl IntoResponse> {
     let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
         "INSERT INTO persons (user_id, first_name, last_name, known_from_source_id, coordinate, job_title, company, linkedin, notes) VALUES (",

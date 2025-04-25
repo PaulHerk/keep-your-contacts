@@ -6,7 +6,7 @@ use axum::{
     extract::State,
     http::StatusCode,
     response::{IntoResponse, Redirect},
-    Extension, Form, Json,
+    Extension, Json,
 };
 use axum_extra::extract::{
     cookie::{Cookie, SameSite},
@@ -22,7 +22,7 @@ use super::{LoginUserSchema, RegisterUserSchema, TokenClaims, User};
 /// Prevents duplicate names by checking existence first.
 pub async fn register_user_handler(
     State(data): State<MyState>,
-    Form(body): Form<RegisterUserSchema>,
+    Json(body): Json<RegisterUserSchema>,
 ) -> Result<impl IntoResponse, Error> {
     let user_exists: Option<bool> =
         sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM Users WHERE name = $1)")
@@ -61,7 +61,7 @@ pub async fn register_user_handler(
 pub async fn login_user_handler(
     State(data): State<MyState>,
     jar: CookieJar,
-    Form(body): Form<LoginUserSchema>,
+    Json(body): Json<LoginUserSchema>,
 ) -> Result<impl IntoResponse, Error> {
     let user = sqlx::query_as::<_, User>("SELECT * FROM Users WHERE name = $1")
         .bind(body.name.to_ascii_lowercase())
@@ -104,7 +104,11 @@ pub async fn login_user_handler(
         .same_site(SameSite::Lax)
         .http_only(true);
 
-    Ok((StatusCode::ACCEPTED, jar.add(cookie.clone())))
+    Ok((
+        StatusCode::ACCEPTED,
+        jar.add(cookie.clone()),
+        cookie.clone().to_string(),
+    ))
 }
 
 /// Invalidates the authentication by expiring the token cookie.

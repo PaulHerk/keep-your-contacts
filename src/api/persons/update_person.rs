@@ -2,7 +2,7 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
-    Extension, Form,
+    Extension, Json,
 };
 use serde::{Deserialize, Serialize};
 
@@ -24,7 +24,7 @@ pub async fn update_person(
     State(state): State<MyState>,
     Extension(user): Extension<User>,
     Path(person_id): Path<i32>,
-    Form(data): Form<UpdatePerson>,
+    Json(data): Json<UpdatePerson>,
 ) -> Result<impl IntoResponse, Error> {
     let person =
         sqlx::query_as::<_, Person>("SELECT * FROM Persons WHERE user_id = $1 AND id = $2") // only id should be enough but I want to prevent any secret information to be leaked
