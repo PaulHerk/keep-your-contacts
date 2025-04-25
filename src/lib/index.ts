@@ -4,37 +4,34 @@ import { error, redirect } from "@sveltejs/kit";
 import { api_url } from "../routes/state.svelte";
 import { goto } from "$app/navigation";
 
-
 async function request(url: string, options: RequestInit = {}) {
-    const fetchOptions: RequestInit = {
-        credentials: "include",
-        headers: {
-            "Content-Type": "application/json", // Form request use svelte's fetch function that includes credentials?
-            ...options.headers
-        },
-        ...options
+  const fetchOptions: RequestInit = {
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json", // Form request use svelte's fetch function that includes credentials?
+      ...options.headers,
+    },
+    ...options,
+  };
+  try {
+    const response = await fetch(url, fetchOptions);
+    if (response.ok) {
+      return response;
+    } else {
+      if (response.status === 401) {
+        console.error("Unauthorized aa", await response.text());
+        error(401);
+      } else if (response.status === 500) {
+        console.error("500:", response.text.toString());
+        error(500);
+      } else {
+        error(response.status);
+      }
     }
-    try {
-        const response = await fetch(url, fetchOptions);
-        if (response.ok) {
-            return response
-        }
-        else {
-            if (response.status === 401) {
-                console.error("Unauthorized aa", await response.text());
-                error(401)
-            } else if (response.status === 500) {
-                console.error("500:", response.text.toString())
-                error(500)
-            } else {
-                error(response.status)
-            }
-        }
-
-    } catch (e) {
-        console.error("Api not responding correctly. aa", e)
-        error(500)
-    }
+  } catch (e) {
+    console.error("Api not responding correctly. aa", e);
+    error(500);
+  }
 }
 
 // // place files you want to import through the `$lib` alias in this folder.
@@ -70,5 +67,13 @@ async function request(url: string, options: RequestInit = {}) {
 //     return id
 // }
 
-export const api_get = async (url: string, options: RequestInit) => { return request(url, { method: "GET", ...options }) }
-export const api_post = (url: string, body: object, options: RequestInit) => { return request(url, { method: "POST", body: JSON.stringify(body), ...options }) }
+export const api_get = async (url: string, options: RequestInit) => {
+  return request(url, { method: "GET", ...options });
+};
+export const api_post = (url: string, body: object, options: RequestInit) => {
+  return request(url, {
+    method: "POST",
+    body: JSON.stringify(body),
+    ...options,
+  });
+};
