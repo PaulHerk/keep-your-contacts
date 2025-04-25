@@ -6,7 +6,7 @@ use axum::{
     extract::State,
     http::StatusCode,
     response::{IntoResponse, Redirect},
-    Extension, Json,
+    Extension, Form, Json,
 };
 use axum_extra::extract::{
     cookie::{Cookie, SameSite},
@@ -22,14 +22,14 @@ use super::{LoginUserSchema, RegisterUserSchema, TokenClaims, User};
 /// Prevents duplicate names by checking existence first.
 pub async fn register_user_handler(
     State(data): State<MyState>,
-    Json(body): Json<RegisterUserSchema>,
+    Form(body): Form<RegisterUserSchema>,
 ) -> Result<impl IntoResponse, Error> {
     let user_exists: Option<bool> =
         sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM Users WHERE name = $1)")
             .bind(body.name.to_owned().to_ascii_lowercase())
             .fetch_one(&data.pool)
             .await
-            .map_err(|e| Error::DBError(e))?;
+            .map_err(Error::DBError)?;
 
     if let Some(exists) = user_exists {
         if exists {
@@ -40,7 +40,7 @@ pub async fn register_user_handler(
     let salt = SaltString::generate(&mut OsRng);
     let hashed_password = Argon2::default()
         .hash_password(body.password.as_ref(), &salt)
-        .map_err(|e| Error::HashingError(e))
+        .map_err(Error::HashingError)
         .map(|hash| hash.to_string())?;
 
     sqlx::query_as::<_, User>(
@@ -51,7 +51,7 @@ pub async fn register_user_handler(
     .bind(hashed_password)
     .fetch_one(&data.pool)
     .await
-    .map_err(|e| Error::DBError(e))?;
+    .map_err(Error::DBError)?;
 
     Ok((StatusCode::CREATED, Redirect::to("/auth/login")))
 }
@@ -61,19 +61,19 @@ pub async fn register_user_handler(
 pub async fn login_user_handler(
     State(data): State<MyState>,
     jar: CookieJar,
-    Json(body): Json<LoginUserSchema>,
+    Form(body): Form<LoginUserSchema>,
 ) -> Result<impl IntoResponse, Error> {
     let user = sqlx::query_as::<_, User>("SELECT * FROM Users WHERE name = $1")
         .bind(body.name.to_ascii_lowercase())
         .fetch_optional(&data.pool)
         .await
-        .map_err(|e| Error::DBError(e))?
+        .map_err(Error::DBError)?
         .ok_or_else(|| Error::InvalidLoginName)?;
 
     let is_valid = match PasswordHash::new(&user.password) {
         Ok(parsed_hash) => Argon2::default()
             .verify_password(body.password.as_ref(), &parsed_hash)
-            .map_or(false, |_| true),
+            .is_ok_and(|_| true),
         Err(_) => false,
     };
 

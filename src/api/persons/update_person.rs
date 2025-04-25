@@ -2,7 +2,7 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
-    Extension, Json,
+    Extension, Form,
 };
 use serde::{Deserialize, Serialize};
 
@@ -24,7 +24,7 @@ pub async fn update_person(
     State(state): State<MyState>,
     Extension(user): Extension<User>,
     Path(person_id): Path<i32>,
-    Json(data): Json<UpdatePerson>,
+    Form(data): Form<UpdatePerson>,
 ) -> Result<impl IntoResponse, Error> {
     let person =
         sqlx::query_as::<_, Person>("SELECT * FROM Persons WHERE user_id = $1 AND id = $2") // only id should be enough but I want to prevent any secret information to be leaked
@@ -32,7 +32,7 @@ pub async fn update_person(
             .bind(person_id)
             .fetch_one(&state.pool)
             .await
-            .map_err(|e| Error::DBError(e))?;
+            .map_err(Error::DBError)?;
 
     sqlx::query("UPDATE Persons SET (last_name, known_from_source_id, coordinate, job_title, company, linkedin, notes) = ($3, $4, $5, $6, $7, $8, $9)  WHERE user_id = $1 AND id = $2")
         .bind(user.id)
@@ -43,7 +43,7 @@ pub async fn update_person(
         .bind(data.job_title.unwrap_or(person.job_title))
         .bind(data.company.unwrap_or(person.company))
         .bind(data.linkedin.unwrap_or(person.linkedin))
-        .bind(data.notes.unwrap_or(person.notes)).execute(&state.pool).await.map_err(|e| Error::DBError(e))?;
+        .bind(data.notes.unwrap_or(person.notes)).execute(&state.pool).await.map_err(Error::DBError)?;
     Ok(StatusCode::CREATED)
 }
 
@@ -57,7 +57,7 @@ pub async fn delete_person(
         .bind(person_id)
         .execute(&state.pool)
         .await
-        .map_err(|e| Error::DBError(e))?
+        .map_err(Error::DBError)?
         .rows_affected();
 
     if rows_affected == 0 {

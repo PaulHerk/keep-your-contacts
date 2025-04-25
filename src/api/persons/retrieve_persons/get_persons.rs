@@ -22,11 +22,11 @@ fn get_record_from_coord(
     geocoder: &ReverseGeocoder,
     coord: Option<sqlx::types::Json<Coordinate>>,
 ) -> Option<Record> {
-    return if let Some(coord) = coord {
+    if let Some(coord) = coord {
         Some(geocoder.search((coord.lat, coord.lon)).record).cloned()
     } else {
         None
-    };
+    }
 }
 fn create_person_with_record<Person: PersonTrait + Clone>(
     persons: Vec<Person>,
@@ -35,7 +35,7 @@ fn create_person_with_record<Person: PersonTrait + Clone>(
     persons
         .iter()
         .map(|person| {
-            let record = get_record_from_coord(&geocoder, person.get_coord());
+            let record = get_record_from_coord(geocoder, person.get_coord());
             let fetched = person.clone();
             UserResponse {
                 person: fetched,
@@ -75,7 +75,7 @@ pub async fn retrieve(
                 .build_query_as::<SimplePerson>()
                 .fetch_all(&state.pool)
                 .await
-                .map_err(|e| Error::DBError(e))?;
+                .map_err(Error::DBError)?;
             let simple_persons_with_coords = create_person_with_record(persons, &geocoder);
             Ok((
                 StatusCode::OK,
@@ -87,7 +87,7 @@ pub async fn retrieve(
                 .build_query_as::<Person>()
                 .fetch_all(&state.pool)
                 .await
-                .map_err(|e| Error::DBError(e))?;
+                .map_err(Error::DBError)?;
             let persons_with_coords = create_person_with_record(persons, &geocoder);
             Ok((
                 StatusCode::OK,
