@@ -19,7 +19,7 @@
     // TODO: not fetch all persons again, but only the new one
     api_request(
       fetch,
-      `/persons?page=${page}&per_page=${per_page}&detailed=${detailed}`
+      `/persons?page=${page}&per_page=${per_page}&detailed=true` // I have decided to not call the api when detailed changes, it is rather a frontend thing not backend, I will however preserve the query parameter in the api
     )
       .then(async (response) => {
         const p = await response.json();

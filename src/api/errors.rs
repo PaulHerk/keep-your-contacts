@@ -1,10 +1,12 @@
 use argon2::password_hash;
 use axum::{http::StatusCode, response::IntoResponse};
+use geocoding::GeocodingError;
 
 pub enum Error {
     DBError(sqlx::Error),
     PersonNotFound,
     KnownFromSourceNotFound,
+    CityNotFound(GeocodingError),
     HashingError(password_hash::Error),
     UserAlreadyExists,
     InvalidLoginName,
@@ -29,6 +31,10 @@ impl IntoResponse for Error {
             Error::KnownFromSourceNotFound => (
                 StatusCode::NOT_FOUND,
                 "This known from source was not found.".to_string(),
+            ),
+            Error::CityNotFound(e) => (
+                StatusCode::NOT_FOUND,
+                format!("This city was not found. Error: {e}"),
             ),
             Error::UserAlreadyExists => (
                 StatusCode::CONFLICT,

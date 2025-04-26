@@ -39,8 +39,8 @@
       <article>
         {@render input("name", true)}
         <!-- {@render input("known_from_source_id")} -->
-        <!-- {@render input("coordinate")} -->
-        {@render input("job_title")}
+        {@render input("coordinateOrOsmSearch")}
+        {@render input("jobTitle")}
         {@render input("company")}
         {@render input("linkedin")}
         {@render input("notes")}

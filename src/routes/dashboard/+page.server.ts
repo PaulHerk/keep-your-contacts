@@ -9,12 +9,12 @@ export const actions = {
 
     const formData: NewPerson = {
       name: data.get("name") as string,
-      known_from_source_id: null, // Placeholder for known_from_source_id
-      coordinate: null, // Placeholder for coordinate
-      job_title: data.get("job_title") as string | null,
-      company: data.get("company") as string | null,
-      linkedin: data.get("linkedin") as string | null,
-      notes: data.get("notes") as string | null,
+      knownFromSourceId: null, // Placeholder
+      coordinateOrOsmSearch: data.get("coordinateOrOsmSearch") as string | null,
+      jobTitle: data.get("jobTitle") as string,
+      company: data.get("company") as string,
+      linkedin: data.get("linkedin") as string,
+      notes: data.get("notes") as string,
     };
 
     try {

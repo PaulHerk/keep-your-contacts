@@ -20,10 +20,10 @@ declare global {
 
   interface Person {
     id: number;
-    first_name: string;
-    last_name: string;
-    known_from_source_id: number?;
-    job_title: string;
+    firstName: string;
+    lastName: string;
+    knownFromSourceId: number?;
+    jobTitle: string;
     company: string;
     linkedin: string;
     notes: string;
@@ -45,12 +45,12 @@ declare global {
   }
   interface NewPerson {
     name: string;
-    known_from_source_id: number?;
-    coordinate: Coordinate?;
-    job_title: string?;
-    company: string?;
-    linkedin: string?;
-    notes: string?;
+    knownFromSourceId: number?;
+    coordinateOrOsmSearch: Coordinate | string?;
+    jobTitle: string;
+    company: string;
+    linkedin: string;
+    notes: string;
   }
 }
 

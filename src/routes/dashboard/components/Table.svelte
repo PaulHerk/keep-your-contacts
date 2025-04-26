@@ -7,8 +7,8 @@
 
   let { detailed } = $props();
 
-  let sortByFirst: keyof Person = $state("first_name");
-  let sortBySec: keyof Person | null = $state("last_name");
+  let sortByFirst: keyof Person = $state("firstName");
+  let sortBySec: keyof Person | null = $state("lastName");
   let sortAscFirst: boolean = $state(true);
   let sortAscSec: boolean = $state(true);
 
@@ -62,11 +62,11 @@
           <th>
             {@render sortingH1("Added First", "createdAt")}
           </th>
-          <th>{@render sortingH1("First Name", "first_name")}</th>
-          <th>{@render sortingH1("Last Name", "last_name")}</th>
+          <th>{@render sortingH1("First Name", "firstName")}</th>
+          <th>{@render sortingH1("Last Name", "lastName")}</th>
           {#if detailed}
             <th>{@render sortingH1("City", "company")}</th>
-            <th>{@render sortingH1("Job", "job_title")}</th>
+            <th>{@render sortingH1("Job", "jobTitle")}</th>
             <th>{@render sortingH1("Notes", "notes")}</th>
           {/if}
           <th>{@render sortingH1("Record", "record")}</th>
@@ -78,11 +78,11 @@
             <td>
               <EditModal personID={person.id} />
             </td>
-            <td><p class="text-wrap">{person.first_name}</p></td>
-            <td><p class="text-wrap">{person.last_name}</p></td>
+            <td><p class="text-wrap">{person.firstName}</p></td>
+            <td><p class="text-wrap">{person.lastName}</p></td>
             {#if detailed}
               <td><p class="text-wrap">{person.company}</p></td>
-              <td><p class="text-wrap">{person.job_title}</p></td>
+              <td><p class="text-wrap">{person.jobTitle}</p></td>
               <td><p class="text-wrap">{person.notes}</p></td>
             {/if}
             <td

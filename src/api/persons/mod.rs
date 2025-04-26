@@ -15,14 +15,14 @@ use update_person::{delete_person, update_person};
 
 use super::MyState;
 
-#[derive(Serialize, Deserialize, Default, FromRow, Copy, Clone)]
+#[derive(Serialize, Deserialize, Default, FromRow, Copy, Clone, Debug)]
 pub struct Coordinate {
     pub lon: f64,
     pub lat: f64,
 }
 
 #[derive(FromRow, Default, Serialize, Deserialize, Clone)]
-
+#[serde(rename_all = "camelCase")]
 pub struct Person {
     pub id: i32,
     pub first_name: String,
@@ -34,7 +34,6 @@ pub struct Person {
     pub company: String,
     pub linkedin: String,
     pub notes: String,
-    #[serde(rename = "createdAt")]
     pub created_at: DateTime<Local>, // pub born: String,
 }
 pub trait PersonTrait {

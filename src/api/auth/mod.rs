@@ -21,14 +21,13 @@ mod responses;
 /// Database user model containing all fields including sensitive data.
 /// Only used within internal systems.
 #[derive(Deserialize, Serialize, FromRow, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct User {
     pub id: Uuid,
     pub name: String,
     pub email: String,
     pub password: String,
-    #[serde(rename = "createdAt")]
     pub created_at: Option<DateTime<Utc>>,
-    #[serde(rename = "updatedAt")]
     pub updated_at: Option<DateTime<Utc>>,
 }
 
