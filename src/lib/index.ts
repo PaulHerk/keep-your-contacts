@@ -7,7 +7,7 @@ async function request(
   fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
   url: string,
   options: RequestInit = {}
-): Promise<Response> {
+) {
   const fetchOptions: RequestInit = {
     credentials: "include",
     headers: {
@@ -23,17 +23,15 @@ async function request(
     } else {
       if (response.status === 401) {
         console.error("Unauthorized aa", await response.text());
-        error(401);
+        error(401, "Unauthorized aa" + (await response.text()));
       } else if (response.status === 500) {
-        console.error("500:", response.text.toString());
-        error(500);
+        error(500, "Error 500: " + (await response.text()));
       } else {
-        error(response.status);
+        error(response.status, "Unknown Error " + response.statusText);
       }
     }
   } catch (e) {
-    console.error("Api not responding correctly. aa", e);
-    error(500);
+    error(500, "Api not responding correctly: " + e);
   }
 }
 
@@ -104,5 +102,5 @@ export const api_request = async (
   url: string,
   options: RequestInit = {}
 ) => {
-  return request(fetch, api_url + url, { method: "GET", ...options });
+  return await request(fetch, api_url + url, options);
 };

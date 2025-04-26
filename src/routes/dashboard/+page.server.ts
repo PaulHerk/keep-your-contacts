@@ -1,7 +1,6 @@
 import { api_request, getCoordsFromPlace } from "$lib";
 import type { Actions } from "@sveltejs/kit";
 import { fail } from "@sveltejs/kit";
-import { persons } from "./store";
 
 export const actions = {
   addPerson: async ({ request, fetch }) => {
@@ -27,21 +26,16 @@ export const actions = {
       notes: data.get("notes") as string,
     };
 
-    try {
-      console.log("Form data:", formData);
-      const response = await api_request(fetch, "/persons", {
-        method: "POST",
-        body: JSON.stringify(formData),
-      });
+    console.log("Form data:", formData);
+    const response = await api_request(fetch, "/persons", {
+      method: "POST",
+      body: JSON.stringify(formData),
+    });
 
-      const newPersonId: Person = await response.json();
-      return { success: true, newPersonId };
-    } catch (error) {
-      console.error("Failed to add person:", error);
-      return fail(500, {
-        success: false,
-        message: "Failed to add person",
-      });
-    }
+    if (!response.ok)
+      return fail(response.status, { message: await response.text() });
+
+    const newPerson: Person = await response.json();
+    return { success: true, newPerson };
   },
 } satisfies Actions;

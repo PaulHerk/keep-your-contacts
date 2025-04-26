@@ -6,6 +6,7 @@
   import type { PageProps } from "./$types";
   import { api_request } from "$lib";
   import { persons } from "./store";
+  import SearchBar from "./components/SearchBar.svelte";
 
   let { data, form }: PageProps = $props();
 
@@ -13,22 +14,21 @@
   let page = $state(0);
   let per_page = $state(10);
   let detailed = $derived(windowInnerWidth > 800);
+  let filterTerm = $state("");
+  $inspect(filterTerm);
 
   $effect(() => {
-    form?.success && form?.newPersonId; // if form is successful and new person id is present this will fetch all persons again
+    form?.success && form?.newPerson; // if form is successful and new person id is present this will fetch all persons again
     // TODO: not fetch all persons again, but only the new one
     api_request(
       fetch,
-      `/persons?page=${page}&per_page=${per_page}&detailed=true` // I have decided to not call the api when detailed changes, it is rather a frontend thing not backend, I will however preserve the query parameter in the api
-    )
-      .then(async (response) => {
-        const p = await response.json();
-        console.log("aslas: ", p);
-        persons.set(p);
-      })
-      .catch((e) => {
-        console.error("error: ", e);
-      });
+      `/persons?page=${page}&per_page=${per_page}&detailed=true${filterTerm}` // I have decided to not call the api when detailed changes, it is rather a frontend thing not backend, I will however preserve the query parameter in the api
+    ).then(async (response) => {
+      if (!response.ok) alert(await response.text());
+      let person: Person[] = await response.json();
+      console.log("aslas: ", person);
+      persons.set(person);
+    });
   });
   $inspect(persons);
 </script>
@@ -36,6 +36,14 @@
 <svelte:window bind:innerWidth={windowInnerWidth} />
 
 <div class="grid h-screen grid-rows-[auto_1fr_auto]">
+  <!-- Header -->
+  <header class="p-4">
+    <p
+      class="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-5xl font-extrabold text-transparent ..."
+    >
+      Know Your Contacts
+    </p>
+  </header>
   <!-- Grid Columns -->
   <div class="grid grid-cols-1 md:grid-cols-[auto_1fr]">
     <!-- Left Sidebar. -->
@@ -43,8 +51,9 @@
     <!-- Main Content -->
     <main class="space-y-4 p-4">
       <div class="flex flex-col gap-4">
-        <div class="self-center">
+        <div class="self-center flex flex-row gap-8 w-full">
           <AddPerson {form} />
+          <SearchBar bind:filterTerm />
         </div>
         <Table {detailed} />
       </div>
