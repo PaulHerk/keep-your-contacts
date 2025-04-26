@@ -7,13 +7,13 @@ use api::{
 use axum::{
     http::{
         header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
-        Method,
+        HeaderValue, Method,
     },
     middleware, Router,
 };
 use shuttle_runtime::SecretStore;
 use sqlx::PgPool;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 pub mod api;
 
 #[shuttle_runtime::main]
@@ -35,9 +35,10 @@ async fn main(
 
     // for cross-origin requests
     let cors = CorsLayer::new()
-        .allow_methods([Method::GET, Method::POST])
-        .allow_origin(Any)
-        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
+        .allow_methods([Method::GET, Method::POST, Method::DELETE, Method::PUT])
+        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
+        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE])
+        .allow_credentials(true);
 
     let state = MyState { pool, secrets };
     let router = Router::new()

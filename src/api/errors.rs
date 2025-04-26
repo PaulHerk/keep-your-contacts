@@ -22,22 +22,28 @@ impl IntoResponse for Error {
                 StatusCode::INTERNAL_SERVER_ERROR,
                 format!("Error while hashing password: {e}"),
             ),
-            Error::PersonNotFound => (StatusCode::NOT_FOUND, format!("This person was not found.")),
+            Error::PersonNotFound => (
+                StatusCode::NOT_FOUND,
+                "This person was not found.".to_string(),
+            ),
             Error::KnownFromSourceNotFound => (
                 StatusCode::NOT_FOUND,
-                format!("This known from source was not found."),
+                "This known from source was not found.".to_string(),
             ),
             Error::UserAlreadyExists => (
                 StatusCode::CONFLICT,
-                format!("A user with that name already exists."),
+                "A user with that name already exists.".to_string(),
             ),
-            Error::InvalidLoginName => (StatusCode::BAD_REQUEST, format!("Invalid username")),
-            Error::InvalidPassword => (StatusCode::BAD_REQUEST, format!("Invalid password")),
-            Error::NotLoggedIn => (StatusCode::UNAUTHORIZED, format!("You aren't logged in.")),
-            Error::InvalidToken => (StatusCode::UNAUTHORIZED, format!("Invalid token")),
+            Error::InvalidLoginName => (StatusCode::BAD_REQUEST, "Invalid username".to_string()),
+            Error::InvalidPassword => (StatusCode::BAD_REQUEST, "Invalid password".to_string()),
+            Error::NotLoggedIn => (
+                StatusCode::UNAUTHORIZED,
+                "You aren't logged in.".to_string(),
+            ),
+            Error::InvalidToken => (StatusCode::UNAUTHORIZED, "Invalid token".to_string()),
             Error::InvalidUserName => (
                 StatusCode::UNAUTHORIZED,
-                format!("This user does not exist."),
+                "This user does not exist.".to_string(),
             ),
         }
         .into_response()

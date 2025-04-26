@@ -32,7 +32,7 @@ pub async fn update_person(
             .bind(person_id)
             .fetch_one(&state.pool)
             .await
-            .map_err(|e| Error::DBError(e))?;
+            .map_err(Error::DBError)?;
 
     sqlx::query("UPDATE Persons SET (last_name, known_from_source_id, coordinate, job_title, company, linkedin, notes) = ($3, $4, $5, $6, $7, $8, $9)  WHERE user_id = $1 AND id = $2")
         .bind(user.id)
@@ -43,7 +43,7 @@ pub async fn update_person(
         .bind(data.job_title.unwrap_or(person.job_title))
         .bind(data.company.unwrap_or(person.company))
         .bind(data.linkedin.unwrap_or(person.linkedin))
-        .bind(data.notes.unwrap_or(person.notes)).execute(&state.pool).await.map_err(|e| Error::DBError(e))?;
+        .bind(data.notes.unwrap_or(person.notes)).execute(&state.pool).await.map_err(Error::DBError)?;
     Ok(StatusCode::CREATED)
 }
 
@@ -57,7 +57,7 @@ pub async fn delete_person(
         .bind(person_id)
         .execute(&state.pool)
         .await
-        .map_err(|e| Error::DBError(e))?
+        .map_err(Error::DBError)?
         .rows_affected();
 
     if rows_affected == 0 {
