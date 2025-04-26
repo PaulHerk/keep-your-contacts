@@ -12,3 +12,6 @@ The goal of this project is to make a fully functioning website with back- and f
 - Map to see nearby contacts
 - Extract information from LinkedIn
 - Idk
+
+Now this is in very early developement stage if you want to run it locally install, run
+`shuttle run` (https://www.shuttle.dev/) and `bun run dev` or any other package manager
