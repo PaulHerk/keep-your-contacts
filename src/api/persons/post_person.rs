@@ -2,10 +2,12 @@ use axum::{extract::State, http::StatusCode, response::IntoResponse, Extension, 
 use serde::Deserialize;
 use sqlx::{Postgres, QueryBuilder};
 
-use crate::api::{auth::User, MyState};
+use crate::api::{auth::User, errors::Error, MyState};
 
-use super::Coordinate;
+use super::{Coordinate, Person};
+
 #[derive(Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct PersonNew {
     pub name: String,
     pub known_from_source_id: Option<i32>,
@@ -18,11 +20,6 @@ pub struct PersonNew {
     pub linkedin: String,
     #[serde(default)]
     pub notes: String,
-}
-
-#[derive(sqlx::FromRow)]
-struct InsertedId {
-    id: i32,
 }
 
 pub async fn create_person(
@@ -38,25 +35,27 @@ pub async fn create_person(
     let first_name = names.next().unwrap_or_default();
     let last_name: String = names.collect::<Vec<&str>>().join(" ");
 
+    dbg!(&data.coordinate);
+
     let mut field_separator = query_builder.separated(", ");
     field_separator
         .push_bind(user.id)
         .push_bind(first_name.trim())
         .push_bind(last_name.trim())
         .push_bind(data.known_from_source_id)
-        .push_bind(data.coordinate.map(|coord| serde_json::json!(&coord)))
+        .push_bind(data.coordinate.map(|c| serde_json::json!(c)))
         .push_bind(data.job_title)
         .push_bind(data.company)
         .push_bind(data.linkedin)
         .push_bind(data.notes);
-    field_separator.push_unseparated(") RETURNING id;");
+    field_separator.push_unseparated(") RETURNING *;");
 
     match query_builder
-        .build_query_as::<InsertedId>()
+        .build_query_as::<Person>()
         .fetch_one(&state.pool)
         .await
     {
-        Ok(inserted_id) => Ok((StatusCode::CREATED, Json(inserted_id.id))),
-        Err(e) => Err((StatusCode::BAD_REQUEST, e.to_string())),
+        Ok(person) => Ok((StatusCode::CREATED, Json(person))),
+        Err(e) => Err(Error::DBError(e)),
     }
 }

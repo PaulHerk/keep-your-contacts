@@ -19,7 +19,7 @@
     // TODO: not fetch all persons again, but only the new one
     api_request(
       fetch,
-      `/persons?page=${page}&per_page=${per_page}&detailed=${detailed}`
+      `/persons?page=${page}&per_page=${per_page}&detailed=true` // I have decided to not call the api when detailed changes, it is rather a frontend thing not backend, I will however preserve the query parameter in the api
     )
       .then(async (response) => {
         const p = await response.json();
@@ -36,14 +36,6 @@
 <svelte:window bind:innerWidth={windowInnerWidth} />
 
 <div class="grid h-screen grid-rows-[auto_1fr_auto]">
-  <!-- Header -->
-  <header class="p-4">
-    <p
-      class="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-5xl font-extrabold text-transparent ..."
-    >
-      Know Your Contacts
-    </p>
-  </header>
   <!-- Grid Columns -->
   <div class="grid grid-cols-1 md:grid-cols-[auto_1fr]">
     <!-- Left Sidebar. -->
@@ -52,7 +44,7 @@
     <main class="space-y-4 p-4">
       <div class="flex flex-col gap-4">
         <div class="self-center">
-          <AddPerson />
+          <AddPerson {form} />
         </div>
         <Table {detailed} />
       </div>

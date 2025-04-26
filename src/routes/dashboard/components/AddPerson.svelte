@@ -3,6 +3,8 @@
   import { enhance } from "$app/forms";
   import type { PageProps } from "../$types";
 
+  let { form } = $props();
+
   let newPerson: NewPerson | undefined = $state();
   let openState = $state(false);
 
@@ -11,10 +13,16 @@
   }
 </script>
 
-{#snippet input(key: keyof NewPerson, required = false)}
+{#snippet input(label: string, key: keyof NewPerson, required = false)}
   <label class="label">
-    <span class="label-text">{key}</span>
-    <input class="input" type="text" placeholder={key} name={key} {required} />
+    <span class="label-text">{label}</span>
+    <input
+      class="input"
+      type="text"
+      placeholder={label}
+      name={key}
+      {required}
+    />
   </label>
 {/snippet}
 
@@ -37,13 +45,16 @@
       use:enhance
     >
       <article>
-        {@render input("name", true)}
+        {@render input("Full Name:", "name", true)}
         <!-- {@render input("known_from_source_id")} -->
-        <!-- {@render input("coordinate")} -->
-        {@render input("job_title")}
-        {@render input("company")}
-        {@render input("linkedin")}
-        {@render input("notes")}
+        {#if form?.placeNotFound}
+          <p>{form?.message}</p>
+        {/if}
+        {@render input("Place:", "coordinate")}
+        {@render input("Job Title:", "jobTitle")}
+        {@render input("Company:", "company")}
+        {@render input("", "linkedin")}
+        {@render input("Notes:", "notes")}
       </article>
       <footer class="flex justify-end gap-4">
         <button type="button" class="btn preset-tonal" onclick={modalClose}

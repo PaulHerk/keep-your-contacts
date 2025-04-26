@@ -70,6 +70,34 @@ async function request(
 //     return id
 // }
 
+export const getCoordsFromPlace = async (query: string) => {
+  let error = {
+    success: false,
+    placeNotFound: true,
+    message: "",
+    coordinate: undefined,
+  };
+  try {
+    let res = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${query}&limit=1&format=jsonv2`
+    );
+    if (res.ok) {
+      let place = (await res.json())[0];
+      if (!place) error.message = "This place was not found.";
+      let coordinate: Coordinate = {
+        lat: parseFloat(place.lat),
+        lon: parseFloat(place.lon),
+      };
+      return { success: true, coordinate: coordinate };
+    }
+    error.message = "Error with the api: " + res.statusText;
+  } catch (e) {
+    error.message =
+      "Error with the api: " + e + "Do you have internet connection?";
+  }
+  return error;
+};
+
 export const api_url = "http://localhost:8000";
 export const api_request = async (
   fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,

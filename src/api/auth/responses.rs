@@ -5,14 +5,14 @@ use super::User;
 
 /// Sanitized user representation that excludes sensitive data like passwords.
 /// Used for all user-facing responses.
-#[allow(non_snake_case)]
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct FilteredUser {
     pub id: String,
     pub name: String,
     pub email: String,
-    pub createdAt: DateTime<Utc>,
-    pub updatedAt: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 /// Converts internal User model to public FilteredUser representation.
@@ -23,8 +23,8 @@ impl FilteredUser {
             id: user.id.to_string(),
             name: user.name,
             email: user.email,
-            createdAt: user.created_at.unwrap(),
-            updatedAt: user.updated_at.unwrap(),
+            created_at: user.created_at.unwrap(),
+            updated_at: user.updated_at.unwrap(),
         }
     }
 }
