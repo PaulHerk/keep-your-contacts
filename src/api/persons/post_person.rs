@@ -1,8 +1,4 @@
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Extension, Json};
-use geocoding::{
-    openstreetmap::{OpenstreetmapParams, OpenstreetmapResponse},
-    Openstreetmap,
-};
 use serde::Deserialize;
 use sqlx::{Postgres, QueryBuilder};
 
@@ -10,19 +6,12 @@ use crate::api::{auth::User, errors::Error, MyState};
 
 use super::{Coordinate, Person};
 
-#[derive(Deserialize, Debug)]
-#[serde(untagged)]
-pub enum CoordOrOSMSearch {
-    Coordinate(Coordinate),
-    OSMSearch(String),
-}
-
 #[derive(Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct PersonNew {
     pub name: String,
     pub known_from_source_id: Option<i32>,
-    pub coordinate_or_osm_search: Option<CoordOrOSMSearch>,
+    pub coordinate: Option<Coordinate>,
     #[serde(default)]
     pub job_title: String,
     #[serde(default)]
@@ -46,28 +35,7 @@ pub async fn create_person(
     let first_name = names.next().unwrap_or_default();
     let last_name: String = names.collect::<Vec<&str>>().join(" ");
 
-    dbg!(&data.coordinate_or_osm_search);
-
-    let coords = if let Some(coord_or_osm_search) = data.coordinate_or_osm_search {
-        match coord_or_osm_search {
-            CoordOrOSMSearch::Coordinate(coordinate) => Some(coordinate),
-            CoordOrOSMSearch::OSMSearch(search_query) => {
-                let osm = Openstreetmap::new();
-                let params = OpenstreetmapParams::new(&search_query);
-                let result: Result<OpenstreetmapResponse<f64>, _> = osm.forward_full(&params);
-                match result {
-                    Ok(result) => {
-                        let (lat, lon) = result.features[0].geometry.coordinates;
-                        let coordinate = Coordinate { lat, lon };
-                        Some(coordinate)
-                    }
-                    Err(error) => return Err(Error::CityNotFound(error)),
-                }
-            }
-        }
-    } else {
-        None
-    };
+    dbg!(&data.coordinate);
 
     let mut field_separator = query_builder.separated(", ");
     field_separator
@@ -75,7 +43,7 @@ pub async fn create_person(
         .push_bind(first_name.trim())
         .push_bind(last_name.trim())
         .push_bind(data.known_from_source_id)
-        .push_bind(coords.map(|coordinate| serde_json::json!(coordinate)))
+        .push_bind(data.coordinate.map(|c| serde_json::json!(c)))
         .push_bind(data.job_title)
         .push_bind(data.company)
         .push_bind(data.linkedin)

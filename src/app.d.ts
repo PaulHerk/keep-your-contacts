@@ -46,7 +46,7 @@ declare global {
   interface NewPerson {
     name: string;
     knownFromSourceId: number?;
-    coordinateOrOsmSearch: Coordinate | string?;
+    coordinate: Coordinate?;
     jobTitle: string;
     company: string;
     linkedin: string;

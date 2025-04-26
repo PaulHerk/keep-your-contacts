@@ -36,14 +36,6 @@
 <svelte:window bind:innerWidth={windowInnerWidth} />
 
 <div class="grid h-screen grid-rows-[auto_1fr_auto]">
-  <!-- Header -->
-  <header class="p-4">
-    <p
-      class="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-5xl font-extrabold text-transparent ..."
-    >
-      Know Your Contacts
-    </p>
-  </header>
   <!-- Grid Columns -->
   <div class="grid grid-cols-1 md:grid-cols-[auto_1fr]">
     <!-- Left Sidebar. -->
@@ -52,7 +44,7 @@
     <main class="space-y-4 p-4">
       <div class="flex flex-col gap-4">
         <div class="self-center">
-          <AddPerson />
+          <AddPerson {form} />
         </div>
         <Table {detailed} />
       </div>
