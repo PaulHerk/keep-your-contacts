@@ -87,7 +87,11 @@
             {/if}
             <td
               ><p class="text-wrap">
-                {regionNames.of(person.record?.cc ?? "")}
+                {person.record
+                  ? regionNames.of(person.record?.cc) +
+                    ", " +
+                    person.record.admin1
+                  : ""}
               </p></td
             >
           </tr>

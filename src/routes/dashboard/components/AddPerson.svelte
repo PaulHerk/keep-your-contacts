@@ -5,7 +5,6 @@
 
   let { form } = $props();
 
-  let newPerson: NewPerson | undefined = $state();
   let openState = $state(false);
 
   function modalClose() {
@@ -60,7 +59,12 @@
         <button type="button" class="btn preset-tonal" onclick={modalClose}
           >Cancel</button
         >
-        <input type="submit" value="Confirm" class="btn preset-filled" />
+        <input
+          type="submit"
+          value="Confirm"
+          class="btn preset-filled"
+          onclick={modalClose}
+        />
         <!-- <button class="btn preset-filled">Confirm</button> -->
       </footer>
     </form>
