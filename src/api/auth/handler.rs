@@ -29,7 +29,7 @@ pub async fn register_user_handler(
             .bind(body.name.to_owned().to_ascii_lowercase())
             .fetch_one(&data.pool)
             .await
-            .map_err(|e| Error::DBError(e))?;
+            .map_err(Error::DBError)?;
 
     if let Some(exists) = user_exists {
         if exists {
@@ -40,7 +40,7 @@ pub async fn register_user_handler(
     let salt = SaltString::generate(&mut OsRng);
     let hashed_password = Argon2::default()
         .hash_password(body.password.as_ref(), &salt)
-        .map_err(|e| Error::HashingError(e))
+        .map_err(Error::HashingError)
         .map(|hash| hash.to_string())?;
 
     sqlx::query_as::<_, User>(
@@ -51,7 +51,7 @@ pub async fn register_user_handler(
     .bind(hashed_password)
     .fetch_one(&data.pool)
     .await
-    .map_err(|e| Error::DBError(e))?;
+    .map_err(Error::DBError)?;
 
     Ok((StatusCode::CREATED, Redirect::to("/auth/login")))
 }
@@ -67,13 +67,13 @@ pub async fn login_user_handler(
         .bind(body.name.to_ascii_lowercase())
         .fetch_optional(&data.pool)
         .await
-        .map_err(|e| Error::DBError(e))?
+        .map_err(Error::DBError)?
         .ok_or_else(|| Error::InvalidLoginName)?;
 
     let is_valid = match PasswordHash::new(&user.password) {
         Ok(parsed_hash) => Argon2::default()
             .verify_password(body.password.as_ref(), &parsed_hash)
-            .map_or(false, |_| true),
+            .is_ok_and(|_| true),
         Err(_) => false,
     };
 
@@ -107,7 +107,7 @@ pub async fn login_user_handler(
     Ok((
         StatusCode::ACCEPTED,
         jar.add(cookie.clone()),
-        Redirect::to("/persons/"),
+        cookie.clone().to_string(), // I have to return the cookie in the body since svelte doesn't evalute set-cookie headers so I have to do this manually in the login form request. https://svelte.dev/docs/kit/load#Cookies
     ))
 }
 

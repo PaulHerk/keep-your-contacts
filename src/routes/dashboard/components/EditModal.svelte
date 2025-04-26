@@ -1,14 +1,15 @@
 <script lang="ts">
-    import { delete_person } from "$lib";
+    // import { delete_person } from "$lib";
     import { Modal } from "@skeletonlabs/skeleton-svelte";
-    import { persons } from "../state.svelte";
+    import { getContext } from "svelte";
+    import { persons } from "../store";
     let openState = $state(false);
-
     let { personID } = $props();
+
     function modalClose() {
         openState = false;
     }
-    let index = $derived(persons.findIndex((p) => p.id === personID));
+    let index = $derived($persons.findIndex((p) => p.id === personID));
 </script>
 
 <Modal
@@ -21,15 +22,16 @@
     {#snippet content()}
         <button
             onclick={() => {
-                delete_person(personID).then(() => {
-                    persons.splice(index, 1);
-                    modalClose();
-                });
+                // delete_person(personID).then(() => {
+                //     persons.splice(index, 1);
+                //     modalClose();
+                // });
+                console.log("DELETED!!");
             }}
             class="btn preset-tonal-error"
         >
             <p>
-                Delete <b>{persons[index]?.first_name}</b>
+                Delete <b>{$persons[index]?.first_name}</b>
             </p>
         </button>
     {/snippet}

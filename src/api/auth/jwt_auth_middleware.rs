@@ -50,7 +50,7 @@ pub async fn auth(
         .bind(user_id)
         .fetch_optional(&state.pool)
         .await
-        .map_err(|e| Error::DBError(e))?;
+        .map_err(Error::DBError)?;
 
     // Return error if user does not exist
     let user = user.ok_or_else(|| Error::InvalidUserName)?;

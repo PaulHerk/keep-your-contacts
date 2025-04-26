@@ -22,7 +22,7 @@ pub async fn create_known_from_source(
     .bind(known_from_source.description)
     .execute(&state.pool)
     .await
-    .map_err(|e| Error::DBError(e))?;
+    .map_err(Error::DBError)?;
 
     Ok(StatusCode::CREATED)
 }
@@ -37,7 +37,7 @@ pub async fn get_known_from_sources(
     .bind(user.id)
     .fetch_all(&state.pool)
     .await
-    .map_err(|e| Error::DBError(e))?;
+    .map_err(Error::DBError)?;
 
     Ok(Json(known_from_sources))
 }
@@ -61,7 +61,7 @@ pub async fn update_known_from_source(
     .bind(source_id)
     .fetch_one(&state.pool)
     .await
-    .map_err(|e| Error::DBError(e))?;
+    .map_err(Error::DBError)?;
 
     sqlx::query(
     "UPDATE KnownFromSources SET source_name = $1, description = $2 WHERE user_id = $3 AND source_id = $4",
@@ -72,7 +72,7 @@ pub async fn update_known_from_source(
 .bind(source_id)
 .execute(&state.pool)
 .await
-.map_err(|e| Error::DBError(e))?;
+.map_err(Error::DBError)?;
 
     Ok(StatusCode::CREATED)
 }
@@ -88,7 +88,7 @@ pub async fn delete_known_from_source(
             .bind(source_id)
             .execute(&state.pool)
             .await
-            .map_err(|e| Error::DBError(e))?
+            .map_err(Error::DBError)?
             .rows_affected();
 
     if rows_effected == 0 {
