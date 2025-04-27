@@ -127,8 +127,9 @@
       <!-- Pagination -->
       <Pagination
         data={$persons}
-        count={personCount}
+        count={$persons.length < personCount ? personCount : $persons.length}
         onPageChange={(e) => (page = e.page - 1)}
+        page={page + 1}
         pageSize={perPage}
         onPageSizeChange={(e) => (perPage = e.pageSize)}
         siblingCount={4}

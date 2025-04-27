@@ -1,13 +1,16 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
 
-  let { filterTerm = $bindable() } = $props();
+  let { filterTerm = $bindable(), page = $bindable() } = $props();
 
   let searchTerm: string = $state("");
 
   function search() {
     if (searchTerm.trim() === "") filterTerm = "";
-    else filterTerm = "&global_search=" + searchTerm;
+    else {
+      filterTerm = "&global_search=" + searchTerm;
+      page = 0;
+    }
   }
 </script>
 

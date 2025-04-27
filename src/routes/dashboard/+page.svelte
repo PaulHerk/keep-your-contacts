@@ -19,7 +19,7 @@
   let personCount = $state(0);
 
   $effect(() => {
-    form?.success && form?.newPerson; // if form is successful and new person id is present this will fetch all persons again
+    form?.newPerson; // if form is successful and new person id is present this will fetch all persons again
     // TODO: not fetch all persons again, but only the new one
     api_request(fetch, "/persons/count").then(async (response) => {
       if (!response.ok) error(500, await response.text());
@@ -59,7 +59,7 @@
       <div class="flex flex-col gap-4">
         <div class="self-center flex flex-col md:flex-row gap-8 w-full">
           <AddPerson {form} />
-          <SearchBar bind:filterTerm />
+          <SearchBar bind:filterTerm bind:page />
         </div>
         <Table {detailed} {personCount} bind:perPage bind:page />
       </div>
