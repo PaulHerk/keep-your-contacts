@@ -20,6 +20,9 @@
 >
   {#snippet trigger()}Edit{/snippet}
   {#snippet content()}
+    {#each Object.entries($persons[personID]) as [key, value]}
+      <p><b>{key}</b> : {value}</p>
+    {/each}
     <button
       onclick={() => {
         // delete_person(personID).then(() => {

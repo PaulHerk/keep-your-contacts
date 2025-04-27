@@ -55,7 +55,7 @@
     </Navigation.Rail>
   </div>
   <!-- Content -->
-  <div class="flex items-center justify-center ml-15 sm:ml-30">
+  <div class="flex items-center justify-center ml-15 sm:ml-35">
     {@render children()}
   </div>
 </div>

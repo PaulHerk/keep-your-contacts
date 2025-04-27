@@ -85,10 +85,10 @@
           </tr>
         </thead>
         <tbody class="[&>tr]:hover:preset-tonal-primary">
-          {#each $persons as person}
+          {#each $persons as person, idx}
             <tr>
               <td>
-                <EditModal personID={person.id} />
+                <EditModal personID={idx} />
               </td>
               <td><p class="text-wrap">{person.firstName}</p></td>
               <td><p class="text-wrap">{person.lastName}</p></td>

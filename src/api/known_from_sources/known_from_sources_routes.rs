@@ -1,19 +1,20 @@
 use axum::{
     extract::{Path, State},
     http::StatusCode,
+    response::IntoResponse,
     Extension, Json,
 };
 use serde::Deserialize;
 
 use crate::api::{auth::User, errors::Error, MyState};
 
-use super::KnownFromSources;
+use super::{KnownFromSources, NewKnownFromSources};
 
 pub async fn create_known_from_source(
     Extension(user): Extension<User>,
     State(state): State<MyState>,
-    Json(known_from_source): Json<KnownFromSources>,
-) -> Result<StatusCode, Error> {
+    Json(known_from_source): Json<NewKnownFromSources>,
+) -> Result<impl IntoResponse, Error> {
     sqlx::query(
         "INSERT INTO KnownFromSources (user_id, source_name, description) VALUES ($1, $2, $3)",
     )

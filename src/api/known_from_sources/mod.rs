@@ -14,8 +14,16 @@ use sqlx::FromRow;
 use super::MyState;
 
 #[derive(Deserialize, Serialize, FromRow, Default, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct KnownFromSources {
+    // user_id is omitted since frontend doesn't need this. Is that how you build APIs? Idk
     pub source_id: i32,
+    pub source_name: String,
+    pub description: String,
+}
+#[derive(Deserialize, Serialize, FromRow, Default, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct NewKnownFromSources {
     pub source_name: String,
     pub description: String,
 }

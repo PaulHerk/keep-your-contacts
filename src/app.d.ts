@@ -46,6 +46,13 @@ declare global {
     lat: number;
     lon: number;
   }
+
+  interface KnownFromSource {
+    id: number;
+    sourceName: string;
+    description: string;
+  }
+
   interface NewPerson {
     name: string;
     knownFromSourceId: number?;

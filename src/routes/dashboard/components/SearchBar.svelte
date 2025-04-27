@@ -1,5 +1,6 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
+  import { Search } from "@lucide/svelte";
 
   let { filterTerm = $bindable(), page = $bindable() } = $props();
 
@@ -15,18 +16,19 @@
 </script>
 
 <form class="mx-auto w-full max-w-md space-y-4">
-  <div class=" flex items-center justify-center gap-2">
+  <div class="input-group grid-cols-[auto_1fr_auto]">
+    <div class="ig-cell preset-tonal">
+      <Search size={16} />
+    </div>
     <input
-      type="text"
+      class="ig-input"
+      type="search"
       placeholder="Search..."
-      class="input rounded-lg border border-gray-300 p-2"
       bind:value={searchTerm}
+      oninput={(e) => {
+        if (e.currentTarget.value === "") filterTerm = "";
+      }}
     />
-    <button
-      class="rounded-md bg-blue-500 w-2/5 p-2 text-white"
-      onclick={search}
-    >
-      Search
-    </button>
+    <button class="ig-btn preset-filled" onclick={search}>Search</button>
   </div>
 </form>

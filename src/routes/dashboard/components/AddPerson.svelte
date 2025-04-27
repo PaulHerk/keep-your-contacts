@@ -2,8 +2,39 @@
   import { Modal } from "@skeletonlabs/skeleton-svelte";
   import { enhance } from "$app/forms";
   import type { PageProps } from "../$types";
+  import { api_request } from "$lib";
+  import { onMount } from "svelte";
+  import { error } from "@sveltejs/kit";
+  import { CirclePlus, SquarePlus } from "@lucide/svelte";
 
   let { form } = $props();
+
+  let knownFromSources: KnownFromSource[] = $state([]);
+  let selected = $state(0);
+  let newSource = $state("");
+
+  $inspect(knownFromSources);
+
+  onMount(async () => {
+    api_request(fetch, "/known-from-sources").then(async (response) => {
+      if (!response.ok) error(500, await response.text());
+      knownFromSources = await response.json();
+    });
+  });
+
+  function addNew() {
+    api_request(fetch, "/known-from-sources", {
+      method: "POST",
+      body: JSON.stringify({ sourceName: newSource, description: "" }),
+    }).then(async (response) => {
+      if (!response.ok) error(500, await response.text());
+      knownFromSources.push({
+        id: selected,
+        sourceName: newSource,
+        description: "",
+      });
+    });
+  }
 
   let openState = $state(false);
 
@@ -43,8 +74,30 @@
       action="?/addPerson"
       use:enhance
     >
-      <article>
+      <article class="flex flex-col gap-5">
         {@render input("Full Name:", "name", true)}
+        <label class="label">
+          <span class="label-text">Where do you know this person from?</span>
+          <div class="flex gap-4">
+            <select bind:value={selected} class="select">
+              {#each knownFromSources as source}
+                <option value={source.id}>{source.sourceName}</option>
+              {/each}
+              <option value={knownFromSources.length + 1}>add new</option>
+            </select>
+            {#if selected === knownFromSources.length + 1}
+              <input
+                class="input"
+                type="text"
+                placeholder="add new"
+                bind:value={newSource}
+              />
+              <button class="button" onclick={addNew}>
+                <SquarePlus size={30} />
+              </button>
+            {/if}
+          </div>
+        </label>
         <!-- {@render input("known_from_source_id")} -->
         {#if form?.placeNotFound}
           <p>{form?.message}</p>
