@@ -111,7 +111,8 @@
         </tbody>
       </table>
     </div>
-    <footer class="flex justify-between">
+
+    <footer class="flex flex-col sm:flex-row justify-between">
       <select
         name="size"
         id="size"
@@ -131,6 +132,7 @@
         pageSize={perPage}
         onPageSizeChange={(e) => (perPage = e.pageSize)}
         siblingCount={4}
+        alternative
       >
         {#snippet labelEllipsis()}<IconEllipsis class="size-4" />{/snippet}
         {#snippet labelNext()}<IconArrowRight class="size-4" />{/snippet}

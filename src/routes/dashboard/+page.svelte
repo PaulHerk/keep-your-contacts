@@ -57,7 +57,7 @@
     <!-- Main Content -->
     <main class="space-y-4 p-4">
       <div class="flex flex-col gap-4">
-        <div class="self-center flex flex-row gap-8 w-full">
+        <div class="self-center flex flex-col md:flex-row gap-8 w-full">
           <AddPerson {form} />
           <SearchBar bind:filterTerm />
         </div>
