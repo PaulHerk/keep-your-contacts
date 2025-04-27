@@ -7,30 +7,36 @@
   import { api_request } from "$lib";
   import { persons } from "./store";
   import SearchBar from "./components/SearchBar.svelte";
+  import { error } from "@sveltejs/kit";
 
   let { data, form }: PageProps = $props();
 
   let windowInnerWidth = $state(0);
   let page = $state(0);
-  let per_page = $state(10);
+  let perPage = $state(10);
   let detailed = $derived(windowInnerWidth > 800);
   let filterTerm = $state("");
-  $inspect(filterTerm);
+  let personCount = $state(0);
 
   $effect(() => {
     form?.success && form?.newPerson; // if form is successful and new person id is present this will fetch all persons again
     // TODO: not fetch all persons again, but only the new one
+    api_request(fetch, "/persons/count").then(async (response) => {
+      if (!response.ok) error(500, await response.text());
+      personCount = parseInt(await response.text()); // api will return number.
+    });
+
     api_request(
       fetch,
-      `/persons?page=${page}&per_page=${per_page}&detailed=true${filterTerm}` // I have decided to not call the api when detailed changes, it is rather a frontend thing not backend, I will however preserve the query parameter in the api
+      `/persons?page=${page}&per_page=${perPage}&detailed=true${filterTerm}` // I have decided to not call the api when detailed changes, it is rather a frontend thing not backend, I will however preserve the query parameter in the api
     ).then(async (response) => {
-      if (!response.ok) alert(await response.text());
+      if (!response.ok) error(500, await response.text());
       let person: Person[] = await response.json();
       console.log("aslas: ", person);
       persons.set(person);
     });
   });
-  $inspect(persons);
+  $inspect(persons, personCount, page, perPage);
 </script>
 
 <svelte:window bind:innerWidth={windowInnerWidth} />
@@ -55,7 +61,7 @@
           <AddPerson {form} />
           <SearchBar bind:filterTerm />
         </div>
-        <Table {detailed} />
+        <Table {detailed} {personCount} bind:perPage bind:page />
       </div>
     </main>
   </div>

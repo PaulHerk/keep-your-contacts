@@ -5,6 +5,7 @@ use sqlx::FromRow;
 use super::{Coordinate, Person, PersonTrait};
 
 pub mod filter_persons;
+pub mod get_person_count;
 pub mod get_persons;
 
 #[derive(Deserialize, Clone, Debug)]

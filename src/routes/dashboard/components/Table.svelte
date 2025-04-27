@@ -4,8 +4,19 @@
   import EditModal from "./EditModal.svelte";
   import { getContext } from "svelte";
   import { persons } from "../store";
+  import { Pagination } from "@skeletonlabs/skeleton-svelte";
+  import IconArrowLeft from "@lucide/svelte/icons/arrow-left";
+  import IconArrowRight from "@lucide/svelte/icons/arrow-right";
+  import IconEllipsis from "@lucide/svelte/icons/ellipsis";
+  import IconFirst from "@lucide/svelte/icons/chevrons-left";
+  import IconLast from "@lucide/svelte/icons/chevron-right";
 
-  let { detailed } = $props();
+  let {
+    detailed,
+    personCount,
+    perPage = $bindable(),
+    page = $bindable(),
+  } = $props();
 
   let sortByFirst: keyof Person = $state("firstName");
   let sortBySec: keyof Person | null = $state("lastName");
@@ -55,48 +66,78 @@
 {/snippet}
 
 {#if browser && $persons.length > 0}
-  <div class="table-wrap">
-    <table class="table table-fixed">
-      <thead>
-        <tr>
-          <th>
-            {@render sortingH1("Added First", "createdAt")}
-          </th>
-          <th>{@render sortingH1("First Name", "firstName")}</th>
-          <th>{@render sortingH1("Last Name", "lastName")}</th>
-          {#if detailed}
-            <th>{@render sortingH1("City", "company")}</th>
-            <th>{@render sortingH1("Job", "jobTitle")}</th>
-            <th>{@render sortingH1("Notes", "notes")}</th>
-          {/if}
-          <th>{@render sortingH1("Record", "record")}</th>
-        </tr>
-      </thead>
-      <tbody class="[&>tr]:hover:preset-tonal-primary">
-        {#each $persons as person}
+  <section class="space-y-4">
+    <div class="table-wrap">
+      <table class="table table-auto md:table-fixed">
+        <thead>
           <tr>
-            <td>
-              <EditModal personID={person.id} />
-            </td>
-            <td><p class="text-wrap">{person.firstName}</p></td>
-            <td><p class="text-wrap">{person.lastName}</p></td>
+            <th>
+              {@render sortingH1("Added First", "createdAt")}
+            </th>
+            <th>{@render sortingH1("First Name", "firstName")}</th>
+            <th>{@render sortingH1("Last Name", "lastName")}</th>
             {#if detailed}
-              <td><p class="text-wrap">{person.company}</p></td>
-              <td><p class="text-wrap">{person.jobTitle}</p></td>
-              <td><p class="text-wrap">{person.notes}</p></td>
+              <th>{@render sortingH1("City", "company")}</th>
+              <th>{@render sortingH1("Job", "jobTitle")}</th>
+              <th>{@render sortingH1("Notes", "notes")}</th>
             {/if}
-            <td
-              ><p class="text-wrap">
-                {person.record
-                  ? regionNames.of(person.record?.cc) +
-                    ", " +
-                    person.record.admin1
-                  : ""}
-              </p></td
-            >
+            <th>{@render sortingH1("Record", "record")}</th>
           </tr>
+        </thead>
+        <tbody class="[&>tr]:hover:preset-tonal-primary">
+          {#each $persons as person}
+            <tr>
+              <td>
+                <EditModal personID={person.id} />
+              </td>
+              <td><p class="text-wrap">{person.firstName}</p></td>
+              <td><p class="text-wrap">{person.lastName}</p></td>
+              {#if detailed}
+                <td><p class="text-wrap">{person.company}</p></td>
+                <td><p class="text-wrap">{person.jobTitle}</p></td>
+                <td><p class="text-wrap">{person.notes}</p></td>
+              {/if}
+              <td
+                ><p class="text-wrap">
+                  {person.record
+                    ? regionNames.of(person.record?.cc) +
+                      ", " +
+                      person.record.admin1
+                    : ""}
+                </p></td
+              >
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
+    <footer class="flex justify-between">
+      <select
+        name="size"
+        id="size"
+        class="select max-w-[150px]"
+        bind:value={perPage}
+      >
+        {#each [1, 2, 5, 10] as v}
+          <option value={v}>Items {v}</option>
         {/each}
-      </tbody>
-    </table>
-  </div>
+        <option value={personCount}>Show All</option>
+      </select>
+      <!-- Pagination -->
+      <Pagination
+        data={$persons}
+        count={personCount}
+        onPageChange={(e) => (page = e.page - 1)}
+        pageSize={perPage}
+        onPageSizeChange={(e) => (perPage = e.pageSize)}
+        siblingCount={4}
+      >
+        {#snippet labelEllipsis()}<IconEllipsis class="size-4" />{/snippet}
+        {#snippet labelNext()}<IconArrowRight class="size-4" />{/snippet}
+        {#snippet labelPrevious()}<IconArrowLeft class="size-4" />{/snippet}
+        {#snippet labelFirst()}<IconFirst class="size-4" />{/snippet}
+        {#snippet labelLast()}<IconLast class="size-4" />{/snippet}
+      </Pagination>
+    </footer>
+  </section>
 {/if}

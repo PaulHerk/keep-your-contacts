@@ -8,7 +8,7 @@ use axum::{
 };
 use chrono::{DateTime, Local};
 use post_person::create_person;
-use retrieve_persons::get_persons::retrieve;
+use retrieve_persons::{get_person_count::get_person_count, get_persons::retrieve};
 use serde::{Deserialize, Serialize};
 use sqlx::{types::Json, FromRow};
 use update_person::{delete_person, update_person};
@@ -48,6 +48,7 @@ impl PersonTrait for Person {
 pub fn create_persons_router() -> Router<MyState> {
     Router::new()
         .route("/persons", get(retrieve).post(create_person))
+        .route("/persons/count", get(get_person_count))
         .route(
             "/persons/{person_id}",
             put(update_person).delete(delete_person),
