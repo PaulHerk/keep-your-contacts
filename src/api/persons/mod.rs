@@ -1,3 +1,4 @@
+mod get_coordinates;
 mod post_person;
 pub mod retrieve_persons;
 mod update_person;
@@ -7,8 +8,12 @@ use axum::{
     Router,
 };
 use chrono::{DateTime, Local};
+use get_coordinates::get_persons_with_coords;
 use post_person::create_person;
-use retrieve_persons::{get_person_count::get_person_count, get_persons::retrieve};
+use retrieve_persons::{
+    get_person_count::get_person_count,
+    get_persons::{get_single_person, retrieve},
+};
 use serde::{Deserialize, Serialize};
 use sqlx::{types::Json, FromRow};
 use update_person::{delete_person, update_person};
@@ -49,8 +54,11 @@ pub fn create_persons_router() -> Router<MyState> {
     Router::new()
         .route("/persons", get(retrieve).post(create_person))
         .route("/persons/count", get(get_person_count))
+        .route("/persons/coordinates", get(get_persons_with_coords))
         .route(
             "/persons/{person_id}",
-            put(update_person).delete(delete_person),
+            put(update_person)
+                .delete(delete_person)
+                .get(get_single_person),
         )
 }

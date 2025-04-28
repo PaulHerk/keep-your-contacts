@@ -81,7 +81,7 @@ export const getCoordsFromPlace = async (query: string) => {
     );
     if (res.ok) {
       let place = (await res.json())[0];
-      if (!place) error.message = "This place was not found.";
+      if (!place) return { ...error, message: "This place was not found." };
       let coordinate: Coordinate = {
         lat: parseFloat(place.lat),
         lon: parseFloat(place.lon),

@@ -1,6 +1,7 @@
 use axum::{
-    extract::{Query, State},
+    extract::{Path, Query, State},
     http::StatusCode,
+    response::IntoResponse,
     Extension, Json,
 };
 use reverse_geocoder::{Record, ReverseGeocoder};
@@ -95,4 +96,21 @@ pub async fn retrieve(
             ))
         }
     }
+}
+
+pub async fn get_single_person(
+    Extension(user): Extension<User>,
+    State(state): State<MyState>,
+    Path(person_id): Path<i32>,
+) -> Result<impl IntoResponse, Error> {
+    let person: Person = sqlx::query_as("SELECT * FROM persons WHERE user_id = $1 AND id = $2")
+        .bind(user.id)
+        .bind(person_id)
+        .fetch_one(&state.pool)
+        .await
+        .map_err(Error::DBError)?;
+
+    let geocoder = ReverseGeocoder::new();
+    let record = get_record_from_coord(&geocoder, person.coordinate);
+    Ok(Json(UserResponse { person, record }))
 }

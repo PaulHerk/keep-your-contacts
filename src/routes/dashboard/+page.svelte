@@ -26,7 +26,7 @@
     api_request(fetch, "/persons/count").then(async (response) => {
       if (!response.ok) error(500, await response.text());
       personCount = parseInt(await response.text()); // api will return number.
-    });
+    }); // TODO: put in load function
 
     api_request(
       fetch,

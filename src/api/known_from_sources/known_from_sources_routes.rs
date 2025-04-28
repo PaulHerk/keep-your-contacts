@@ -16,7 +16,7 @@ pub async fn create_known_from_source(
     Json(known_from_source): Json<NewKnownFromSources>,
 ) -> Result<impl IntoResponse, Error> {
     let id: i32 = sqlx::query_scalar(
-        "INSERT INTO KnownFromSources (user_id, source_name, description) VALUES ($1, $2, $3) RETURNING id",
+        "INSERT INTO KnownFromSources (user_id, source_name, description) VALUES ($1, $2, $3) RETURNING source_id",
     )
     .bind(user.id)
     .bind(known_from_source.source_name)

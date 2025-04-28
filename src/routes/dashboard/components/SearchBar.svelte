@@ -39,7 +39,7 @@
         if (e.currentTarget.value === "") filterTerm = "";
       }}
     />
-    <select class="select" bind:value={knownFromSearch}>
+    <select class="select" onchange={search} bind:value={knownFromSearch}>
       <option value=""></option>
       {#each knownFromSources as source}
         <option value={source.sourceId}> {source.sourceName}</option>

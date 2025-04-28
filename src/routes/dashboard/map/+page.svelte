@@ -1,17 +1,32 @@
 <script lang="ts">
-  import { Map, TileLayer, Marker, Popup, DivIcon } from "sveaflet";
+  import { Map, TileLayer, Marker, Tooltip, DivIcon } from "sveaflet";
   import { persons } from "../store";
+  import { onMount } from "svelte";
+  import { api_request } from "$lib";
+  import { error } from "@sveltejs/kit";
+  import { MapPin } from "@lucide/svelte";
 
   let userLocation: [number, number] | null = $state(null);
 
-  let contactWithLocations = $persons
-    .filter((p) => p.record !== null)
-    .map((p) => {
-      return {
-        coord: [p.record?.lat as number, p.record?.lon as number], //how tf is p.record possibly null?????????
-        name: p.firstName,
-      };
+  let contactWithLocations = $state(
+    $persons
+      .filter((p) => p.record !== null)
+      .map((p) => {
+        return {
+          coordinate: [p.record?.lat as number, p.record?.lon as number], //how tf is p.record possibly null?????????
+          firstName: p.firstName,
+          lastName: p.lastName,
+        };
+      })
+  );
+
+  onMount(async () => {
+    api_request(fetch, "/persons/coordinates").then(async (response) => {
+      if (!response.ok) error(500, await response.text());
+      contactWithLocations = await response.json();
     });
+  }); // TODO: put in load function
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -43,15 +58,19 @@
     />
     {#if userLocation}
       <Marker latLng={userLocation}>
-        <Popup options={{ content: "Your Location." }} />
+        <Tooltip options={{ content: "Your Location." }} />
       </Marker>
     {/if}
     {#each contactWithLocations as contact}
-      <Marker latLng={contact.coord}>
-        <DivIcon>
-          <div class="text-lg text-purple-600">
-            {contact.name}
+      <Marker latLng={contact.coordinate}>
+        <DivIcon options={{ className: "transparent", iconAnchor: [12.5, 25] }}>
+          <div class="text-md text-purple-600">
+            <MapPin size={25} />
+            {contact.firstName}
           </div>
+          <Tooltip
+            options={{ content: `${contact.firstName} ${contact.lastName}` }}
+          />
         </DivIcon>
       </Marker>
     {/each}

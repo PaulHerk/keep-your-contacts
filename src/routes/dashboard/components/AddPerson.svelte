@@ -100,7 +100,7 @@
                 placeholder="add new"
                 bind:value={newSource}
               />
-              <button class="button" onclick={addNew}>
+              <button class="button" type="button" onclick={addNew}>
                 <SquarePlus size={30} />
               </button>
             {/if}
@@ -124,7 +124,9 @@
           type="submit"
           value="Confirm"
           class="btn preset-filled"
-          onclick={modalClose}
+          onclick={() => {
+            if (form?.success) modalClose();
+          }}
         />
         <!-- <button class="btn preset-filled">Confirm</button> -->
       </footer>
