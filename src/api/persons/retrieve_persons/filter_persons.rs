@@ -12,10 +12,11 @@ pub fn filter_person_query(
             .push_bind(global_search)
             .push(")");
     }
-    if let Some(known_from_id) = filter.known_from_search {
+    if let Some(Ok(known_from_source_id)) = filter.known_from_search.map(|s| s.parse::<i32>()) {
+        println!("{}", known_from_source_id);
         sql_query
-            .push(" AND known_from_id = ")
-            .push_bind(known_from_id);
+            .push(" AND known_from_source_id = ")
+            .push_bind(known_from_source_id);
     }
     sql_query
 }

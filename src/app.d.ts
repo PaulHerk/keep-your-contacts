@@ -48,7 +48,7 @@ declare global {
   }
 
   interface KnownFromSource {
-    id: number;
+    sourceId: number;
     sourceName: string;
     description: string;
   }

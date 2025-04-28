@@ -15,17 +15,17 @@ pub async fn create_known_from_source(
     State(state): State<MyState>,
     Json(known_from_source): Json<NewKnownFromSources>,
 ) -> Result<impl IntoResponse, Error> {
-    sqlx::query(
-        "INSERT INTO KnownFromSources (user_id, source_name, description) VALUES ($1, $2, $3)",
+    let id: i32 = sqlx::query_scalar(
+        "INSERT INTO KnownFromSources (user_id, source_name, description) VALUES ($1, $2, $3) RETURNING id",
     )
     .bind(user.id)
     .bind(known_from_source.source_name)
     .bind(known_from_source.description)
-    .execute(&state.pool)
+    .fetch_one(&state.pool)
     .await
     .map_err(Error::DBError)?;
 
-    Ok(StatusCode::CREATED)
+    Ok((StatusCode::CREATED, Json(id)))
 }
 
 pub async fn get_known_from_sources(

@@ -2,17 +2,27 @@
   import { enhance } from "$app/forms";
   import { Search } from "@lucide/svelte";
 
-  let { filterTerm = $bindable(), page = $bindable() } = $props();
+  let {
+    filterTerm = $bindable(),
+    page = $bindable(),
+    knownFromSources,
+  }: {
+    filterTerm: string;
+    page: number;
+    knownFromSources: KnownFromSource[];
+  } = $props();
 
-  let searchTerm: string = $state("");
+  let globalSearch = $state("");
+  let knownFromSearch = $state("");
 
   function search() {
-    if (searchTerm.trim() === "") filterTerm = "";
-    else {
-      filterTerm = "&global_search=" + searchTerm;
-      page = 0;
-    }
+    let search = "";
+    search = globalSearch.trim() !== "" ? "&global_search=" + globalSearch : "";
+    search +=
+      knownFromSearch !== "" ? "&known_from_search=" + knownFromSearch : "";
+    filterTerm = search;
   }
+  $inspect(knownFromSearch);
 </script>
 
 <form class="mx-auto w-full max-w-md space-y-4">
@@ -24,11 +34,17 @@
       class="ig-input"
       type="search"
       placeholder="Search..."
-      bind:value={searchTerm}
+      bind:value={globalSearch}
       oninput={(e) => {
         if (e.currentTarget.value === "") filterTerm = "";
       }}
     />
+    <select class="select" bind:value={knownFromSearch}>
+      <option value=""></option>
+      {#each knownFromSources as source}
+        <option value={source.sourceId}> {source.sourceName}</option>
+      {/each}
+    </select>
     <button class="ig-btn preset-filled" onclick={search}>Search</button>
   </div>
 </form>

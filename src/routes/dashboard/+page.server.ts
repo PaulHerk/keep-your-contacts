@@ -14,11 +14,13 @@ export const actions = {
       return fail(500, { ...coordinateOrFail });
     }
     const coordinate = coordinateOrFail?.coordinate as Coordinate | null;
+    let knownFromSourceId = data.get("knownFromSourceId") as number | null;
+    knownFromSourceId = knownFromSourceId ? Number(knownFromSourceId) : null;
 
     console.log(coordinate);
     const formData: NewPerson = {
       name: data.get("name") as string,
-      knownFromSourceId: null, // Placeholder
+      knownFromSourceId: knownFromSourceId, // Placeholder
       coordinate: coordinate,
       jobTitle: data.get("jobTitle") as string,
       company: data.get("company") as string,

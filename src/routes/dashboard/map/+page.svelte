@@ -33,7 +33,14 @@
       zoom: 13,
     }}
   >
-    <TileLayer url={"https://tile.openstreetmap.org/{z}/{x}/{y}.png"} />
+    <TileLayer
+      url={"https://tile.openstreetmap.de/{z}/{x}/{y}.png"}
+      options={{
+        maxZoom: 18,
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }}
+    />
     {#if userLocation}
       <Marker latLng={userLocation}>
         <Popup options={{ content: "Your Location." }} />

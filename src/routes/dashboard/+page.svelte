@@ -18,6 +18,8 @@
   let filterTerm = $state("");
   let personCount = $state(0);
 
+  let knownFromSources: KnownFromSource[] = $state([]);
+
   $effect(() => {
     form?.newPerson; // if form is successful and new person id is present this will fetch all persons again
     // TODO: not fetch all persons again, but only the new one
@@ -58,8 +60,8 @@
     <main class="space-y-4 p-4">
       <div class="flex flex-col gap-4">
         <div class="self-center flex flex-col md:flex-row gap-8 w-full">
-          <AddPerson {form} />
-          <SearchBar bind:filterTerm bind:page />
+          <AddPerson {form} bind:knownFromSources />
+          <SearchBar {knownFromSources} bind:filterTerm bind:page />
         </div>
         <Table {detailed} {personCount} bind:perPage bind:page />
       </div>

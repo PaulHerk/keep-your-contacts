@@ -1,15 +1,17 @@
 <script lang="ts">
   import { Modal } from "@skeletonlabs/skeleton-svelte";
   import { enhance } from "$app/forms";
-  import type { PageProps } from "../$types";
+  import type { ActionData, PageProps } from "../$types";
   import { api_request } from "$lib";
   import { onMount } from "svelte";
   import { error } from "@sveltejs/kit";
   import { CirclePlus, SquarePlus } from "@lucide/svelte";
 
-  let { form } = $props();
+  let {
+    form,
+    knownFromSources = $bindable([]),
+  }: { form: ActionData; knownFromSources: KnownFromSource[] } = $props();
 
-  let knownFromSources: KnownFromSource[] = $state([]);
   let selected = $state(0);
   let newSource = $state("");
 
@@ -28,8 +30,9 @@
       body: JSON.stringify({ sourceName: newSource, description: "" }),
     }).then(async (response) => {
       if (!response.ok) error(500, await response.text());
+      let newId = await response.json();
       knownFromSources.push({
-        id: selected,
+        sourceId: newId,
         sourceName: newSource,
         description: "",
       });
@@ -79,9 +82,14 @@
         <label class="label">
           <span class="label-text">Where do you know this person from?</span>
           <div class="flex gap-4">
-            <select bind:value={selected} class="select">
+            <select
+              bind:value={selected}
+              class="select"
+              name="knownFromSourceId"
+            >
+              <option value=""></option>
               {#each knownFromSources as source}
-                <option value={source.id}>{source.sourceName}</option>
+                <option value={source.sourceId}>{source.sourceName}</option>
               {/each}
               <option value={knownFromSources.length + 1}>add new</option>
             </select>

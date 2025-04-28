@@ -20,7 +20,7 @@ pub struct PaginationFilterQuery {
 #[derive(Deserialize, Clone, Debug)]
 pub struct Filtering {
     pub global_search: Option<String>,
-    pub known_from_search: Option<i32>,
+    pub known_from_search: Option<String>,
 }
 
 enum UserView {
