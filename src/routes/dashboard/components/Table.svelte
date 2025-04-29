@@ -1,7 +1,6 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import { orderBy } from "natural-orderby";
-  import EditModal from "./EditModal.svelte";
   import { getContext } from "svelte";
   import { persons } from "../store";
   import { Pagination } from "@skeletonlabs/skeleton-svelte";
@@ -16,6 +15,7 @@
     personCount,
     perPage = $bindable(),
     page = $bindable(),
+    editPersonModal,
   } = $props();
 
   let sortByFirst: keyof Person = $state("firstName");
@@ -85,10 +85,10 @@
           </tr>
         </thead>
         <tbody class="[&>tr]:hover:preset-tonal-primary">
-          {#each $persons as person, idx}
+          {#each $persons as person}
             <tr>
               <td>
-                <EditModal {person} />
+                {@render editPersonModal(person)}
               </td>
               <td><p class="text-wrap">{person.firstName}</p></td>
               <td><p class="text-wrap">{person.lastName}</p></td>

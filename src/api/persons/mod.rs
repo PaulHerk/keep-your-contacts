@@ -9,7 +9,6 @@ use axum::{
 };
 use chrono::{DateTime, Local};
 use get_coordinates::get_persons_with_coords;
-use post_person::create_person;
 use retrieve_persons::{
     get_person_count::get_person_count,
     get_persons::{get_single_person, retrieve},
@@ -17,6 +16,7 @@ use retrieve_persons::{
 use reverse_geocoder::{Record, ReverseGeocoder};
 use serde::{Deserialize, Serialize};
 use sqlx::{types::Json, FromRow};
+use update_person::create_person;
 use update_person::{delete_person, update_person};
 
 use super::MyState;

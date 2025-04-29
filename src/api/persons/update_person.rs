@@ -4,47 +4,96 @@ use axum::{
     response::IntoResponse,
     Extension, Json,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 use crate::api::{auth::User, errors::Error, MyState};
 
 use super::{Coordinate, Person};
-#[derive(Serialize, Deserialize, Default)]
-pub struct UpdatePerson {
-    pub last_name: Option<String>,
+use reverse_geocoder::ReverseGeocoder;
+use sqlx::{Postgres, QueryBuilder};
+
+use crate::api::persons::{get_record_from_coord, UserResponse};
+
+#[derive(Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct PersonNew {
+    pub name: String,
     pub known_from_source_id: Option<i32>,
     pub coordinate: Option<Coordinate>,
-    pub job_title: Option<String>,
-    pub company: Option<String>,
-    pub linkedin: Option<String>,
-    pub notes: Option<String>,
+    #[serde(default)]
+    pub job_title: String,
+    #[serde(default)]
+    pub company: String,
+    #[serde(default)]
+    pub linkedin: String,
+    #[serde(default)]
+    pub notes: String,
+}
+
+pub async fn create_person(
+    State(state): State<MyState>,
+    Extension(user): Extension<User>,
+    Json(data): Json<PersonNew>,
+) -> Result<impl IntoResponse, impl IntoResponse> {
+    let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
+        "INSERT INTO persons (user_id, first_name, last_name, known_from_source_id, coordinate, job_title, company, linkedin, notes) VALUES (",
+    );
+
+    let mut names = data.name.trim().split_ascii_whitespace();
+    let first_name = names.next().unwrap_or_default();
+    let last_name: String = names.collect::<Vec<&str>>().join(" ");
+
+    dbg!(&data.coordinate);
+
+    let mut field_separator = query_builder.separated(", ");
+    field_separator
+        .push_bind(user.id)
+        .push_bind(first_name.trim())
+        .push_bind(last_name.trim())
+        .push_bind(data.known_from_source_id)
+        .push_bind(data.coordinate.map(|c| serde_json::json!(c)))
+        .push_bind(data.job_title)
+        .push_bind(data.company)
+        .push_bind(data.linkedin)
+        .push_bind(data.notes);
+    field_separator.push_unseparated(") RETURNING *;");
+
+    match query_builder
+        .build_query_as::<Person>()
+        .fetch_one(&state.pool)
+        .await
+    {
+        Ok(person) => {
+            let geocoder = ReverseGeocoder::new();
+            let record = get_record_from_coord(&geocoder, person.coordinate);
+            Ok(Json(UserResponse { person, record }))
+        }
+        Err(e) => Err(Error::DBError(e)),
+    }
 }
 
 pub async fn update_person(
     State(state): State<MyState>,
     Extension(user): Extension<User>,
     Path(person_id): Path<i32>,
-    Json(data): Json<UpdatePerson>,
+    Json(data): Json<PersonNew>,
 ) -> Result<impl IntoResponse, Error> {
-    let person =
-        sqlx::query_as::<_, Person>("SELECT * FROM Persons WHERE user_id = $1 AND id = $2") // only id should be enough but I want to prevent any secret information to be leaked
-            .bind(user.id)
-            .bind(person_id)
-            .fetch_one(&state.pool)
-            .await
-            .map_err(Error::DBError)?;
+    let mut names = data.name.trim().split_ascii_whitespace();
+    let first_name = names.next().unwrap_or_default();
+    let last_name: String = names.collect::<Vec<&str>>().join(" ");
 
-    sqlx::query("UPDATE Persons SET (last_name, known_from_source_id, coordinate, job_title, company, linkedin, notes) = ($3, $4, $5, $6, $7, $8, $9)  WHERE user_id = $1 AND id = $2")
+    let person: Person = sqlx::query_as("UPDATE Persons SET (first_name, last_name, known_from_source_id, coordinate, job_title, company, linkedin, notes) = ($3, $4, $5, $6, $7, $8, $9, $10)  WHERE user_id = $1 AND id = $2 RETURNING *")
         .bind(user.id)
         .bind(person_id)
-        .bind(data.last_name.unwrap_or(person.last_name))
-        .bind(data.known_from_source_id.or(person.known_from_source_id))
-        .bind(data.coordinate.or(person.coordinate.map(|p| p.0)).map(|coord| serde_json::json!(coord)))
-        .bind(data.job_title.unwrap_or(person.job_title))
-        .bind(data.company.unwrap_or(person.company))
-        .bind(data.linkedin.unwrap_or(person.linkedin))
-        .bind(data.notes.unwrap_or(person.notes)).execute(&state.pool).await.map_err(Error::DBError)?;
-    Ok(StatusCode::CREATED)
+        .bind(first_name)
+        .bind(last_name)
+        .bind(data.known_from_source_id)
+        .bind(data.coordinate.map(|coord| serde_json::json!(coord)))
+        .bind(data.job_title)
+        .bind(data.company)
+        .bind(data.linkedin)
+        .bind(data.notes).fetch_one(&state.pool).await.map_err(Error::DBError)?;
+    Ok((StatusCode::CREATED, Json(person)))
 }
 
 pub async fn delete_person(

@@ -2,7 +2,8 @@
   import "./components/Table.svelte";
   import "../../style.css";
   import Table from "./components/Table.svelte";
-  import AddPerson from "./components/AddPerson.svelte";
+  import AddPersonModal from "./components/AddPersonModal.svelte";
+  import EditPersonModal from "./components/EditPersonModal.svelte";
   import type { PageProps } from "./$types";
   import { api_request } from "$lib";
   import { persons } from "./store";
@@ -55,7 +56,7 @@
     <main class="space-y-4 p-4">
       <div class="flex flex-col gap-4">
         <div class="self-center flex flex-col md:flex-row gap-8 w-full">
-          <AddPerson
+          <AddPersonModal
             {form}
             bind:knownFromSources
             bind:personCount
@@ -64,7 +65,7 @@
           <SearchBar {knownFromSources} bind:filterTerm bind:page />
         </div>
         <Table {detailed} {personCount} bind:perPage bind:page>
-          <!-- {#snippet editPersonModal(personToUpdate: Person)}
+          {#snippet editPersonModal(personToUpdate: Person)}
             <EditPersonModal
               {form}
               {personToUpdate}
@@ -72,7 +73,7 @@
               bind:personCount
               bind:perPage
             />
-          {/snippet} -->
+          {/snippet}
         </Table>
       </div>
     </main>

@@ -39,6 +39,7 @@ pub async fn retrieve(
 
     sql_query = filter_person_query(sql_query, url_query.filter);
     sql_query
+        .push(" ORDER BY id") // TODO: manual sorting
         .push(" OFFSET ")
         .push_bind(url_query.per_page * url_query.page)
         .push(" LIMIT ")
