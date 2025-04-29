@@ -48,14 +48,15 @@
     });
   }
 
-  function modalCloseAndUpdatePersons() {
+  function modalCloseAndUpdatePersons(newPerson: Person) {
     openState = false;
     if (perPage === personCount) perPage += 1;
     invalidate(api_url + "/persons/count"); // Update personCount (this will also update it in maps)
     // ? is it smarter to instead refetch it in /maps?
-    if (form?.newPerson) $persons.push(form.newPerson);
+    $persons.push(newPerson);
+    personCount += 1;
 
-    console.warn(personCount, form?.newPerson);
+    console.warn(personCount, form?.newPerson, $persons, perPage, personCount);
   }
 </script>
 
@@ -88,13 +89,16 @@
       class="flex flex-col gap-4 p-4"
       method="POST"
       action="?/addPerson"
-      use:enhance={({ formElement, formData, action, cancel }) => {
+      use:enhance={() => {
         return async ({ result }) => {
           // `result` is an `ActionResult` object
-          if (result.type === "success") {
-            modalCloseAndUpdatePersons();
-            await applyAction(result);
+          if (result.type === "success" && result.data) {
+            const newP = (
+              result.data as { success: boolean; newPerson: Person }
+            ).newPerson;
+            modalCloseAndUpdatePersons(newP);
           }
+          await applyAction(result);
         };
       }}
     >

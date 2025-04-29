@@ -63,7 +63,17 @@
           />
           <SearchBar {knownFromSources} bind:filterTerm bind:page />
         </div>
-        <Table {detailed} {personCount} bind:perPage bind:page />
+        <Table {detailed} {personCount} bind:perPage bind:page>
+          <!-- {#snippet editPersonModal(personToUpdate: Person)}
+            <EditPersonModal
+              {form}
+              {personToUpdate}
+              bind:knownFromSources
+              bind:personCount
+              bind:perPage
+            />
+          {/snippet} -->
+        </Table>
       </div>
     </main>
   </div>
