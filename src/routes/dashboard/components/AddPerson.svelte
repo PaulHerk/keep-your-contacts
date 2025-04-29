@@ -2,12 +2,13 @@
   import { Modal } from "@skeletonlabs/skeleton-svelte";
   import { enhance } from "$app/forms";
   import type { ActionData } from "../$types";
-  import { api_request } from "$lib";
+  import { api_request, api_url } from "$lib";
   import { onMount } from "svelte";
   import { error } from "@sveltejs/kit";
   import { SquarePlus } from "@lucide/svelte";
   import { applyAction } from "$app/forms";
   import { persons } from "../store";
+  import { invalidate } from "$app/navigation";
 
   let {
     form,
@@ -50,12 +51,12 @@
   function modalCloseAndUpdatePersons() {
     openState = false;
     if (perPage === personCount) perPage += 1;
-    personCount += 1;
+    invalidate(api_url + "/persons/count"); // Update personCount (this will also update it in maps)
+    // ? is it smarter to instead refetch it in /maps?
     if (form?.newPerson) $persons.push(form.newPerson);
 
     console.warn(personCount, form?.newPerson);
   }
-  // if (form?.success) modalCloseAndUpdatePersons(); // TODO Not updating reactively
 </script>
 
 {#snippet input(label: string, key: keyof NewPerson, required = false)}

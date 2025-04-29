@@ -8,6 +8,7 @@
   import { persons } from "./store";
   import SearchBar from "./components/SearchBar.svelte";
   import { error } from "@sveltejs/kit";
+  import { untrack } from "svelte";
 
   let { data, form }: PageProps = $props();
 
@@ -27,7 +28,7 @@
     ).then(async (response) => {
       if (!response.ok) error(500, await response.text());
       let person: Person[] = await response.json();
-      persons.set(person);
+      untrack(() => persons.set(person));
     });
   });
 

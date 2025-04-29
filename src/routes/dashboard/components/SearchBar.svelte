@@ -22,7 +22,6 @@
       knownFromSearch !== "" ? "&known_from_search=" + knownFromSearch : "";
     filterTerm = search;
   }
-  $inspect(knownFromSearch);
 </script>
 
 <form class="mx-auto w-full max-w-md space-y-4">

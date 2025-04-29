@@ -5,15 +5,18 @@
   import { api_request } from "$lib";
   import { error } from "@sveltejs/kit";
   import { MapPin } from "@lucide/svelte";
+  import type { PageProps } from "../$types";
 
   let userLocation: [number, number] | null = $state(null);
 
+  let { data }: PageProps = $props();
+
   let contactWithLocations = $state(
     $persons
-      .filter((p) => p.record !== null)
+      .filter((p) => p.record)
       .map((p) => {
         return {
-          coordinate: [p.record?.lat as number, p.record?.lon as number], //how tf is p.record possibly null?????????
+          coordinate: [p.record?.lat, p.record?.lon], //how tf is p.record possibly null?????????
           firstName: p.firstName,
           lastName: p.lastName,
         };
@@ -21,11 +24,12 @@
   );
 
   onMount(async () => {
+    if ($persons.length === data.personCount) return;
     api_request(fetch, "/persons/coordinates").then(async (response) => {
       if (!response.ok) error(500, await response.text());
       contactWithLocations = await response.json();
     });
-  }); // TODO: put in load function
+  }); // TODO: put in load function? Idk
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(

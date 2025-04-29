@@ -1,15 +1,11 @@
 <script lang="ts">
-  // import { delete_person } from "$lib";
   import { Modal } from "@skeletonlabs/skeleton-svelte";
-  import { getContext } from "svelte";
-  import { persons } from "../store";
   let openState = $state(false);
-  let { personID } = $props();
+  let { person } = $props();
 
   function modalClose() {
     openState = false;
   }
-  let index = $derived($persons.findIndex((p) => p.id === personID));
 </script>
 
 <Modal
@@ -20,7 +16,7 @@
 >
   {#snippet trigger()}Edit{/snippet}
   {#snippet content()}
-    {#each Object.entries($persons[personID]) as [key, value]}
+    {#each Object.entries(person) as [key, value]}
       <p><b>{key}</b> : {value}</p>
     {/each}
     <button
@@ -34,7 +30,7 @@
       class="btn preset-tonal-error"
     >
       <p>
-        Delete <b>{$persons[index]?.firstName}</b>
+        Delete <b>{person.firstName}</b>
       </p>
     </button>
   {/snippet}
