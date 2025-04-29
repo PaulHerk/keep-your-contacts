@@ -1,8 +1,7 @@
-use reverse_geocoder::Record;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-use super::{Coordinate, Person, PersonTrait};
+use super::{Coordinate, Person, PersonTrait, UserResponse};
 
 pub mod filter_persons;
 pub mod get_person_count;
@@ -44,13 +43,6 @@ impl PersonTrait for SimplePerson {
     fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>> {
         self.coordinate
     }
-}
-/// needed for the coordinate record that gets appened to the response
-#[derive(Deserialize, Serialize)]
-pub struct UserResponse<Fetched> {
-    #[serde(flatten)]
-    person: Fetched,
-    record: Option<Record>,
 }
 
 #[derive(Serialize)]

@@ -4,47 +4,20 @@ use axum::{
     response::IntoResponse,
     Extension, Json,
 };
-use reverse_geocoder::{Record, ReverseGeocoder};
+use reverse_geocoder::ReverseGeocoder;
 use sqlx::{Postgres, QueryBuilder};
 
 use crate::api::{
     auth::User,
     errors::Error,
-    persons::{Coordinate, Person},
+    persons::{create_person_with_record, get_record_from_coord, Person, UserResponse},
     MyState,
 };
 
 use super::{
-    filter_persons::filter_person_query, PaginationFilterQuery, PersonTrait, SimplePerson,
-    UserQueryResult, UserResponse, UserView,
+    filter_persons::filter_person_query, PaginationFilterQuery, SimplePerson, UserQueryResult,
+    UserView,
 };
-
-fn get_record_from_coord(
-    geocoder: &ReverseGeocoder,
-    coord: Option<sqlx::types::Json<Coordinate>>,
-) -> Option<Record> {
-    if let Some(coord) = coord {
-        Some(geocoder.search((coord.lat, coord.lon)).record).cloned()
-    } else {
-        None
-    }
-}
-fn create_person_with_record<Person: PersonTrait + Clone>(
-    persons: Vec<Person>,
-    geocoder: &ReverseGeocoder,
-) -> Vec<UserResponse<Person>> {
-    persons
-        .iter()
-        .map(|person| {
-            let record = get_record_from_coord(geocoder, person.get_coord());
-            let fetched = person.clone();
-            UserResponse {
-                person: fetched,
-                record,
-            }
-        })
-        .collect()
-}
 
 pub async fn retrieve(
     Extension(user): Extension<User>,

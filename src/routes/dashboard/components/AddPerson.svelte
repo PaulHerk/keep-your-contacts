@@ -1,21 +1,29 @@
 <script lang="ts">
   import { Modal } from "@skeletonlabs/skeleton-svelte";
   import { enhance } from "$app/forms";
-  import type { ActionData, PageProps } from "../$types";
+  import type { ActionData } from "../$types";
   import { api_request } from "$lib";
   import { onMount } from "svelte";
   import { error } from "@sveltejs/kit";
-  import { CirclePlus, SquarePlus } from "@lucide/svelte";
+  import { SquarePlus } from "@lucide/svelte";
+  import { applyAction } from "$app/forms";
+  import { persons } from "../store";
 
   let {
     form,
     knownFromSources = $bindable([]),
-  }: { form: ActionData; knownFromSources: KnownFromSource[] } = $props();
+    personCount = $bindable(),
+    perPage = $bindable(),
+  }: {
+    form: ActionData;
+    knownFromSources: KnownFromSource[];
+    personCount: number;
+    perPage: number;
+  } = $props();
 
+  let openState = $state(false);
   let selected = $state(0);
   let newSource = $state("");
-
-  $inspect(knownFromSources);
 
   onMount(async () => {
     api_request(fetch, "/known-from-sources").then(async (response) => {
@@ -24,7 +32,7 @@
     });
   });
 
-  function addNew() {
+  function addNewKnownFromSource() {
     api_request(fetch, "/known-from-sources", {
       method: "POST",
       body: JSON.stringify({ sourceName: newSource, description: "" }),
@@ -39,11 +47,15 @@
     });
   }
 
-  let openState = $state(false);
-
-  function modalClose() {
+  function modalCloseAndUpdatePersons() {
     openState = false;
+    if (perPage === personCount) perPage += 1;
+    personCount += 1;
+    if (form?.newPerson) $persons.push(form.newPerson);
+
+    console.warn(personCount, form?.newPerson);
   }
+  // if (form?.success) modalCloseAndUpdatePersons(); // TODO Not updating reactively
 </script>
 
 {#snippet input(label: string, key: keyof NewPerson, required = false)}
@@ -75,7 +87,15 @@
       class="flex flex-col gap-4 p-4"
       method="POST"
       action="?/addPerson"
-      use:enhance
+      use:enhance={({ formElement, formData, action, cancel }) => {
+        return async ({ result }) => {
+          // `result` is an `ActionResult` object
+          if (result.type === "success") {
+            modalCloseAndUpdatePersons();
+            await applyAction(result);
+          }
+        };
+      }}
     >
       <article class="flex flex-col gap-5">
         {@render input("Full Name:", "name", true)}
@@ -100,7 +120,11 @@
                 placeholder="add new"
                 bind:value={newSource}
               />
-              <button class="button" type="button" onclick={addNew}>
+              <button
+                class="button"
+                type="button"
+                onclick={addNewKnownFromSource}
+              >
                 <SquarePlus size={30} />
               </button>
             {/if}
@@ -117,15 +141,22 @@
         {@render input("Notes:", "notes")}
       </article>
       <footer class="flex justify-end gap-4">
-        <button type="button" class="btn preset-tonal" onclick={modalClose}
-          >Cancel</button
+        <button
+          type="button"
+          class="btn preset-tonal"
+          onclick={() => (openState = false)}>Cancel</button
         >
         <input
           type="submit"
           value="Confirm"
           class="btn preset-filled"
           onclick={() => {
-            if (form?.success) modalClose();
+            // modalCloseAndUpdatePersons();
+            // setTimeout(() => {
+            //   console.log(form);
+            //   if (form?.newPerson && form?.success)
+            //     modalCloseAndUpdatePersons();
+            // }, 1000); // TODO: How do I update after form has successfully returned?? with await in form
           }}
         />
         <!-- <button class="btn preset-filled">Confirm</button> -->

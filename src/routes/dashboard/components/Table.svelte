@@ -88,7 +88,7 @@
           {#each $persons as person, idx}
             <tr>
               <td>
-                <EditModal personID={idx} />
+                <EditModal {person} />
               </td>
               <td><p class="text-wrap">{person.firstName}</p></td>
               <td><p class="text-wrap">{person.lastName}</p></td>
@@ -101,6 +101,8 @@
                 ><p class="text-wrap">
                   {person.record
                     ? regionNames.of(person.record?.cc) +
+                      ", " +
+                      person.record.admin2 +
                       ", " +
                       person.record.admin1
                     : ""}
@@ -135,6 +137,7 @@
         siblingCount={4}
         alternative
       >
+        <!-- TODO weird stuff when adding persons & on last page -->
         {#snippet labelEllipsis()}<IconEllipsis class="size-4" />{/snippet}
         {#snippet labelNext()}<IconArrowRight class="size-4" />{/snippet}
         {#snippet labelPrevious()}<IconArrowLeft class="size-4" />{/snippet}

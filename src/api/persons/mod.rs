@@ -14,6 +14,7 @@ use retrieve_persons::{
     get_person_count::get_person_count,
     get_persons::{get_single_person, retrieve},
 };
+use reverse_geocoder::{Record, ReverseGeocoder};
 use serde::{Deserialize, Serialize};
 use sqlx::{types::Json, FromRow};
 use update_person::{delete_person, update_person};
@@ -41,6 +42,42 @@ pub struct Person {
     pub notes: String,
     pub created_at: DateTime<Local>, // pub born: String,
 }
+
+/// needed for the coordinate record that gets appened to the response
+#[derive(Deserialize, Serialize)]
+pub struct UserResponse<Fetched> {
+    #[serde(flatten)]
+    pub person: Fetched,
+    pub record: Option<Record>,
+}
+
+pub fn get_record_from_coord(
+    geocoder: &ReverseGeocoder,
+    coord: Option<sqlx::types::Json<Coordinate>>,
+) -> Option<Record> {
+    if let Some(coord) = coord {
+        Some(geocoder.search((coord.lat, coord.lon)).record).cloned()
+    } else {
+        None
+    }
+}
+fn create_person_with_record<Person: PersonTrait + Clone>(
+    persons: Vec<Person>,
+    geocoder: &ReverseGeocoder,
+) -> Vec<UserResponse<Person>> {
+    persons
+        .iter()
+        .map(|person| {
+            let record = get_record_from_coord(geocoder, person.get_coord());
+            let fetched = person.clone();
+            UserResponse {
+                person: fetched,
+                record,
+            }
+        })
+        .collect()
+}
+
 pub trait PersonTrait {
     fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>>;
 }

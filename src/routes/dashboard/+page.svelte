@@ -16,29 +16,23 @@
   let perPage = $state(10);
   let detailed = $derived(windowInnerWidth > 800);
   let filterTerm = $state("");
-  let personCount = $state(0);
+  let personCount = $state(data.personCount);
 
   let knownFromSources: KnownFromSource[] = $state([]);
 
   $effect(() => {
-    form?.newPerson; // if form is successful and new person id is present this will fetch all persons again
-    // TODO: not fetch all persons again, but only the new one
-    api_request(fetch, "/persons/count").then(async (response) => {
-      if (!response.ok) error(500, await response.text());
-      personCount = parseInt(await response.text()); // api will return number.
-    }); // TODO: put in load function
-
     api_request(
       fetch,
       `/persons?page=${page}&per_page=${perPage}&detailed=true${filterTerm}` // I have decided to not call the api when detailed changes, it is rather a frontend thing not backend, I will however preserve the query parameter in the api
     ).then(async (response) => {
       if (!response.ok) error(500, await response.text());
       let person: Person[] = await response.json();
-      console.log("aslas: ", person);
       persons.set(person);
     });
   });
-  $inspect(persons, personCount, page, perPage);
+
+  $inspect($persons);
+  $inspect(form);
 </script>
 
 <svelte:window bind:innerWidth={windowInnerWidth} />
@@ -60,7 +54,12 @@
     <main class="space-y-4 p-4">
       <div class="flex flex-col gap-4">
         <div class="self-center flex flex-col md:flex-row gap-8 w-full">
-          <AddPerson {form} bind:knownFromSources />
+          <AddPerson
+            {form}
+            bind:knownFromSources
+            bind:personCount
+            bind:perPage
+          />
           <SearchBar {knownFromSources} bind:filterTerm bind:page />
         </div>
         <Table {detailed} {personCount} bind:perPage bind:page />

@@ -1,8 +1,14 @@
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Extension, Json};
+use axum::{extract::State, response::IntoResponse, Extension, Json};
+use reverse_geocoder::ReverseGeocoder;
 use serde::Deserialize;
 use sqlx::{Postgres, QueryBuilder};
 
-use crate::api::{auth::User, errors::Error, MyState};
+use crate::api::{
+    auth::User,
+    errors::Error,
+    persons::{get_record_from_coord, UserResponse},
+    MyState,
+};
 
 use super::{Coordinate, Person};
 
@@ -55,7 +61,11 @@ pub async fn create_person(
         .fetch_one(&state.pool)
         .await
     {
-        Ok(person) => Ok((StatusCode::CREATED, Json(person))),
+        Ok(person) => {
+            let geocoder = ReverseGeocoder::new();
+            let record = get_record_from_coord(&geocoder, person.coordinate);
+            Ok(Json(UserResponse { person, record }))
+        }
         Err(e) => Err(Error::DBError(e)),
     }
 }
