@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Modal } from "@skeletonlabs/skeleton-svelte";
-  import UpdatePerson from "./UpdatePerson.svelte";
+  import ChangePersons from "./ChangePersons.svelte";
   import type { ActionData } from "../$types";
   let openState = $state(false);
   let {
@@ -42,7 +42,7 @@
 >
   {#snippet trigger()}Edit{/snippet}
   {#snippet content()}
-    <UpdatePerson
+    <ChangePersons
       {form}
       personToUpdate={{ person: newP, personId }}
       bind:knownFromSources

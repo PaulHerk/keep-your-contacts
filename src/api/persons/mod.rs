@@ -1,5 +1,4 @@
 mod get_coordinates;
-mod post_person;
 pub mod retrieve_persons;
 mod update_person;
 

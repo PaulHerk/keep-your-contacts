@@ -66,13 +66,16 @@
         </div>
         <Table {detailed} {personCount} bind:perPage bind:page>
           {#snippet editPersonModal(personToUpdate: Person)}
-            <EditPersonModal
-              {form}
-              {personToUpdate}
-              bind:knownFromSources
-              bind:personCount
-              bind:perPage
-            />
+            {#key personToUpdate}
+              <!-- This key is necessary so that the person values in the EditModal update on repeated editing -->
+              <EditPersonModal
+                {form}
+                {personToUpdate}
+                bind:knownFromSources
+                bind:personCount
+                bind:perPage
+              />
+            {/key}
           {/snippet}
         </Table>
       </div>

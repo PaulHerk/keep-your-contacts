@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Modal } from "@skeletonlabs/skeleton-svelte";
-  import UpdatePerson from "./UpdatePerson.svelte";
+  import ChangePersons from "./ChangePersons.svelte";
   import type { ActionData } from "../$types";
 
   let {
@@ -30,7 +30,7 @@
     <header class="flex justify-between">
       <h2 class="h2">Add Person</h2>
     </header>
-    <UpdatePerson
+    <ChangePersons
       {form}
       bind:knownFromSources
       bind:personCount

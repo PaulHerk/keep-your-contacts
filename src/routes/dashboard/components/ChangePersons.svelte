@@ -93,11 +93,12 @@
   class="flex flex-col gap-4 p-4"
   method="POST"
   action={personToUpdate ? "?/updatePerson" : "?/addPerson"}
-  use:enhance={({ formData }) => {
+  use:enhance={({ formData, formElement, cancel }) => {
+    if (formElement.id === "cancel") cancel();
     if (personToUpdate)
       formData.append("personId", personToUpdate.personId.toString());
 
-    return async ({ result }) => {
+    return async ({ result, update }) => {
       if (result.type === "success") {
         const newP = (result.data as { success: boolean; newPerson: Person })
           .newPerson;
@@ -129,16 +130,22 @@
             placeholder="add new"
             bind:value={newSource}
           />
+          <!-- TODO: Place value is not shown by default right now -->
           <button class="button" type="button" onclick={addNewKnownFromSource}>
             <SquarePlus size={30} />
           </button>
         {/if}
       </div>
     </label>
-    {#if form?.placeNotFound}
-      <p>{form?.message}</p>
-    {/if}
-    {@render input("Place:", "coordinate")}
+
+    <label class="label">
+      {#if form?.placeNotFound}
+        <p class="text-red-600">{form?.message}</p>
+      {/if}
+      <span class="label-text">Place:</span>
+      <input class="input" type="text" placeholder="Place:" name="coordinate" />
+    </label>
+
     {@render input("Job Title:", "jobTitle")}
     {@render input("Company:", "company")}
     {@render input("", "linkedin")}
@@ -146,8 +153,9 @@
   </article>
   <footer class="flex justify-end gap-4">
     <button
-      type="button"
+      type="reset"
       class="btn preset-tonal"
+      id="cancel"
       onclick={() => (openState = false)}>Cancel</button
     >
     <input type="submit" value="Confirm" class="btn preset-filled" />
