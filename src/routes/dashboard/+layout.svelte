@@ -7,8 +7,7 @@
   import IconSettings from "@lucide/svelte/icons/settings";
   import { ContactRound, Map } from "@lucide/svelte";
   import { page } from "$app/state";
-  import { onMount, setContext } from "svelte";
-  import { api_request } from "$lib";
+  import "../../style.css";
 
   let innerWidth = $state(0);
 </script>
