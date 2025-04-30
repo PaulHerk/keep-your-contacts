@@ -124,6 +124,9 @@
         {#each [1, 2, 5, 10] as v}
           <option value={v}>Items {v}</option>
         {/each}
+        {#if ![1, 2, 5, 10, personCount].includes($persons.length)}
+          <option value={$persons.length}>Items {$persons.length}</option>
+        {/if}
         <option value={personCount}>Show All</option>
       </select>
       <!-- Pagination -->

@@ -55,7 +55,6 @@ export const actions = {
   },
 
   updatePerson: async ({ request, fetch, route, url }) => {
-    console.warn("OAUSHFIASN", route, url);
     const data = await request.formData();
 
     const parsedFormData = await createNewPersonObj(data);

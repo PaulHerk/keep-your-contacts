@@ -2,6 +2,10 @@
   import { Modal } from "@skeletonlabs/skeleton-svelte";
   import ChangePersons from "./ChangePersons.svelte";
   import type { ActionData } from "../$types";
+  import { api_request, api_url } from "$lib";
+  import { error } from "@sveltejs/kit";
+  import { persons } from "../store";
+  import { invalidate } from "$app/navigation";
   let openState = $state(false);
   let {
     form,
@@ -32,6 +36,26 @@
     notes: personToUpdate.notes,
   };
   const personId = personToUpdate.id;
+
+  async function deletePerson(personId: number) {
+    const response = await api_request(fetch, `/persons/${personId}`, {
+      method: "DELETE",
+    });
+    if (!response.ok)
+      error(500, "Something went wrong: " + (await response.text()));
+
+    persons.update((oldPersons) => {
+      let idx = oldPersons.findIndex((p) => p.id === personId);
+      oldPersons.splice(idx, 1);
+      return oldPersons;
+    });
+    perPage -= 1;
+
+    invalidate(api_url + "/persons/count"); // Update personCount (this will also update it in maps)
+    // ? is it smarter to instead refetch it in /maps?
+    personCount -= 1;
+    openState = false;
+  }
 </script>
 
 <Modal
@@ -51,12 +75,8 @@
       bind:openState
     />
     <button
-      onclick={() => {
-        // delete_person(personID).then(() => {
-        //     persons.splice(index, 1);
-        //     modalClose();
-        // });
-        console.log("DELETED!!");
+      onclick={async () => {
+        await deletePerson(personId);
       }}
       class="btn preset-tonal-error"
     >
