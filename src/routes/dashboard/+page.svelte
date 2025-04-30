@@ -1,6 +1,5 @@
 <script lang="ts">
   import "./components/Table.svelte";
-  import "../../style.css";
   import Table from "./components/Table.svelte";
   import AddPersonModal from "./components/AddPersonModal.svelte";
   import EditPersonModal from "./components/EditPersonModal.svelte";
@@ -20,7 +19,7 @@
   let filterTerm = $state("");
   let personCount = $state(data.personCount);
 
-  let knownFromSources: KnownFromSource[] = $state([]);
+  let knownFromSources: KnownFromSource[] = $state(data.knownFromSources);
 
   $effect(() => {
     api_request(

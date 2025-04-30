@@ -7,12 +7,17 @@ export const load: LayoutServerLoad = async ({ locals, fetch }) => {
     redirect(307, "/login");
   }
 
-  const response = await api_request(fetch, "/persons/count");
-  if (!response.ok) error(500, await response.text());
-  const personCount = parseInt(await response.text()); // api will return number.
+  const kfsResponse = await api_request(fetch, "/known-from-sources");
+  if (!kfsResponse.ok) error(500, await kfsResponse.text());
+  const knownFromSources: KnownFromSource[] = await kfsResponse.json();
+
+  const pcResponse = await api_request(fetch, "/persons/count");
+  if (!pcResponse.ok) error(500, await pcResponse.text());
+  const personCount = parseInt(await pcResponse.text()); // api will return number.
 
   return {
     loggedInUser: locals.user,
     personCount,
+    knownFromSources,
   };
 };

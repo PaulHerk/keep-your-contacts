@@ -21,6 +21,7 @@
     search +=
       knownFromSearch !== "" ? "&known_from_search=" + knownFromSearch : "";
     filterTerm = search;
+    page = 0;
   }
 </script>
 
