@@ -16,6 +16,7 @@ use axum::{
 use shuttle_runtime::SecretStore;
 use sqlx::PgPool;
 use tower_http::cors::CorsLayer;
+use tower_http::trace::TraceLayer;
 pub mod api;
 
 #[shuttle_runtime::main]
@@ -30,7 +31,7 @@ async fn main(
         .with(tracing_subscriber::EnvFilter::new(
             // axum logs rejections from built-in extractors with the `axum::rejection`
             // target, at `TRACE` level. `axum::rejection=trace` enables showing those events
-            "RUST_LOG=debug,tower_http=debug,axum::rejection=trace", // .into(),
+            "RUST_LOG=trace,tower_http=trace,axum::rejection=trace", // .into(),
         ))
         .with(tracing_subscriber::fmt::layer())
         .init();
@@ -57,7 +58,8 @@ async fn main(
         .route_layer(middleware::from_fn_with_state(state.clone(), auth))
         .merge(create_auth_router(state.clone()))
         .with_state(state)
-        .layer(cors);
+        .layer(cors)
+        .layer(TraceLayer::new_for_http());
 
     Ok(router.into())
 }

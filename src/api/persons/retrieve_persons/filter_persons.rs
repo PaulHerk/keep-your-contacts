@@ -13,7 +13,6 @@ pub fn filter_person_query(
             .push(")");
     }
     if let Some(Ok(known_from_source_id)) = filter.known_from_search.map(|s| s.parse::<i32>()) {
-        println!("{}", known_from_source_id);
         sql_query
             .push(" AND known_from_source_id = ")
             .push_bind(known_from_source_id);
