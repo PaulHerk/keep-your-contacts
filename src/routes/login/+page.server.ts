@@ -1,4 +1,4 @@
-import { api_request, api_url } from "$lib";
+import { api_url } from "$lib";
 import { redirect } from "@sveltejs/kit";
 import * as setCookieParser from "set-cookie-parser";
 import { fail } from "@sveltejs/kit";

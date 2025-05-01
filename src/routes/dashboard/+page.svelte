@@ -4,7 +4,7 @@
   import EditPersonModal from "./components/EditPersonModal.svelte";
   import type { PageProps } from "./$types";
   import { api_request } from "$lib";
-  import { knownFromSources, persons } from "./store";
+  import { knownFromSources, persons, prevQueryParams } from "./store";
   import SearchBar from "./components/SearchBar.svelte";
   import { error } from "@sveltejs/kit";
   import { onMount, untrack } from "svelte";
@@ -24,14 +24,18 @@
   onMount(() => ($knownFromSources = data.knownFromSources));
 
   $effect(() => {
-    api_request(
-      fetch,
-      `/persons?page=${page}&per_page=${perPage}&detailed=true${filterTerm}` // I have decided to not call the api when detailed changes, it is rather a frontend thing not backend, I will however preserve the query parameter in the api
-    ).then(async (response) => {
-      if (!response.ok) error(500, await response.text());
-      let person: Person[] = await response.json();
-      untrack(() => persons.set(person));
-    });
+    const queryParams = `/persons?page=${page}&per_page=${perPage}&detailed=true${filterTerm}`;
+    // Only fetch if query params changed or store is empty
+    if (queryParams !== $prevQueryParams || $persons.length === 0) {
+      api_request(fetch, queryParams).then(async (response) => {
+        if (!response.ok) error(500, await response.text());
+        let person: Person[] = await response.json();
+        untrack(() => {
+          persons.set(person);
+          prevQueryParams.set(queryParams);
+        });
+      });
+    }
   });
 
   $inspect($persons);

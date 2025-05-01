@@ -22,8 +22,7 @@ async function request(
       return response;
     } else {
       if (response.status === 401) {
-        console.error("Unauthorized aa", await response.text());
-        error(401, "Unauthorized aa" + (await response.text()));
+        error(401, await response.text());
       } else if (response.status === 500) {
         error(500, "Error 500: " + (await response.text()));
       } else {
@@ -96,7 +95,8 @@ export const getCoordsFromPlace = async (query: string) => {
   return error;
 };
 
-export const api_url = "http://localhost:8000";
+// export const api_url = "http://localhost:8000";
+export const api_url = "https://keep-your-contacts-fkfz.shuttle.app";
 export const api_request = async (
   fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
   url: string,

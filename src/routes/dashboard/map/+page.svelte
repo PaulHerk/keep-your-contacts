@@ -67,7 +67,7 @@
     <TileLayer
       url={"https://tile.openstreetmap.de/{z}/{x}/{y}.png"}
       options={{
-        maxZoom: 18,
+        maxZoom: 20,
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }}
