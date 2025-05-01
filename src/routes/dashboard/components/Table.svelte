@@ -130,23 +130,25 @@
         <option value={personCount}>Show All</option>
       </select>
       <!-- Pagination -->
-      <Pagination
-        data={$persons}
-        count={$persons.length < personCount ? personCount : $persons.length}
-        onPageChange={(e) => (page = e.page - 1)}
-        page={page + 1}
-        pageSize={perPage}
-        onPageSizeChange={(e) => (perPage = e.pageSize)}
-        siblingCount={4}
-        alternative
-      >
-        <!-- TODO weird stuff when adding persons & on last page -->
-        {#snippet labelEllipsis()}<IconEllipsis class="size-4" />{/snippet}
-        {#snippet labelNext()}<IconArrowRight class="size-4" />{/snippet}
-        {#snippet labelPrevious()}<IconArrowLeft class="size-4" />{/snippet}
-        {#snippet labelFirst()}<IconFirst class="size-4" />{/snippet}
-        {#snippet labelLast()}<IconLast class="size-4" />{/snippet}
-      </Pagination>
+      {#key personCount}
+        <Pagination
+          data={$persons}
+          count={$persons.length < personCount ? personCount : $persons.length}
+          onPageChange={(e) => (page = e.page - 1)}
+          page={page + 1}
+          pageSize={perPage}
+          onPageSizeChange={(e) => (perPage = e.pageSize)}
+          siblingCount={4}
+          alternative
+        >
+          <!-- TODO weird stuff when adding persons & on last page -->
+          {#snippet labelEllipsis()}<IconEllipsis class="size-4" />{/snippet}
+          {#snippet labelNext()}<IconArrowRight class="size-4" />{/snippet}
+          {#snippet labelPrevious()}<IconArrowLeft class="size-4" />{/snippet}
+          {#snippet labelFirst()}<IconFirst class="size-4" />{/snippet}
+          {#snippet labelLast()}<IconLast class="size-4" />{/snippet}
+        </Pagination>
+      {/key}
     </footer>
   </section>
 {/if}

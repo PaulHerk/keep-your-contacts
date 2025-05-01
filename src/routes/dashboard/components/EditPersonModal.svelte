@@ -10,15 +10,15 @@
   let {
     form,
     personToUpdate,
-    knownFromSources = $bindable([]),
-    personCount = $bindable(),
-    perPage = $bindable(),
+    personCount,
+    perPage = $bindable(), // this is needed for deletion
+    children,
   }: {
     form: ActionData;
     personToUpdate: Person;
-    knownFromSources: KnownFromSource[];
     personCount: number;
     perPage: number;
+    children: any;
   } = $props();
 
   const newP: NewPerson = {
@@ -53,7 +53,6 @@
 
     invalidate(api_url + "/persons/count"); // Update personCount (this will also update it in maps)
     // ? is it smarter to instead refetch it in /maps?
-    personCount -= 1;
     openState = false;
   }
 </script>
@@ -61,22 +60,23 @@
 <Modal
   open={openState}
   onOpenChange={(e) => (openState = e.open)}
-  triggerBase="btn btn-md preset-outlined-primary-500"
   backdropClasses="backdrop-blur-sm"
 >
-  {#snippet trigger()}Edit{/snippet}
+  {#snippet trigger()}
+    {@render children()}
+  {/snippet}
   {#snippet content()}
     <ChangePersons
       {form}
       personToUpdate={{ person: newP, personId }}
-      bind:knownFromSources
-      bind:personCount
+      {personCount}
       bind:perPage
       bind:openState
     />
     <button
       onclick={async () => {
         await deletePerson(personId);
+        console.log("DELETED!!");
       }}
       class="btn preset-tonal-error"
     >

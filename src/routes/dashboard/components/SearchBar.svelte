@@ -1,15 +1,14 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
   import { Search } from "@lucide/svelte";
+  import { knownFromSources } from "../store";
 
   let {
     filterTerm = $bindable(),
     page = $bindable(),
-    knownFromSources,
   }: {
     filterTerm: string;
     page: number;
-    knownFromSources: KnownFromSource[];
   } = $props();
 
   let globalSearch = $state("");
@@ -41,7 +40,7 @@
     />
     <select class="select" onchange={search} bind:value={knownFromSearch}>
       <option value=""></option>
-      {#each knownFromSources as source}
+      {#each $knownFromSources as source}
         <option value={source.sourceId}> {source.sourceName}</option>
       {/each}
     </select>

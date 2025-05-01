@@ -9,6 +9,7 @@ use super::Coordinate;
 #[derive(FromRow, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 struct MapContactResponse {
+    id: i32,
     first_name: String,
     last_name: Option<String>,
     coordinate: sqlx::types::Json<Coordinate>,
@@ -19,7 +20,7 @@ pub async fn get_persons_with_coords(
     Extension(user): Extension<User>,
 ) -> Result<impl IntoResponse, Error> {
     let coordinates:Vec<MapContactResponse> = sqlx::query_as(
-        "SELECT first_name, last_name, coordinate FROM persons WHERE user_id = $1 AND coordinate IS NOT NULL",
+        "SELECT id, first_name, last_name, coordinate FROM persons WHERE user_id = $1 AND coordinate IS NOT NULL",
     )
     .bind(user.id)
     .fetch_all(&state.pool)

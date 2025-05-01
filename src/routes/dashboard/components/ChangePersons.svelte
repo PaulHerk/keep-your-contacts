@@ -7,20 +7,18 @@
   import { error } from "@sveltejs/kit";
   import { SquarePlus } from "@lucide/svelte";
   import { applyAction } from "$app/forms";
-  import { persons } from "../store";
+  import { knownFromSources, persons } from "../store";
   import { invalidate } from "$app/navigation";
 
   let {
     form,
     personToUpdate = undefined,
-    knownFromSources = $bindable([]),
-    personCount = $bindable(),
+    personCount,
     perPage = $bindable(),
     openState = $bindable(false),
   }: {
     form: ActionData;
     personToUpdate?: { person: NewPerson; personId: number };
-    knownFromSources: KnownFromSource[];
     personCount: number;
     perPage: number;
     openState: boolean;
@@ -34,7 +32,7 @@
   onMount(async () => {
     api_request(fetch, "/known-from-sources").then(async (response) => {
       if (!response.ok) error(500, await response.text());
-      knownFromSources = await response.json();
+      $knownFromSources = await response.json();
     });
   }); // TODO: put in load
 
@@ -45,21 +43,24 @@
     }).then(async (response) => {
       if (!response.ok) error(500, await response.text());
       let newId = await response.json();
-      knownFromSources.push({
-        sourceId: newId,
-        sourceName: newSource,
-        description: "",
-      });
+      knownFromSources.update((oldSources) => [
+        {
+          sourceId: newId,
+          sourceName: newSource,
+          description: "",
+        } as KnownFromSource,
+        ...oldSources,
+      ]);
+      selected = newId;
     });
   }
 
   function modalCloseAndAddPerson(newPerson: Person) {
     openState = false;
     if (perPage === personCount) perPage += 1;
+    $persons.push(newPerson);
     invalidate(api_url + "/persons/count"); // Update personCount (this will also update it in maps)
     // ? is it smarter to instead refetch it in /maps?
-    $persons.push(newPerson);
-    personCount += 1;
   }
 
   function modalCloseAndUpdatePersons(newPerson: Person) {
@@ -98,7 +99,7 @@
     if (personToUpdate)
       formData.append("personId", personToUpdate.personId.toString());
 
-    return async ({ result, update }) => {
+    return async ({ result }) => {
       if (result.type === "success") {
         const newP = (result.data as { success: boolean; newPerson: Person })
           .newPerson;
@@ -118,12 +119,12 @@
       <div class="flex gap-4">
         <select bind:value={selected} class="select" name="knownFromSourceId">
           <option value=""></option>
-          {#each knownFromSources as source}
+          {#each $knownFromSources as source}
             <option value={source.sourceId}>{source.sourceName}</option>
           {/each}
-          <option value={knownFromSources.length + 1}>add new</option>
+          <option value={$knownFromSources.length + 1}>add new</option>
         </select>
-        {#if selected === knownFromSources.length + 1}
+        {#if selected === $knownFromSources.length + 1}
           <input
             class="input"
             type="text"

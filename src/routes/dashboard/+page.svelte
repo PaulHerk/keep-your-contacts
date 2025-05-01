@@ -5,10 +5,11 @@
   import EditPersonModal from "./components/EditPersonModal.svelte";
   import type { PageProps } from "./$types";
   import { api_request } from "$lib";
-  import { persons } from "./store";
+  import { knownFromSources, persons } from "./store";
   import SearchBar from "./components/SearchBar.svelte";
   import { error } from "@sveltejs/kit";
-  import { untrack } from "svelte";
+  import { onMount, untrack } from "svelte";
+  import { Modal } from "@skeletonlabs/skeleton-svelte";
 
   let { data, form }: PageProps = $props();
 
@@ -17,9 +18,10 @@
   let perPage = $state(10);
   let detailed = $derived(windowInnerWidth > 800);
   let filterTerm = $state("");
-  let personCount = $state(data.personCount);
 
-  let knownFromSources: KnownFromSource[] = $state(data.knownFromSources);
+  let openStateAddP = $state(false);
+
+  onMount(() => ($knownFromSources = data.knownFromSources));
 
   $effect(() => {
     api_request(
@@ -55,25 +57,40 @@
     <main class="space-y-4 p-4">
       <div class="flex flex-col gap-4">
         <div class="self-center flex flex-col md:flex-row gap-8 w-full">
-          <AddPersonModal
-            {form}
-            bind:knownFromSources
-            bind:personCount
-            bind:perPage
-          />
-          <SearchBar {knownFromSources} bind:filterTerm bind:page />
+          <Modal
+            open={openStateAddP}
+            onOpenChange={(e) => (openStateAddP = e.open)}
+            triggerBase="btn btn-lg preset-filled-tertiary-500"
+            contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
+            backdropClasses="backdrop-blur-sm"
+          >
+            {#snippet trigger()}Add Person{/snippet}
+            {#snippet content()}
+              <AddPersonModal
+                {form}
+                personCount={data.personCount}
+                bind:perPage
+                bind:openState={openStateAddP}
+              />
+            {/snippet}
+          </Modal>
+
+          <SearchBar bind:filterTerm bind:page />
         </div>
-        <Table {detailed} {personCount} bind:perPage bind:page>
+        <Table {detailed} personCount={data.personCount} bind:perPage bind:page>
           {#snippet editPersonModal(personToUpdate: Person)}
             {#key personToUpdate}
               <!-- This key is necessary so that the person values in the EditModal update on repeated editing -->
               <EditPersonModal
                 {form}
                 {personToUpdate}
-                bind:knownFromSources
-                bind:personCount
+                personCount={data.personCount}
                 bind:perPage
-              />
+              >
+                <button class="btn btn-md preset-outlined-primary-500">
+                  Edit
+                </button>
+              </EditPersonModal>
             {/key}
           {/snippet}
         </Table>
