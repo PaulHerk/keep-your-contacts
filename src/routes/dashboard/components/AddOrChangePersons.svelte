@@ -14,12 +14,14 @@
     form,
     personToUpdate = undefined,
     personCount,
+    personCoordinateToAdd,
     perPage = $bindable(),
     openState = $bindable(false),
   }: {
     form: ActionData;
     personToUpdate?: { person: NewPerson; personId: number };
     personCount: number;
+    personCoordinateToAdd?: Coordinate;
     perPage: number;
     openState: boolean;
   } = $props();
@@ -60,7 +62,6 @@
     if (perPage === personCount) perPage += 1;
     $persons.push(newPerson);
     invalidate(api_url + "/persons/count"); // Update personCount (this will also update it in maps)
-    // ? is it smarter to instead refetch it in /maps?
   }
 
   function modalCloseAndUpdatePersons(newPerson: Person) {
@@ -93,7 +94,7 @@
 <form
   class="flex flex-col gap-4 p-4"
   method="POST"
-  action={personToUpdate ? "?/updatePerson" : "?/addPerson"}
+  action={personToUpdate ? "/dashboard?/updatePerson" : "/dashboard?/addPerson"}
   use:enhance={({ formData, formElement, cancel }) => {
     if (formElement.id === "cancel") cancel();
     if (personToUpdate)
@@ -112,6 +113,11 @@
     };
   }}
 >
+  <header>
+    <h2 class="h2">
+      {personToUpdate ? "Update Person" : "Add Person"}
+    </h2>
+  </header>
   <article class="flex flex-col gap-5">
     {@render input("Full Name:", "name", true)}
     <label class="label">
@@ -144,7 +150,15 @@
         <p class="text-red-600">{form?.message}</p>
       {/if}
       <span class="label-text">Place:</span>
-      <input class="input" type="text" placeholder="Place:" name="coordinate" />
+      <input
+        class="input"
+        type="text"
+        placeholder="Place:"
+        name="coordinate"
+        value={personCoordinateToAdd
+          ? JSON.stringify(personCoordinateToAdd)
+          : ""}
+      />
     </label>
 
     {@render input("Job Title:", "jobTitle")}

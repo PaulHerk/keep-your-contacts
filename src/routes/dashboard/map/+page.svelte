@@ -7,12 +7,13 @@
   import { MapPin } from "@lucide/svelte";
   import type { PageProps } from "../$types";
   import { Modal } from "@skeletonlabs/skeleton-svelte";
-  import AddPersonModal from "../components/AddPersonModal.svelte";
+  import AddOrChangePersons from "../components/AddOrChangePersons.svelte";
 
   let { data, form }: PageProps = $props();
 
   let openState = $state(false);
   let userLocation: [number, number] | null = $state(null);
+  let personCoordinateToAdd: Coordinate | undefined = $state(undefined);
 
   let contactWithLocations = $state(
     $persons
@@ -48,7 +49,9 @@
     console.error("Geolocation is not supported by this browser.");
   }
   function onMapClick(e: any) {
-    console.log(e.latlng);
+    personCoordinateToAdd = { lat: e.latlng.lat, lon: e.latlng.lng };
+    console.log(personCoordinateToAdd);
+
     openState = true;
   } // TODO: edit person on click at marker, add person when clicking anywhere on map
 </script>
@@ -56,8 +59,8 @@
 <div style="width:100%;height:100vh;">
   <Map
     options={{
-      center: userLocation ? userLocation : [0, 0],
-      zoom: 13,
+      center: userLocation ?? [0, 0],
+      zoom: userLocation ? 13 : 2,
     }}
     onclick={onMapClick}
   >
@@ -95,9 +98,10 @@
     backdropClasses="backdrop-blur-sm"
   >
     {#snippet content()}
-      <AddPersonModal
+      <AddOrChangePersons
         {form}
         personCount={data.personCount}
+        {personCoordinateToAdd}
         perPage={1}
         bind:openState
       />

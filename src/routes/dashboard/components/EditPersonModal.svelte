@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Modal } from "@skeletonlabs/skeleton-svelte";
-  import ChangePersons from "./ChangePersons.svelte";
+  import AddOrChangePersons from "./AddOrChangePersons.svelte";
   import type { ActionData } from "../$types";
   import { api_request, api_url } from "$lib";
   import { error } from "@sveltejs/kit";
@@ -60,13 +60,14 @@
 <Modal
   open={openState}
   onOpenChange={(e) => (openState = e.open)}
+  contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
   backdropClasses="backdrop-blur-sm"
 >
   {#snippet trigger()}
     {@render children()}
   {/snippet}
   {#snippet content()}
-    <ChangePersons
+    <AddOrChangePersons
       {form}
       personToUpdate={{ person: newP, personId }}
       {personCount}

@@ -4,13 +4,18 @@ import { fail } from "@sveltejs/kit";
 
 const createNewPersonObj = async (formData: FormData) => {
   const place = formData.get("coordinate");
-  const coordinateOrFail = place
-    ? await getCoordsFromPlace(place as string)
-    : null;
-  if (coordinateOrFail && !coordinateOrFail.success) {
-    return coordinateOrFail;
+  let coordinate;
+  try {
+    coordinate = JSON.parse(place as string) as Coordinate;
+  } catch {
+    const coordinateOrFail = place
+      ? await getCoordsFromPlace(place as string)
+      : null;
+    if (coordinateOrFail && !coordinateOrFail.success) {
+      return coordinateOrFail;
+    }
+    coordinate = coordinateOrFail?.coordinate as Coordinate | null;
   }
-  const coordinate = coordinateOrFail?.coordinate as Coordinate | null;
   let knownFromSourceId = formData.get("knownFromSourceId") as number | null;
   knownFromSourceId = knownFromSourceId ? Number(knownFromSourceId) : null;
 

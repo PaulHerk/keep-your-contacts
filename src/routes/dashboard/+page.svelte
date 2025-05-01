@@ -1,7 +1,6 @@
 <script lang="ts">
   import "./components/Table.svelte";
   import Table from "./components/Table.svelte";
-  import AddPersonModal from "./components/AddPersonModal.svelte";
   import EditPersonModal from "./components/EditPersonModal.svelte";
   import type { PageProps } from "./$types";
   import { api_request } from "$lib";
@@ -10,6 +9,7 @@
   import { error } from "@sveltejs/kit";
   import { onMount, untrack } from "svelte";
   import { Modal } from "@skeletonlabs/skeleton-svelte";
+  import AddOrChangePersons from "./components/AddOrChangePersons.svelte";
 
   let { data, form }: PageProps = $props();
 
@@ -66,7 +66,7 @@
           >
             {#snippet trigger()}Add Person{/snippet}
             {#snippet content()}
-              <AddPersonModal
+              <AddOrChangePersons
                 {form}
                 personCount={data.personCount}
                 bind:perPage
