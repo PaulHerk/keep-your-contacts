@@ -4,7 +4,7 @@ import { api_url } from "$lib";
 import type { HandleFetch } from "@sveltejs/kit";
 
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
-  if (request.url.startsWith("https://api.my-domain.com/")) {
+  if (request.url.startsWith(api_url)) {
     request.headers.set("cookie", event.request.headers.get("cookie") ?? "");
   }
 
