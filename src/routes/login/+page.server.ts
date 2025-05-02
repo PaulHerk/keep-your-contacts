@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ request, cookies }) => {
 };
 
 export const actions = {
-  login: async ({ request, fetch, cookies, locals }) => {
+  login: async ({ request, fetch, cookies }) => {
     const data = await request.formData();
     const name = data.get("name");
     const password = data.get("password");
@@ -43,7 +43,9 @@ export const actions = {
       } = setCookieParser.parseString(token);
       cookies.set(cookieName, value, {
         path: path ? path : "/",
-        sameSite: sameSite as boolean | "lax" | "strict" | "none" | undefined,
+        sameSite: "strict",
+        secure: true, // Only sent over HTTPS
+        httpOnly: true, // Not accessible via JavaScript
         ...options,
       });
     } catch (e) {

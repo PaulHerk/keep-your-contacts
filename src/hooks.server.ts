@@ -1,6 +1,15 @@
 import type { Handle } from "@sveltejs/kit";
 import { redirect } from "@sveltejs/kit";
 import { api_url } from "$lib";
+import type { HandleFetch } from "@sveltejs/kit";
+
+export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
+  if (request.url.startsWith("https://api.my-domain.com/")) {
+    request.headers.set("cookie", event.request.headers.get("cookie") ?? "");
+  }
+
+  return fetch(request);
+};
 
 export const handle: Handle = async ({ event, resolve }) => {
   // Only verify token if accessing protected routes
