@@ -102,8 +102,8 @@ export const api_request = async (
 ) => {
   if (authToken)
     options = {
+      headers: { Authorization: "Bearer " + authToken, ...options.headers },
       ...options,
-      headers: { ...options.headers, Authorization: "Bearer " + authToken },
     };
   return await request(fetch, api_url + url, options);
 };

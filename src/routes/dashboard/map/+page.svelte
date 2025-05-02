@@ -58,55 +58,59 @@
   } // TODO: edit person on click at marker, add person when clicking anywhere on map
 </script>
 
-<div style="width:100%;height:100vh;">
-  <Map
-    options={{
-      center: userLocation ?? [0, 0],
-      zoom: userLocation ? 13 : 2,
-    }}
-    onclick={onMapClick}
-  >
-    <TileLayer
-      url={"https://tile.openstreetmap.de/{z}/{x}/{y}.png"}
+{#key userLocation}
+  <div style="width:100%;height:100vh;">
+    <Map
       options={{
-        maxZoom: 20,
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        center: userLocation ?? [0, 0],
+        zoom: userLocation ? 13 : 2,
       }}
-    />
-    {#if userLocation}
-      <Marker latLng={userLocation}>
-        <Tooltip options={{ content: "Your Location." }} />
-      </Marker>
-    {/if}
-    {#each contactWithLocations as contact}
-      <Marker latLng={contact.coordinate} onclick={onMapClick}>
-        <DivIcon options={{ className: "transparent", iconAnchor: [12.5, 25] }}>
-          <div class="text-md text-purple-600">
-            <MapPin size={25} />
-            {contact.firstName}
-          </div>
-          <Tooltip
-            options={{ content: `${contact.firstName} ${contact.lastName}` }}
-          />
-        </DivIcon>
-      </Marker>
-    {/each}
-  </Map>
-  <Modal
-    open={openState}
-    onOpenChange={(e) => (openState = e.open)}
-    contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
-    backdropClasses="backdrop-blur-sm"
-  >
-    {#snippet content()}
-      <AddOrChangePersons
-        {form}
-        personCount={data.personCount}
-        {personCoordinateToAdd}
-        perPage={1}
-        bind:openState
+      onclick={onMapClick}
+    >
+      <TileLayer
+        url={"https://tile.openstreetmap.de/{z}/{x}/{y}.png"}
+        options={{
+          maxZoom: 20,
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }}
       />
-    {/snippet}
-  </Modal>
-</div>
+      {#if userLocation}
+        <Marker latLng={userLocation}>
+          <Tooltip options={{ content: "Your Location." }} />
+        </Marker>
+      {/if}
+      {#each contactWithLocations as contact}
+        <Marker latLng={contact.coordinate} onclick={onMapClick}>
+          <DivIcon
+            options={{ className: "transparent", iconAnchor: [12.5, 25] }}
+          >
+            <div class="text-md text-purple-600">
+              <MapPin size={25} />
+              {contact.firstName}
+            </div>
+            <Tooltip
+              options={{ content: `${contact.firstName} ${contact.lastName}` }}
+            />
+          </DivIcon>
+        </Marker>
+      {/each}
+    </Map>
+    <Modal
+      open={openState}
+      onOpenChange={(e) => (openState = e.open)}
+      contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
+      backdropClasses="backdrop-blur-sm"
+    >
+      {#snippet content()}
+        <AddOrChangePersons
+          {form}
+          personCount={data.personCount}
+          {personCoordinateToAdd}
+          perPage={1}
+          bind:openState
+        />
+      {/snippet}
+    </Modal>
+  </div>
+{/key}
