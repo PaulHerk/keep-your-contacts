@@ -4,7 +4,7 @@
   import type { ActionData } from "../$types";
   import { api_request, api_url } from "$lib";
   import { error } from "@sveltejs/kit";
-  import { persons } from "../store";
+  import { authToken, persons } from "../store";
   import { invalidate } from "$app/navigation";
   let openState = $state(false);
   let {
@@ -38,9 +38,14 @@
   const personId = personToUpdate.id;
 
   async function deletePerson(personId: number) {
-    const response = await api_request(fetch, `/persons/${personId}`, {
-      method: "DELETE",
-    });
+    const response = await api_request(
+      fetch,
+      `/persons/${personId}`,
+      {
+        method: "DELETE",
+      },
+      $authToken
+    );
     if (!response.ok)
       error(500, "Something went wrong: " + (await response.text()));
 

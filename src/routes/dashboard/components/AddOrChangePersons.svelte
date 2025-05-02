@@ -7,7 +7,7 @@
   import { error } from "@sveltejs/kit";
   import { SquarePlus } from "@lucide/svelte";
   import { applyAction } from "$app/forms";
-  import { knownFromSources, persons } from "../store";
+  import { authToken, knownFromSources, persons } from "../store";
   import { invalidate } from "$app/navigation";
 
   let {
@@ -32,17 +32,24 @@
   let newSource = $state("");
 
   onMount(async () => {
-    api_request(fetch, "/known-from-sources").then(async (response) => {
-      if (!response.ok) error(500, await response.text());
-      $knownFromSources = await response.json();
-    });
+    api_request(fetch, "/known-from-sources", {}, $authToken).then(
+      async (response) => {
+        if (!response.ok) error(500, await response.text());
+        $knownFromSources = await response.json();
+      }
+    );
   }); // TODO: put in load
 
   function addNewKnownFromSource() {
-    api_request(fetch, "/known-from-sources", {
-      method: "POST",
-      body: JSON.stringify({ sourceName: newSource, description: "" }),
-    }).then(async (response) => {
+    api_request(
+      fetch,
+      "/known-from-sources",
+      {
+        method: "POST",
+        body: JSON.stringify({ sourceName: newSource, description: "" }),
+      },
+      $authToken
+    ).then(async (response) => {
       if (!response.ok) error(500, await response.text());
       let newId = await response.json();
       knownFromSources.update((oldSources) => [

@@ -2,8 +2,10 @@ import { error, redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 import { api_request } from "$lib";
 
-export const load: LayoutServerLoad = async ({ locals, fetch }) => {
-  if (!locals.user) {
+export const load: LayoutServerLoad = async ({ locals, fetch, cookies }) => {
+  console.log(locals.user);
+  const token = cookies.get("token");
+  if (!locals.user || !token) {
     redirect(307, "/login");
   }
 
@@ -17,6 +19,7 @@ export const load: LayoutServerLoad = async ({ locals, fetch }) => {
 
   return {
     loggedInUser: locals.user,
+    token,
     personCount,
     knownFromSources,
   };

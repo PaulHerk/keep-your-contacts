@@ -1,12 +1,9 @@
-// let url = "https://keep-your-contacts-fkfz.shuttle.app/persons"
-
-import { error, redirect } from "@sveltejs/kit";
-import { goto } from "$app/navigation";
+import { error } from "@sveltejs/kit";
 
 async function request(
   fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
   url: string,
-  options: RequestInit = {}
+  options: RequestInit
 ) {
   const fetchOptions: RequestInit = {
     credentials: "include",
@@ -100,7 +97,13 @@ export const api_url = "https://keep-your-contacts-fkfz.shuttle.app";
 export const api_request = async (
   fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
   url: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  authToken: string | null = null
 ) => {
+  if (authToken)
+    options = {
+      ...options,
+      headers: { ...options.headers, Authorization: "Bearer " + authToken },
+    };
   return await request(fetch, api_url + url, options);
 };

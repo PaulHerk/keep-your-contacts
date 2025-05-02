@@ -4,7 +4,12 @@
   import EditPersonModal from "./components/EditPersonModal.svelte";
   import type { PageProps } from "./$types";
   import { api_request } from "$lib";
-  import { knownFromSources, persons, prevQueryParams } from "./store";
+  import {
+    authToken,
+    knownFromSources,
+    persons,
+    prevQueryParams,
+  } from "./store";
   import SearchBar from "./components/SearchBar.svelte";
   import { error } from "@sveltejs/kit";
   import { onMount, untrack } from "svelte";
@@ -12,6 +17,7 @@
   import AddOrChangePersons from "./components/AddOrChangePersons.svelte";
 
   let { data, form }: PageProps = $props();
+  authToken.set(data.token);
 
   let windowInnerWidth = $state(0);
   let page = $state(0);
@@ -27,7 +33,7 @@
     const queryParams = `/persons?page=${page}&per_page=${perPage}&detailed=true${filterTerm}`;
     // Only fetch if query params changed or store is empty
     if (queryParams !== $prevQueryParams || $persons.length === 0) {
-      api_request(fetch, queryParams).then(async (response) => {
+      api_request(fetch, queryParams, {}, $authToken).then(async (response) => {
         if (!response.ok) error(500, await response.text());
         let person: Person[] = await response.json();
         untrack(() => {

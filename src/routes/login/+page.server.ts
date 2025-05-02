@@ -7,8 +7,8 @@ import type { Actions } from "./$types";
 
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ request, cookies }) => {
-  if (cookies.get("token") && request.method === "GET") {
+export const load: PageServerLoad = async ({ request, locals }) => {
+  if (locals.user && request.method === "GET") {
     redirect(307, "/dashboard");
   }
 };

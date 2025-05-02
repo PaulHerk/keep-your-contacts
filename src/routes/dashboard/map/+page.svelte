@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Map, TileLayer, Marker, Tooltip, DivIcon } from "sveaflet";
-  import { persons } from "../store";
+  import { authToken, persons } from "../store";
   import { onMount } from "svelte";
   import { api_request } from "$lib";
   import { error } from "@sveltejs/kit";
@@ -30,10 +30,12 @@
 
   onMount(async () => {
     if ($persons.length === data.personCount) return;
-    api_request(fetch, "/persons/coordinates").then(async (response) => {
-      if (!response.ok) error(500, await response.text());
-      contactWithLocations = await response.json();
-    });
+    api_request(fetch, "/persons/coordinates", {}, $authToken).then(
+      async (response) => {
+        if (!response.ok) error(500, await response.text());
+        contactWithLocations = await response.json();
+      }
+    );
   }); // TODO: put in load function? Idk
 
   if (navigator.geolocation) {
