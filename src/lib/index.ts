@@ -6,13 +6,14 @@ async function request(
   options: RequestInit
 ) {
   const fetchOptions: RequestInit = {
+    ...options,
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
     },
-    ...options,
   };
+  console.log(fetchOptions);
   try {
     const response: Response = await fetch(url, fetchOptions);
     if (response.ok) {
