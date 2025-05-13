@@ -31,9 +31,9 @@ declare global {
     linkedin: string;
     notes: string;
     createdAt: string;
-    record: Record?;
+    record: PlaceRecord?;
   }
-  interface Record {
+  interface PlaceRecord {
     lat: number;
     lon: number;
     name: string;
@@ -51,6 +51,7 @@ declare global {
     sourceId: number;
     sourceName: string;
     description: string;
+    locationSearch: string?;
   }
 
   interface NewPerson {

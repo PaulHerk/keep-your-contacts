@@ -63,8 +63,6 @@ export const actions = {
     if (!email) return fail(400, { emailMissing: true });
     const password = data.get("password");
 
-    console.log(name, password);
-
     try {
       const response = await fetch(api_url + "/auth/register", {
         method: "POST",
@@ -74,8 +72,6 @@ export const actions = {
         body: JSON.stringify({ name, email, password }),
       });
       if (response.ok) {
-        // console.log(response, user)
-        // locals.user = user;
         return { success: true, message: "Registered! You can now Log In." };
       } else if (response.status === 409) {
         return fail(409, { userTaken: true });

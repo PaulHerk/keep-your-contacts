@@ -10,14 +10,10 @@
   let {
     form,
     personToUpdate,
-    personCount,
-    perPage = $bindable(), // this is needed for deletion
     children,
   }: {
     form: ActionData;
     personToUpdate: Person;
-    personCount: number;
-    perPage: number;
     children: any;
   } = $props();
 
@@ -54,9 +50,8 @@
       oldPersons.splice(idx, 1);
       return oldPersons;
     });
-    perPage -= 1;
 
-    invalidate(api_url + "/persons/count"); // Update personCount (this will also update it in maps)
+    invalidate((url) => url.pathname === "/persons/count"); // Update personCount (this will also update it in maps)
     // ? is it smarter to instead refetch it in /maps?
     openState = false;
   }
@@ -74,9 +69,7 @@
   {#snippet content()}
     <AddOrChangePersons
       {form}
-      personToUpdate={{ person: newP, personId }}
-      {personCount}
-      bind:perPage
+      personToUpdate={{ person: newP, personId , record: personToUpdate.record ?? undefined}}
       bind:openState
     />
     <button

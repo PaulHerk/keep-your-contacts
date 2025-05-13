@@ -36,6 +36,16 @@ async fn main(
         .with(tracing_subscriber::fmt::layer())
         .init();
     let secrets = Secrets::from_secret_store(secret_store);
+
+    sqlx::query("DROP TABLE _sqlx_migrations;")
+        .execute(&pool)
+        .await
+        .expect("Failed to delete _sqlx_migrations table.");
+    sqlx::query("ALTER TABLE KnownFromSources ADD COLUMN IF NOT EXISTS location_search TEXT NULL")
+        .execute(&pool)
+        .await
+        .expect("Failed to alter table.");
+
     sqlx::migrate!()
         .run(&pool)
         .await

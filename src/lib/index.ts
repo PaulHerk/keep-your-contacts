@@ -1,35 +1,35 @@
 import { error } from "@sveltejs/kit";
+import { dev } from '$app/environment';
 
 async function request(
-  fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
-  url: string,
-  options: RequestInit
+	fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
+	url: string,
+	options: RequestInit
 ) {
-  const fetchOptions: RequestInit = {
-    ...options,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  };
-  console.log(fetchOptions);
-  try {
-    const response: Response = await fetch(url, fetchOptions);
-    if (response.ok) {
-      return response;
-    } else {
-      if (response.status === 401) {
-        error(401, await response.text());
-      } else if (response.status === 500) {
-        error(500, "Error 500: " + (await response.text()));
-      } else {
-        error(response.status, "Unknown Error " + response.statusText);
-      }
-    }
-  } catch (e) {
-    error(500, "Api not responding correctly: " + e);
-  }
+	const fetchOptions: RequestInit = {
+		...options,
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+			...options.headers,
+		},
+	};
+	try {
+		const response: Response = await fetch(url, fetchOptions);
+		if (response.ok) {
+			return response;
+		} else {
+			if (response.status === 401) {
+				error(401, await response.text());
+			} else if (response.status === 500) {
+				error(500, "Error 500: " + (await response.text()));
+			} else {
+				error(response.status, "Unknown Error " + response.statusText);
+			}
+		}
+	} catch (e) {
+		error(500, "Api not responding correctly: " + e);
+	}
 }
 
 // // place files you want to import through the `$lib` alias in this folder.
@@ -66,45 +66,54 @@ async function request(
 // }
 
 export const getCoordsFromPlace = async (query: string) => {
-  let error = {
-    success: false,
-    placeNotFound: true,
-    message: "",
-    coordinate: undefined,
-  };
-  try {
-    let res = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${query}&limit=1&format=jsonv2`
-    );
-    if (res.ok) {
-      let place = (await res.json())[0];
-      if (!place) return { ...error, message: "This place was not found." };
-      let coordinate: Coordinate = {
-        lat: parseFloat(place.lat),
-        lon: parseFloat(place.lon),
-      };
-      return { success: true, coordinate: coordinate };
-    }
-    error.message = "Error with the api: " + res.statusText;
-  } catch (e) {
-    error.message =
-      "Error with the api: " + e + "Do you have internet connection?";
-  }
-  return error;
+	let error = {
+		success: false,
+		placeNotFound: true,
+		message: "",
+		coordinate: undefined,
+	};
+	try {
+		let res = await fetch(
+			`https://nominatim.openstreetmap.org/search?q=${query}&limit=1&format=jsonv2`
+		);
+		if (res.ok) {
+			let place = (await res.json())[0];
+			if (!place) return { ...error, message: "This place was not found." };
+			let coordinate: Coordinate = {
+				lat: parseFloat(place.lat),
+				lon: parseFloat(place.lon),
+			};
+			return { success: true, coordinate: coordinate };
+		}
+		error.message = "Error with the api: " + res.statusText;
+	} catch (e) {
+		error.message =
+			"Error with the api: " + e + "Do you have internet connection?";
+	}
+	return error;
 };
 
-// export const api_url = "http://localhost:8000";
-export const api_url = "https://keep-your-contacts-fkfz.shuttle.app";
+export const getStringFromRecord = (record?: PlaceRecord) => {
+	if (!record) return ""
+	const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+	let regionName = regionNames.of(record?.cc)
+
+	if (record.admin2 === "") return `${regionName}, ${record.admin1}`
+
+	return `${regionName}, ${record.admin2}, ${record.admin1}`
+}
+
+export const api_url = dev ? "http://localhost:8000" : "https://keep-your-contacts-fkfz.shuttle.app";
 export const api_request = async (
-  fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
-  url: string,
-  options: RequestInit = {},
-  authToken: string | null = null
+	fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
+	url: string,
+	options: RequestInit = {},
+	authToken: string | null = null
 ) => {
-  if (authToken)
-    options = {
-      headers: { Authorization: "Bearer " + authToken, ...options.headers },
-      ...options,
-    };
-  return await request(fetch, api_url + url, options);
+	if (authToken)
+		options = {
+			headers: { Authorization: "Bearer " + authToken, ...options.headers },
+			...options,
+		};
+	return await request(fetch, api_url + url, options);
 };

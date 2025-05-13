@@ -20,12 +20,12 @@ pub struct KnownFromSources {
     pub source_id: i32,
     pub source_name: String,
     pub description: String,
+    pub location_search: Option<String>,
 }
 #[derive(Deserialize, Serialize, FromRow, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct NewKnownFromSources {
     pub source_name: String,
-    pub description: String,
 }
 
 pub fn create_known_from_sources_router() -> Router<MyState> {

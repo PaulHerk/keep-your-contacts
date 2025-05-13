@@ -15,6 +15,7 @@
   import { onMount, untrack } from "svelte";
   import { Modal } from "@skeletonlabs/skeleton-svelte";
   import AddOrChangePersons from "./components/AddOrChangePersons.svelte";
+  import { invalidate } from "$app/navigation";
 
   let { data, form }: PageProps = $props();
   authToken.set(data.token);
@@ -45,7 +46,6 @@
   });
 
   $inspect($persons);
-  $inspect(form);
 </script>
 
 <svelte:window bind:innerWidth={windowInnerWidth} />
@@ -76,12 +76,7 @@
           >
             {#snippet trigger()}Add Person{/snippet}
             {#snippet content()}
-              <AddOrChangePersons
-                {form}
-                personCount={data.personCount}
-                bind:perPage
-                bind:openState={openStateAddP}
-              />
+              <AddOrChangePersons {form} bind:openState={openStateAddP} />
             {/snippet}
           </Modal>
 
@@ -91,12 +86,7 @@
           {#snippet editPersonModal(personToUpdate: Person)}
             {#key personToUpdate}
               <!-- This key is necessary so that the person values in the EditModal update on repeated editing -->
-              <EditPersonModal
-                {form}
-                {personToUpdate}
-                personCount={data.personCount}
-                bind:perPage
-              >
+              <EditPersonModal {form} {personToUpdate}>
                 <button class="btn btn-md preset-outlined-primary-500">
                   Edit
                 </button>

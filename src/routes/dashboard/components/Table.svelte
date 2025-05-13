@@ -2,6 +2,7 @@
   import { browser } from "$app/environment";
   import { orderBy } from "natural-orderby";
   import { getContext } from "svelte";
+  import { getStringFromRecord } from "$lib";
   import { persons } from "../store";
   import { Pagination } from "@skeletonlabs/skeleton-svelte";
   import IconArrowLeft from "@lucide/svelte/icons/arrow-left";
@@ -23,7 +24,6 @@
   let sortAscFirst: boolean = $state(true);
   let sortAscSec: boolean = $state(true);
 
-  const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
 
   // let persons: Person[] | SimplePerson[] = getContext("persons");
 
@@ -99,13 +99,7 @@
               {/if}
               <td
                 ><p class="text-wrap">
-                  {person.record
-                    ? regionNames.of(person.record?.cc) +
-                      ", " +
-                      person.record.admin2 +
-                      ", " +
-                      person.record.admin1
-                    : ""}
+                  {getStringFromRecord(person.record)}
                 </p></td
               >
             </tr>
@@ -124,22 +118,19 @@
         {#each [1, 2, 5, 10] as v}
           <option value={v}>Items {v}</option>
         {/each}
-        {#if ![1, 2, 5, 10, personCount].includes($persons.length)}
-          <option value={$persons.length}>Items {$persons.length}</option>
-        {/if}
         <option value={personCount}>Show All</option>
       </select>
       <!-- Pagination -->
-      {#key personCount}
+      {#key personCount + perPage}
         <Pagination
           data={$persons}
           count={$persons.length < personCount ? personCount : $persons.length}
           onPageChange={(e) => (page = e.page - 1)}
           page={page + 1}
           pageSize={perPage}
-          onPageSizeChange={(e) => (perPage = e.pageSize)}
-          siblingCount={4}
-          alternative
+          onPageSizeChange={(e) => {
+            perPage = e.pageSize;
+          }}
         >
           <!-- TODO weird stuff when adding persons & on last page -->
           {#snippet labelEllipsis()}<IconEllipsis class="size-4" />{/snippet}

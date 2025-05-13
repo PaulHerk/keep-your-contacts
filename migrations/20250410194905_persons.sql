@@ -1,6 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE Users (
+CREATE TABLE IF NOT EXISTS Users (
         id UUID NOT NULL PRIMARY KEY DEFAULT (uuid_generate_v4()),
         name VARCHAR(100) NOT NULL,
         email VARCHAR(255) NOT NULL UNIQUE,
@@ -9,14 +9,15 @@ CREATE TABLE Users (
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX users_email_idx ON Users(email);
+CREATE INDEX IF NOT EXISTS users_email_idx ON Users(email);
 
 
-CREATE TABLE KnownFromSources (
+CREATE TABLE IF NOT EXISTS KnownFromSources (
     source_id SERIAL PRIMARY KEY,             -- Auto-incrementing integer PK
     user_id UUID NOT NULL,
     source_name VARCHAR(100) NOT NULL UNIQUE, -- Name of the source (e.g., 'Work')
     description TEXT NULL,                     -- Optional longer description
+    location_search TEXT NULL,				-- Optional location that gets appended when selecting this KnownFromSource
 
     CONSTRAINT fk_user
         FOREIGN KEY (user_id)
@@ -24,7 +25,7 @@ CREATE TABLE KnownFromSources (
         ON UPDATE CASCADE
 );
 
-CREATE TABLE Persons (
+CREATE TABLE IF NOT EXISTS Persons (
     id SERIAL PRIMARY KEY,             -- Auto-incrementing integer PK
 
     user_id UUID NOT NULL,
@@ -64,12 +65,12 @@ CREATE TABLE Persons (
 );
 
 ALTER TABLE Persons
-    ADD COLUMN searchable tsvector
+    ADD COLUMN IF NOT EXISTS searchable tsvector
         GENERATED ALWAYS AS (to_tsvector('english', first_name || ' ' || last_name || ' ' || job_title || ' ' || company || ' ' || linkedin || ' ' || notes)) STORED;
 
 -- === Indexes for Performance ===
-CREATE INDEX idx_persons_lastname ON Persons(last_name);
-CREATE INDEX idx_persons_coordinate ON Persons(coordinate);
-CREATE INDEX idx_persons_job ON Persons(job_title);
-CREATE INDEX idx_persons_company ON Persons(company);
-CREATE INDEX idx_persons_known_from ON Persons(known_from_source_id); -- Good for FK lookups
+CREATE INDEX IF NOT EXISTS idx_persons_lastname ON Persons(last_name);
+CREATE INDEX IF NOT EXISTS idx_persons_coordinate ON Persons(coordinate);
+CREATE INDEX IF NOT EXISTS idx_persons_job ON Persons(job_title);
+CREATE INDEX IF NOT EXISTS idx_persons_company ON Persons(company);
+CREATE INDEX IF NOT EXISTS idx_persons_known_from ON Persons(known_from_source_id); -- Good for FK lookups
