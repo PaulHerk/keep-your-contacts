@@ -8,6 +8,7 @@
 	import { applyAction } from "$app/forms";
 	import { authToken, knownFromSources, persons } from "../store";
 	import { invalidate } from "$app/navigation";
+	import EditKfs from "./EditKFS.svelte";
 
 	let {
 		form,
@@ -62,13 +63,12 @@
 	}
 
 	function modalCloseAndAddPerson(newPerson: Person) {
-		openState = false;
 		persons.update((oldP) => [...oldP, newPerson]);
 		invalidate((url) => url.pathname === "/persons/count"); // Update personCount (this will also update it in maps)
+		openState = false;
 	}
 
 	function modalCloseAndUpdatePersons(newPerson: Person) {
-		openState = false;
 		persons.update((oldPersons) => {
 			if (
 				!oldPersons.some(
@@ -85,6 +85,7 @@
 			oldPersons.splice(idx, 1, newPerson);
 			return oldPersons;
 		});
+		openState = false;
 	}
 </script>
 
@@ -175,6 +176,8 @@
 					>
 						<SquarePlus size={30} />
 					</button>
+				{:else if selected_kfs && selected_kfs !== 0}
+					<EditKfs kfsIds={[selected_kfs]} />
 				{/if}
 			</div>
 		</label>

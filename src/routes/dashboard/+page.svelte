@@ -16,6 +16,7 @@
   import { Modal } from "@skeletonlabs/skeleton-svelte";
   import AddOrChangePersons from "./components/AddOrChangePersons.svelte";
   import { invalidate } from "$app/navigation";
+    import EditKfs from "./components/EditKFS.svelte";
 
   let { data, form }: PageProps = $props();
   authToken.set(data.token);
@@ -81,6 +82,8 @@
           </Modal>
 
           <SearchBar bind:filterTerm bind:page />
+	
+	  <EditKfs kfsIds={$knownFromSources.map(kfs => kfs.sourceId)}/> 
         </div>
         <Table {detailed} personCount={data.personCount} bind:perPage bind:page>
           {#snippet editPersonModal(personToUpdate: Person)}

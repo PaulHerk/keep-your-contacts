@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @plugin '@tailwindcss/forms';
 
+@theme {
+  --breakpoint-xs: 30rem;
+}
+
 @import "@skeletonlabs/skeleton";
 @import "@skeletonlabs/skeleton/optional/presets";
 @import "@skeletonlabs/skeleton/themes/cerberus";

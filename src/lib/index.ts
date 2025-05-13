@@ -93,7 +93,7 @@ export const getCoordsFromPlace = async (query: string) => {
 	return error;
 };
 
-export const getStringFromRecord = (record?: PlaceRecord) => {
+export const getStringFromRecord = (record?: PlaceRecord | null) => {
 	if (!record) return ""
 	const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
 	let regionName = regionNames.of(record?.cc)

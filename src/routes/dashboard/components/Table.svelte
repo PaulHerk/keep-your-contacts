@@ -99,7 +99,7 @@
               {/if}
               <td
                 ><p class="text-wrap">
-                  {getStringFromRecord(person.record)}
+			{getStringFromRecord(person.record)}
                 </p></td
               >
             </tr>
