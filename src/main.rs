@@ -23,7 +23,7 @@ pub mod api;
 async fn main(
     #[shuttle_runtime::Secrets] secret_store: SecretStore,
     #[shuttle_shared_db::Postgres(
-        local_uri = "postgres://postgres:{secrets.PASSWORD}@localhost:5432/postgres"
+        local_uri = "postgres://postgres:password@localhost:5432/postgres"
     )]
     pool: PgPool,
 ) -> shuttle_axum::ShuttleAxum {

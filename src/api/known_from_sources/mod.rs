@@ -19,7 +19,7 @@ pub struct KnownFromSources {
     // user_id is omitted since frontend doesn't need this. Is that how you build APIs? Idk
     pub source_id: i32,
     pub source_name: String,
-    pub description: String,
+    pub description: Option<String>,
     pub location_search: Option<String>,
 }
 #[derive(Deserialize, Serialize, FromRow, Default, Clone)]

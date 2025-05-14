@@ -69,7 +69,7 @@ pub async fn update_known_from_source(
     "UPDATE KnownFromSources SET source_name = $1, description = $2, location_search = $3 WHERE user_id = $4 AND source_id = $5",
     )
     .bind(known_from_source.source_name.unwrap_or(row.source_name))
-    .bind(known_from_source.description.unwrap_or(row.description))
+    .bind(known_from_source.description.or(row.description))
     .bind(known_from_source.location_search.or(row.location_search))
     .bind(user.id)
     .bind(source_id)

@@ -50,7 +50,7 @@ declare global {
   interface KnownFromSource {
     sourceId: number;
     sourceName: string;
-    description: string;
+    description: string?;
     locationSearch: string?;
   }
 

@@ -2,7 +2,6 @@
 	import { enhance } from "$app/forms";
 	import type { ActionData } from "../$types";
 	import { getStringFromRecord, api_request } from "$lib";
-	import { onMount } from "svelte";
 	import { error } from "@sveltejs/kit";
 	import { SquarePlus } from "@lucide/svelte";
 	import { applyAction } from "$app/forms";
@@ -26,11 +25,11 @@
 		openState: boolean;
 	} = $props();
 
-	let selected_kfs = $state(
+	let selectedKfs = $state(
 		personToUpdate ? personToUpdate.person.knownFromSourceId : 0, // TODO: this does'nt update
 	);
 	let kfs = $derived(
-		$knownFromSources.find((kfs) => kfs.sourceId === selected_kfs),
+		$knownFromSources.find((kfs) => kfs.sourceId === selectedKfs),
 	);
 
 	let newSource = $state("");
@@ -43,22 +42,21 @@
 				method: "POST",
 				body: JSON.stringify({
 					sourceName: newSource,
-					description: "",
 				}),
 			},
 			$authToken,
 		).then(async (response) => {
 			if (!response.ok) error(500, await response.text());
-			let newId = await response.json();
+			let newSourceId = await response.json();
 			knownFromSources.update((oldSources) => [
 				...oldSources,
 				{
-					sourceId: newId,
+					sourceId: newSourceId,
 					sourceName: newSource,
 					description: "",
 				} as KnownFromSource,
 			]);
-			selected_kfs = newId;
+			selectedKfs = $knownFromSources.length - 1;
 		});
 	}
 
@@ -87,6 +85,7 @@
 		});
 		openState = false;
 	}
+	$inspect(selectedKfs);
 </script>
 
 {#snippet input(label: string, key: keyof NewPerson, required = false)}
@@ -147,22 +146,21 @@
 			>
 			<div class="flex gap-4">
 				<select
-					bind:value={selected_kfs}
+					bind:value={selectedKfs}
 					class="select"
 					name="knownFromSourceId"
 				>
-					<option value=""></option>
-					{#each $knownFromSources as source}
-						<option value={source.sourceId}
+					<option value={null}></option>
+					{#each $knownFromSources as source, idx}
+						<option value={idx}
 							>{source.sourceName}</option
 						>
 					{/each}
-					<option
-						value={$knownFromSources.length +
-							1}>add new</option
+					<option value={$knownFromSources.length}
+						>add new</option
 					>
 				</select>
-				{#if selected_kfs === $knownFromSources.length + 1}
+				{#if selectedKfs === $knownFromSources.length}
 					<input
 						class="input"
 						type="text"
@@ -176,8 +174,9 @@
 					>
 						<SquarePlus size={30} />
 					</button>
-				{:else if selected_kfs && selected_kfs !== 0}
-					<EditKfs kfsIds={[selected_kfs]} />
+				{:else if selectedKfs !== null}
+					<!-- This check for !== null is so stupid, since selectedKfs would be false if its 0 in this if-clause -->
+					<EditKfs kfsIds={[selectedKfs]} />
 				{/if}
 			</div>
 		</label>

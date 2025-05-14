@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from "@skeletonlabs/skeleton-svelte";
-	import { knownFromSources } from "../store";
+	import { authToken, knownFromSources } from "../store";
 	import { api_request } from "$lib";
 	import { error } from "@sveltejs/kit";
 
@@ -17,20 +17,31 @@
 	}
 
 	function updateKfs(sourceId: number, idx: number) {
-		api_request(fetch, `/known-from-sources/${sourceId}`, {
-			method: "PUT",
-			body: JSON.stringify({
-				sourceName: kfss[idx].sourceName,
-				description: kfss[idx].description,
-				locationSearch: kfss[idx].locationSearch,
-			}),
-		}).then(async (res) => {
+		api_request(
+			fetch,
+			`/known-from-sources/${sourceId}`,
+			{
+				method: "PUT",
+				body: JSON.stringify({
+					sourceName: kfss[idx].sourceName,
+					description: kfss[idx].description,
+					locationSearch:
+						kfss[idx].locationSearch,
+				}),
+			},
+			$authToken,
+		).then(async (res) => {
 			if (!res.ok) error(500, await res.text());
 			knownFromSources.update((oldKfss) => {
-				return [...oldKfss, kfss[idx]];
+				let kfsIdx = oldKfss.findIndex(
+					(kfs) =>
+						(kfs.sourceId =
+							kfss[idx].sourceId),
+				); // I am not sure whether this is needed. I can imagine there's a situation where the $knownFromSources idx doesn't match up with the kfss idx.
+				oldKfss.splice(kfsIdx, 1, kfss[idx]);
+				return oldKfss;
 			});
 		});
-		console.log(kfss[idx]);
 	}
 </script>
 
