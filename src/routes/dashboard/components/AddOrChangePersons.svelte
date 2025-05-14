@@ -117,6 +117,17 @@
 				"personId",
 				personToUpdate.personId.toString(),
 			);
+		if (selectedKfs !== null)
+			formData.set(
+				"knownFromSources",
+				$knownFromSources
+					.findIndex(
+						(_kfs, idx) =>
+							(idx =
+								selectedKfs as number), // Typescript, are u ok?
+					)
+					.toString(),
+			);
 
 		return async ({ result }) => {
 			if (result.type === "success") {
