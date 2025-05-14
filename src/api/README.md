@@ -4,8 +4,6 @@
 
 Keep-Your-Contacts is a RESTful API for managing contact information in a professional context. It enables users to store, retrieve, and manage contact details including personal information, professional background, and location data.
 
-**Current Version**: v1.0.0
-
 ## Authentication and Authorization
 
 Authentication is handled via JWT (JSON Web Tokens) with secure httpOnly cookies.
@@ -223,7 +221,29 @@ Creates new contact source.
 Required fields:
 
 - source_name: string
+
+#### DELETE /known-from-sources/{id}
+
+Deletes a contact source by its ID.
+
+Path Parameters:
+
+- `id` (required, integer): The ID of the contact source to delete
+
+#### PUT /known-from-sources/{id}
+
+Updates a contact source by its ID.
+
+Path Parameters:
+
+- `id` (required, integer): The ID of the contact source to update
+
+Optional fields:
+
+- source_name: string
 - description: string
+- location: string
+
 
 ## Error Handling
 
@@ -242,7 +262,6 @@ Errors are returned as StatusCodes which are not OK. A detailed description is r
 
 ## Missing features
 
-- Post and delete Known-From-Sources
 - Scraping LinkedIn for profile pictures?
   The database structure will change.
 
