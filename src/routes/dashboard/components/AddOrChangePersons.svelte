@@ -26,7 +26,7 @@
 	} = $props();
 
 	let selectedKfs = $state(
-		personToUpdate ? personToUpdate.person.knownFromSourceId : 0, // TODO: this does'nt update
+		personToUpdate ? personToUpdate.person.knownFromSourceId : null, // TODO: this does'nt update
 	);
 	let kfs = $derived(
 		$knownFromSources.find((kfs) => kfs.sourceId === selectedKfs),
@@ -110,6 +110,8 @@
 		: "/dashboard?/addPerson"}
 	use:enhance={({ formData, formElement, cancel }) => {
 		if (formElement.id === "cancel") cancel();
+		if (selectedKfs === $knownFromSources.length)
+			formData.delete("knownFromSourceId"); // ensures that user cannot set the KFSID to the "add new" value
 		if (personToUpdate)
 			formData.append(
 				"personId",

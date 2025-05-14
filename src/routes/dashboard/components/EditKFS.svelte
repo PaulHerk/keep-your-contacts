@@ -7,8 +7,8 @@
 	let { kfsIds }: { kfsIds: number[] } = $props();
 
 	let kfss = $derived(
-		$knownFromSources.filter((kfs) =>
-			kfsIds.includes(kfs.sourceId),
+		$knownFromSources.filter((_kfs, idx) =>
+			kfsIds.includes(idx),
 		),
 	);
 	let openState = $state(false);

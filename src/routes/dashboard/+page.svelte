@@ -102,9 +102,11 @@
 					<SearchBar bind:filterTerm bind:page />
 
 					<EditKfs
-						kfsIds={$knownFromSources.map(
-							(kfs) => kfs.sourceId,
-						)}
+						kfsIds={[
+							...Array(
+								$knownFromSources.length,
+							).keys(),
+						]}
 					/>
 				</div>
 				<Table
