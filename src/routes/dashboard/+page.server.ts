@@ -17,7 +17,7 @@ const createNewPersonObj = async (formData: FormData) => {
 		coordinate = coordinateOrFail?.coordinate as Coordinate | null;
 	}
 	let knownFromSourceId = formData.get("knownFromSourceId") as number | null | undefined;
-	knownFromSourceId = knownFromSourceId ? Number(knownFromSourceId) : null;
+	knownFromSourceId = knownFromSourceId ? Number(knownFromSourceId) + 1 : null;
 
 	return {
 		success: true,
