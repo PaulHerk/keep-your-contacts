@@ -18,6 +18,7 @@ const createNewPersonObj = async (formData: FormData) => {
 	}
 	let knownFromSourceId = formData.get("knownFromSourceId") as number | null | undefined;
 	knownFromSourceId = knownFromSourceId ? Number(knownFromSourceId) + 1 : null;
+	console.log(knownFromSourceId);
 
 	return {
 		success: true,

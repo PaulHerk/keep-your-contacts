@@ -43,7 +43,8 @@ pub async fn get_known_from_sources(
     Ok(Json(known_from_sources))
 }
 
-#[derive(Deserialize, FromRow)]
+#[derive(Deserialize, FromRow, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct UpdateKnownFromSource {
     source_name: Option<String>,
     description: Option<String>,

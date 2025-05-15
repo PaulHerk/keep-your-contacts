@@ -29,8 +29,18 @@
 		personToUpdate ? personToUpdate.person.knownFromSourceId : null, // TODO: this does'nt update
 	);
 	let kfs = $derived(
-		$knownFromSources.find((kfs) => kfs.sourceId === selectedKfs),
+		selectedKfs !== null ? $knownFromSources[selectedKfs] : null,
 	);
+	let placeStr = $derived.by(() => {
+		if (personCoordinateToAdd)
+			return JSON.stringify(personCoordinateToAdd);
+
+		if (kfs) {
+			return personToUpdate?.record
+				? getStringFromRecord(personToUpdate.record)
+				: kfs.locationSearch;
+		}
+	});
 
 	let newSource = $state("");
 
@@ -48,14 +58,16 @@
 		).then(async (response) => {
 			if (!response.ok) error(500, await response.text());
 			let newSourceId = await response.json();
-			knownFromSources.update((oldSources) => [
-				...oldSources,
-				{
-					sourceId: newSourceId,
-					sourceName: newSource,
-					description: "",
-				} as KnownFromSource,
-			]);
+			knownFromSources.update((oldSources) =>
+				[
+					...oldSources,
+					{
+						sourceId: newSourceId,
+						sourceName: newSource,
+						description: "",
+					} as KnownFromSource,
+				],
+			);
 			selectedKfs = $knownFromSources.length - 1;
 		});
 	}
@@ -85,7 +97,6 @@
 		});
 		openState = false;
 	}
-	$inspect(selectedKfs);
 </script>
 
 {#snippet input(label: string, key: keyof NewPerson, required = false)}
@@ -117,7 +128,10 @@
 				"personId",
 				personToUpdate.personId.toString(),
 			);
-		if (selectedKfs !== null)
+
+		if (selectedKfs === $knownFromSources.length)
+			selectedKfs = null;
+		if (selectedKfs !== null) {
 			formData.set(
 				"knownFromSources",
 				$knownFromSources
@@ -128,6 +142,7 @@
 					)
 					.toString(),
 			);
+		}
 
 		return async ({ result }) => {
 			if (result.type === "success") {
@@ -188,7 +203,6 @@
 						<SquarePlus size={30} />
 					</button>
 				{:else if selectedKfs !== null}
-					<!-- This check for !== null is so stupid, since selectedKfs would be false if its 0 in this if-clause -->
 					<EditKfs kfsIds={[selectedKfs]} />
 				{/if}
 			</div>
@@ -204,12 +218,7 @@
 				type="text"
 				placeholder="Place:"
 				name="coordinateOrSearch"
-				value={personCoordinateToAdd
-					? JSON.stringify(personCoordinateToAdd)
-					: (kfs?.locationSearch ??
-						getStringFromRecord(
-							personToUpdate?.record,
-						))}
+				value={placeStr}
 			/>
 		</label>
 
