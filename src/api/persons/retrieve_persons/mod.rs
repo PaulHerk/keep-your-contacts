@@ -34,7 +34,6 @@ pub struct SimplePerson {
     first_name: String,
     #[sqlx(default)]
     last_name: Option<String>,
-    #[sqlx(default)]
     #[serde(skip_serializing)]
     coordinate: Option<sqlx::types::Json<Coordinate>>,
 }

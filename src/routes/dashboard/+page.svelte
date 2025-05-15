@@ -9,21 +9,22 @@
 		knownFromSources,
 		persons,
 		prevQueryParams,
+		settings
 	} from "./store";
 	import SearchBar from "./components/SearchBar.svelte";
 	import { error } from "@sveltejs/kit";
 	import { onMount, untrack } from "svelte";
 	import { Modal } from "@skeletonlabs/skeleton-svelte";
 	import AddOrChangePersons from "./components/AddOrChangePersons.svelte";
-	import { invalidate } from "$app/navigation";
 	import EditKfs from "./components/EditKFS.svelte";
 
 	let { data, form }: PageProps = $props();
 	authToken.set(data.token);
+	settings.set(data.loggedInUser.settings)
 
 	let windowInnerWidth = $state(0);
 	let page = $state(0);
-	let perPage = $state(10);
+	let perPage = $derived($settings.perPage);
 	let detailed = $derived(windowInnerWidth > 800);
 	let filterTerm = $state("");
 

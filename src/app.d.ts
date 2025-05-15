@@ -1,68 +1,73 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 declare global {
-  namespace App {
-    interface Error {
-      message: string;
-    }
+	namespace App {
+		interface Error {
+			message: string;
+		}
 
-    interface Locals {
-      user: User | null;
-    }
-    // interface PageData {}
-    // interface PageState {}
-    // interface Platform {}
-  }
-  interface User {
-    id: number;
-    name: String;
-    email: String;
-    createdAt: String;
-    updatedAt: String;
-  }
+		interface Locals {
+			user: User | null;
+		}
+		// interface PageData {}
+		// interface PageState {}
+		// interface Platform {}
+	}
+	interface User {
+		id: number;
+		name: String;
+		email: String;
+		settings: Settings;
+		createdAt: String;
+		updatedAt: String;
+	}
 
-  interface Person {
-    id: number;
-    firstName: string;
-    lastName: string;
-    knownFromSourceId: number?;
-    jobTitle: string;
-    company: string;
-    linkedin: string;
-    notes: string;
-    createdAt: string;
-    record: PlaceRecord?;
-  }
-  interface PlaceRecord {
-    lat: number;
-    lon: number;
-    name: string;
-    admin1: string;
-    admin2: string;
-    cc: string;
-  }
+	interface Settings {
+		perPage: number;
+	}
 
-  interface Coordinate {
-    lat: number;
-    lon: number;
-  }
+	interface Person {
+		id: number;
+		firstName: string;
+		lastName: string;
+		knownFromSourceId: number?;
+		jobTitle: string;
+		company: string;
+		linkedin: string;
+		notes: string;
+		createdAt: string;
+		record: PlaceRecord?;
+	}
+	interface PlaceRecord {
+		lat: number;
+		lon: number;
+		name: string;
+		admin1: string;
+		admin2: string;
+		cc: string;
+	}
 
-  interface KnownFromSource {
-    sourceId: number;
-    sourceName: string;
-    description: string?;
-    locationSearch: string?;
-  }
+	interface Coordinate {
+		lat: number;
+		lon: number;
+	}
 
-  interface NewPerson {
-    name: string;
-    knownFromSourceId: number?;
-    coordinate: Coordinate?;
-    jobTitle: string;
-    company: string;
-    linkedin: string;
-    notes: string;
-  }
+	interface KnownFromSource {
+		sourceId: number;
+		sourceName: string;
+		description: string?;
+		locationSearch: string?;
+	}
+
+	interface NewPerson {
+		name: string;
+		knownFromSourceId: number?;
+		coordinate: Coordinate?;
+		jobTitle: string;
+		company: string;
+		linkedin: string;
+		notes: string;
+	}
 }
 
-export {};
+export { };

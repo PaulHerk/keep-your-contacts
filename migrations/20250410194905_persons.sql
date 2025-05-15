@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS Users (
         name VARCHAR(100) NOT NULL,
         email VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(100) NOT NULL,
+	settings JSONB NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -38,6 +39,8 @@ CREATE TABLE IF NOT EXISTS Persons (
 
     -- === Coordinates ===
     coordinate JSONB NULL,
+	-- save location_search or not??
+
     -- =========================================
 
     -- === Job Information ===

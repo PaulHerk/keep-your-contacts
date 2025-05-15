@@ -56,7 +56,7 @@ export const actions = {
 		return { success: true, newPerson };
 	},
 
-	updatePerson: async ({ request, fetch, route, url }) => {
+	updatePerson: async ({ request, fetch }) => {
 		const data = await request.formData();
 
 		const parsedFormData = await createNewPersonObj(data);

@@ -16,7 +16,7 @@ use jsonwebtoken::{encode, EncodingKey, Header};
 
 use crate::api::{auth::responses::FilteredUser, errors::Error, MyState};
 
-use super::{LoginUserSchema, RegisterUserSchema, TokenClaims, User};
+use super::{DBSettings, FullSettings, LoginUserSchema, RegisterUserSchema, TokenClaims, User};
 
 /// Creates a new user account with password hashing using Argon2.
 /// Prevents duplicate names by checking existence first.
@@ -44,11 +44,12 @@ pub async fn register_user_handler(
         .map(|hash| hash.to_string())?;
 
     sqlx::query_as::<_, User>(
-        "INSERT INTO Users (name,email,password) VALUES ($1, $2, $3) RETURNING *",
+        "INSERT INTO Users (name,email,password,settings) VALUES ($1, $2, $3, $4) RETURNING *",
     )
     .bind(body.name.to_string())
     .bind(body.email.to_string().to_ascii_lowercase())
     .bind(hashed_password)
+    .bind(serde_json::json!(DBSettings::from(FullSettings::default())))
     .fetch_one(&data.pool)
     .await
     .map_err(Error::DBError)?;
@@ -125,4 +126,20 @@ pub async fn logout_handler(jar: CookieJar) -> Result<impl IntoResponse, Error> 
 /// Returns the authenticated user's data, excluding sensitive fields.
 pub async fn get_me_handler(Extension(user): Extension<User>) -> Result<impl IntoResponse, Error> {
     Ok(Json(FilteredUser::from_user(user)))
+}
+
+/// Updates the authenticated user's settings.
+pub async fn update_settings(
+    State(data): State<MyState>,
+    Extension(user): Extension<User>,
+    Json(new_settings): Json<DBSettings>,
+) -> Result<impl IntoResponse, Error> {
+    sqlx::query("UPDATE Users SET settings = $1 WHERE id = $2")
+        .bind(serde_json::json!(new_settings))
+        .bind(user.id)
+        .execute(&data.pool)
+        .await
+        .map_err(Error::DBError)?;
+
+    Ok(StatusCode::OK)
 }

@@ -6,9 +6,9 @@
 	import IconMenu from "@lucide/svelte/icons/menu";
 	import IconSettings from "@lucide/svelte/icons/settings";
 	import { ContactRound, Map } from "@lucide/svelte";
-	import { page } from "$app/state";
 	import "../../style.css";
 	import Settings from "./components/layout/Settings.svelte";
+	import { page } from "$app/state";
 
 	let innerWidth = $state(0);
 
@@ -88,7 +88,10 @@
 								</h2>
 							</header>
 							<article>
-								<Settings />
+								<Settings
+									bind:settingsDrawerState
+									personCount={page.data.personCount}
+								/>
 							</article>
 							<footer>
 								<button

@@ -13,6 +13,7 @@ use uuid::Uuid;
 
 use self::handler::*;
 use super::MyState;
+use optfield::optfield;
 
 mod handler;
 pub mod jwt_auth_middleware;
@@ -27,8 +28,25 @@ pub struct User {
     pub name: String,
     pub email: String,
     pub password: String,
+    #[sqlx(json)]
+    pub settings: DBSettings,
     pub created_at: Option<DateTime<Utc>>,
     pub updated_at: Option<DateTime<Utc>>,
+}
+
+/// This struct contains all settings. If they aren't in the DB it will default them.
+#[optfield(pub DBSettings, attrs = add(derive(FromRow)), from, merge_fn = pub(self), doc = "This struct contains all fields as in FullSettings, but wrapped in Option<>.
+    This is useful when adding new settings (server-side), so parsing won't fail if the attributes aren't present in the DB.")]
+#[derive(Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct FullSettings {
+    pub per_page: i32,
+}
+
+impl Default for FullSettings {
+    fn default() -> Self {
+        Self { per_page: 10 }
+    }
 }
 
 /// JWT claim structure for token payload.
@@ -65,6 +83,8 @@ pub fn create_auth_router(state: MyState) -> Router<MyState> {
         )
         .route(
             "/auth/me",
-            get(get_me_handler).route_layer(middleware::from_fn_with_state(state.clone(), auth)),
+            get(get_me_handler)
+                .put(update_settings)
+                .route_layer(middleware::from_fn_with_state(state.clone(), auth)),
         )
 }
