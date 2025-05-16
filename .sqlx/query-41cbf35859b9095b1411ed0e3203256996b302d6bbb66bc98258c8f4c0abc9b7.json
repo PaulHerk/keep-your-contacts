@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM KnownFromSources WHERE user_id = $1 AND source_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "source_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "source_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "location_search",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "41cbf35859b9095b1411ed0e3203256996b302d6bbb66bc98258c8f4c0abc9b7"
+}

@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO UserSettings (per_page) VALUES ($1) RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "50064524d1f6fa2c55f0d19343779e9c1e5dd7bdf05c37a78f3e5445921c46ce"
+}

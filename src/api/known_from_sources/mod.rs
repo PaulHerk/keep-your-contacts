@@ -12,11 +12,13 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
 use super::MyState;
+use uuid::Uuid;
 
 #[derive(Deserialize, Serialize, FromRow, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct KnownFromSources {
-    // user_id is omitted since frontend doesn't need this. Is that how you build APIs? Idk
+    #[serde(skip_serializing)]
+    pub user_id: Uuid,
     pub source_id: i32,
     pub source_name: String,
     pub description: Option<String>,

@@ -16,7 +16,10 @@ use jsonwebtoken::{encode, EncodingKey, Header};
 
 use crate::api::{auth::responses::FilteredUser, errors::Error, MyState};
 
-use super::{DBSettings, FullSettings, LoginUserSchema, RegisterUserSchema, TokenClaims, User};
+use super::{
+    FullSettings, LoginUserSchema, RegisterUserSchema, TokenClaims, User, UserSettings,
+    UserWithSettings,
+};
 
 /// Creates a new user account with password hashing using Argon2.
 /// Prevents duplicate names by checking existence first.
@@ -24,12 +27,13 @@ pub async fn register_user_handler(
     State(data): State<MyState>,
     Json(body): Json<RegisterUserSchema>,
 ) -> Result<impl IntoResponse, Error> {
-    let user_exists: Option<bool> =
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM Users WHERE name = $1)")
-            .bind(body.name.to_owned().to_ascii_lowercase())
-            .fetch_one(&data.pool)
-            .await
-            .map_err(Error::DBError)?;
+    let user_exists: Option<bool> = sqlx::query_scalar!(
+        "SELECT EXISTS(SELECT 1 FROM Users WHERE name = $1)",
+        body.name.to_owned().to_ascii_lowercase()
+    )
+    .fetch_one(&data.pool)
+    .await
+    .map_err(Error::DBError)?;
 
     if let Some(exists) = user_exists {
         if exists {
@@ -43,18 +47,31 @@ pub async fn register_user_handler(
         .map_err(Error::HashingError)
         .map(|hash| hash.to_string())?;
 
-    sqlx::query_as::<_, User>(
-        "INSERT INTO Users (name,email,password,settings) VALUES ($1, $2, $3, $4) RETURNING *",
+    let default_settings = UserSettings::from(FullSettings::default());
+    let settings_id = sqlx::query_as!(
+        SettingsId,
+        "INSERT INTO UserSettings (per_page) VALUES ($1) RETURNING id",
+        default_settings.per_page,
     )
-    .bind(body.name.to_string())
-    .bind(body.email.to_string().to_ascii_lowercase())
-    .bind(hashed_password)
-    .bind(serde_json::json!(DBSettings::from(FullSettings::default())))
     .fetch_one(&data.pool)
     .await
     .map_err(Error::DBError)?;
 
+    sqlx::query!(
+        "INSERT INTO Users (name, email, settings_id, password) VALUES ($1, $2, $3, $4)",
+        body.name.to_string(),
+        body.email.to_string().to_ascii_lowercase(),
+        settings_id.id,
+        hashed_password,
+    )
+    .execute(&data.pool)
+    .await
+    .map_err(Error::DBError)?;
+
     Ok((StatusCode::CREATED, Redirect::to("/auth/login")))
+}
+struct SettingsId {
+    id: i32,
 }
 
 /// Authenticates user and issues a JWT token valid for 24 hours.
@@ -64,12 +81,15 @@ pub async fn login_user_handler(
     jar: CookieJar,
     Json(body): Json<LoginUserSchema>,
 ) -> Result<impl IntoResponse, Error> {
-    let user = sqlx::query_as::<_, User>("SELECT * FROM Users WHERE name = $1")
-        .bind(body.name.to_ascii_lowercase())
-        .fetch_optional(&data.pool)
-        .await
-        .map_err(Error::DBError)?
-        .ok_or_else(|| Error::InvalidLoginName)?;
+    let user = sqlx::query_as!(
+        User,
+        "SELECT * FROM Users WHERE name = $1",
+        body.name.to_ascii_lowercase()
+    )
+    .fetch_optional(&data.pool)
+    .await
+    .map_err(Error::DBError)?
+    .ok_or_else(|| Error::InvalidLoginName)?;
 
     let is_valid = match PasswordHash::new(&user.password) {
         Ok(parsed_hash) => Argon2::default()
@@ -124,22 +144,26 @@ pub async fn logout_handler(jar: CookieJar) -> Result<impl IntoResponse, Error> 
 }
 
 /// Returns the authenticated user's data, excluding sensitive fields.
-pub async fn get_me_handler(Extension(user): Extension<User>) -> Result<impl IntoResponse, Error> {
+pub async fn get_me_handler(
+    Extension(user): Extension<UserWithSettings>,
+) -> Result<impl IntoResponse, Error> {
     Ok(Json(FilteredUser::from_user(user)))
 }
 
 /// Updates the authenticated user's settings.
 pub async fn update_settings(
     State(data): State<MyState>,
-    Extension(user): Extension<User>,
-    Json(new_settings): Json<DBSettings>,
+    Extension(user): Extension<UserWithSettings>,
+    Json(new_settings): Json<UserSettings>,
 ) -> Result<impl IntoResponse, Error> {
-    sqlx::query("UPDATE Users SET settings = $1 WHERE id = $2")
-        .bind(serde_json::json!(new_settings))
-        .bind(user.id)
-        .execute(&data.pool)
-        .await
-        .map_err(Error::DBError)?;
+    sqlx::query!(
+        "UPDATE UserSettings SET per_page = $1 WHERE id = $2",
+        new_settings.per_page,
+        user.settings.id
+    )
+    .execute(&data.pool)
+    .await
+    .map_err(Error::DBError)?;
 
     Ok(StatusCode::OK)
 }

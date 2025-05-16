@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM KnownFromSources WHERE user_id = $1 AND source_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "65f5c8d18a295ede72cdb90e218fc311924864bbd1bb68eadaabb4a2a7b2c83d"
+}

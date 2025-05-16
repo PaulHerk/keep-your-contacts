@@ -6,9 +6,9 @@ use axum::{
 };
 use serde::Deserialize;
 
-use crate::api::{auth::User, errors::Error, MyState};
+use crate::api::{auth::UserWithSettings, errors::Error, MyState};
 
-use super::{Coordinate, Person};
+use super::{CoordinateSearch, Person};
 use reverse_geocoder::ReverseGeocoder;
 use sqlx::{Postgres, QueryBuilder};
 
@@ -19,7 +19,7 @@ use crate::api::persons::{get_record_from_coord, UserResponse};
 pub struct PersonNew {
     pub name: String,
     pub known_from_source_id: Option<i32>,
-    pub coordinate: Option<Coordinate>,
+    pub coordinate: Option<CoordinateSearch>,
     #[serde(default)]
     pub job_title: String,
     #[serde(default)]
@@ -32,11 +32,11 @@ pub struct PersonNew {
 
 pub async fn create_person(
     State(state): State<MyState>,
-    Extension(user): Extension<User>,
+    Extension(user): Extension<UserWithSettings>,
     Json(data): Json<PersonNew>,
 ) -> Result<impl IntoResponse, impl IntoResponse> {
     let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-        "INSERT INTO persons (user_id, first_name, last_name, known_from_source_id, coordinate, job_title, company, linkedin, notes) VALUES (",
+        "INSERT INTO persons (user_id, first_name, last_name, known_from_source_id, coordinate_with_search, job_title, company, linkedin, notes) VALUES (",
     );
 
     let mut names = data.name.trim().split_ascii_whitespace();
@@ -47,7 +47,7 @@ pub async fn create_person(
 
     let mut field_separator = query_builder.separated(", ");
     field_separator
-        .push_bind(user.id)
+        .push_bind(user.user.id)
         .push_bind(first_name.trim())
         .push_bind(last_name.trim())
         .push_bind(data.known_from_source_id)
@@ -65,7 +65,7 @@ pub async fn create_person(
     {
         Ok(person) => {
             let geocoder = ReverseGeocoder::new();
-            let record = get_record_from_coord(&geocoder, person.coordinate);
+            let record = get_record_from_coord(&geocoder, person.coordinate_with_search.clone());
             Ok(Json(UserResponse { person, record }))
         }
         Err(e) => Err(Error::DBError(e)),
@@ -74,7 +74,7 @@ pub async fn create_person(
 
 pub async fn update_person(
     State(state): State<MyState>,
-    Extension(user): Extension<User>,
+    Extension(user): Extension<UserWithSettings>,
     Path(person_id): Path<i32>,
     Json(data): Json<PersonNew>,
 ) -> Result<impl IntoResponse, Error> {
@@ -82,8 +82,8 @@ pub async fn update_person(
     let first_name = names.next().unwrap_or_default();
     let last_name: String = names.collect::<Vec<&str>>().join(" ");
 
-    let person: Person = sqlx::query_as("UPDATE Persons SET (first_name, last_name, known_from_source_id, coordinate, job_title, company, linkedin, notes) = ($3, $4, $5, $6, $7, $8, $9, $10)  WHERE user_id = $1 AND id = $2 RETURNING *")
-        .bind(user.id)
+    let person: Person = sqlx::query_as("UPDATE Persons SET (first_name, last_name, known_from_source_id, coordinate_with_search, job_title, company, linkedin, notes) = ($3, $4, $5, $6, $7, $8, $9, $10)  WHERE user_id = $1 AND id = $2 RETURNING *")
+        .bind(user.user.id)
         .bind(person_id)
         .bind(first_name)
         .bind(last_name)
@@ -98,11 +98,11 @@ pub async fn update_person(
 
 pub async fn delete_person(
     State(state): State<MyState>,
-    Extension(user): Extension<User>,
+    Extension(user): Extension<UserWithSettings>,
     Path(person_id): Path<i32>,
 ) -> Result<impl IntoResponse, Error> {
     let rows_affected = sqlx::query("DELETE FROM Persons WHERE user_id = $1 AND id = $2")
-        .bind(user.id)
+        .bind(user.user.id)
         .bind(person_id)
         .execute(&state.pool)
         .await

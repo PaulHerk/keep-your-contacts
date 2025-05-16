@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, first_name, last_name, coordinate_with_search as \"coordinate_with_search!: CoordinateSearch\" FROM persons WHERE user_id = $1 AND coordinate_with_search IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "first_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "last_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "coordinate_with_search!: CoordinateSearch",
+        "type_info": "Jsonb"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "bb72bf229e73e01dbe75124f9873359fafca8d83646df015461e1d9263053a70"
+}

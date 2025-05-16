@@ -11,9 +11,9 @@ use axum_extra::{
 };
 use jsonwebtoken::{decode, DecodingKey, Validation};
 
-use crate::api::{errors::Error, MyState};
+use crate::api::{auth::UserSettings, errors::Error, MyState};
 
-use super::{TokenClaims, User};
+use super::{TokenClaims, User, UserWithSettings};
 
 /// Middleware that validates JWT tokens from either cookies or Authorization header.
 /// Attaches validated User to request extensions for downstream handlers.
@@ -46,8 +46,7 @@ pub async fn auth(
     let user_id = uuid::Uuid::parse_str(&claims.sub).map_err(|_| Error::InvalidToken)?;
 
     // Fetch user from database using user ID
-    let user = sqlx::query_as::<_, User>("SELECT * FROM Users WHERE id = $1")
-        .bind(user_id)
+    let user = sqlx::query_as!(User, "SELECT * FROM Users WHERE id = $1", user_id)
         .fetch_optional(&state.pool)
         .await
         .map_err(Error::DBError)?;
@@ -55,7 +54,20 @@ pub async fn auth(
     // Return error if user does not exist
     let user = user.ok_or_else(|| Error::InvalidUserName)?;
 
+    // Fetch user settings from db
+    let user_settings = sqlx::query_as!(
+        UserSettings,
+        "SELECT * FROM UserSettings WHERE id = $1",
+        user.settings_id
+    )
+    .fetch_one(&state.pool)
+    .await
+    .map_err(Error::DBError)?;
+
     // Attach user to request extensions, run next middleware
-    req.extensions_mut().insert(user);
+    req.extensions_mut().insert(UserWithSettings {
+        user,
+        settings: user_settings,
+    });
     Ok(next.run(req).await)
 }

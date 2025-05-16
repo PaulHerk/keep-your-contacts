@@ -1,7 +1,7 @@
 use serde::Serialize;
 use sqlx::types::chrono::{DateTime, Utc};
 
-use super::{FullSettings, User};
+use super::{FullSettings, UserWithSettings};
 
 /// Sanitized user representation that excludes sensitive data like passwords.
 /// Used for all user-facing responses.
@@ -19,17 +19,17 @@ pub struct FilteredUser {
 /// Converts internal User model to public FilteredUser representation.
 /// Ensures sensitive data never leaves the system.
 impl FilteredUser {
-    pub fn from_user(user: User) -> Self {
+    pub fn from_user(user: UserWithSettings) -> Self {
         let mut settings = FullSettings::default();
         settings.merge_opt(user.settings);
 
         FilteredUser {
-            id: user.id.to_string(),
-            name: user.name,
-            email: user.email,
+            id: user.user.id.to_string(),
+            name: user.user.name,
+            email: user.user.email,
             settings,
-            created_at: user.created_at.unwrap(),
-            updated_at: user.updated_at.unwrap(),
+            created_at: user.user.created_at.unwrap(),
+            updated_at: user.user.updated_at.unwrap(),
         }
     }
 }

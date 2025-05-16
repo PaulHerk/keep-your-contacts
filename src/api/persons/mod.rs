@@ -19,9 +19,11 @@ use update_person::create_person;
 use update_person::{delete_person, update_person};
 
 use super::MyState;
+use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Default, FromRow, Copy, Clone, Debug)]
-pub struct Coordinate {
+#[derive(sqlx::Type, Serialize, Deserialize, Default, FromRow, Clone, Debug)]
+pub struct CoordinateSearch {
+    pub search: String,
     pub lon: f64,
     pub lat: f64,
 }
@@ -30,11 +32,12 @@ pub struct Coordinate {
 #[serde(rename_all = "camelCase")]
 pub struct Person {
     pub id: i32,
+    pub user_id: Uuid,
     pub first_name: String,
     pub last_name: String,
     pub known_from_source_id: Option<i32>,
     #[serde(skip_serializing)]
-    pub coordinate: Option<Json<Coordinate>>,
+    pub coordinate_with_search: Option<sqlx::types::Json<CoordinateSearch>>,
     pub job_title: String,
     pub company: String,
     pub linkedin: String,
@@ -52,7 +55,7 @@ pub struct UserResponse<Fetched> {
 
 pub fn get_record_from_coord(
     geocoder: &ReverseGeocoder,
-    coord: Option<sqlx::types::Json<Coordinate>>,
+    coord: Option<Json<CoordinateSearch>>,
 ) -> Option<Record> {
     if let Some(coord) = coord {
         Some(geocoder.search((coord.lat, coord.lon)).record).cloned()
@@ -78,11 +81,12 @@ fn create_person_with_record<Person: PersonTrait + Clone>(
 }
 
 pub trait PersonTrait {
-    fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>>;
+    fn get_coord(&self) -> Option<Json<CoordinateSearch>>;
 }
 impl PersonTrait for Person {
-    fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>> {
-        self.coordinate
+    fn get_coord(&self) -> Option<Json<CoordinateSearch>> {
+        self.coordinate_with_search.clone() // TODO: theoretically the search query is not needed,
+                                            // which would remove the .clone()
     }
 }
 

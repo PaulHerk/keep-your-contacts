@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
+use sqlx::{types::Json, FromRow};
 
-use super::{Coordinate, Person, PersonTrait, UserResponse};
+use super::{CoordinateSearch, Person, PersonTrait, UserResponse};
 
 pub mod filter_persons;
 pub mod get_person_count;
@@ -35,12 +35,12 @@ pub struct SimplePerson {
     #[sqlx(default)]
     last_name: Option<String>,
     #[serde(skip_serializing)]
-    coordinate: Option<sqlx::types::Json<Coordinate>>,
+    coordinate_with_search: Option<Json<CoordinateSearch>>,
 }
 
 impl PersonTrait for SimplePerson {
-    fn get_coord(&self) -> Option<sqlx::types::Json<Coordinate>> {
-        self.coordinate
+    fn get_coord(&self) -> Option<Json<CoordinateSearch>> {
+        self.coordinate_with_search.clone()
     }
 }
 

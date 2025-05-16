@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO KnownFromSources (user_id, source_name) VALUES ($1, $2) RETURNING source_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "source_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "187a39d63e666439facc07c236d0145ee07b6e16da55765f0e0ea6ada7a686a4"
+}
