@@ -1,12 +1,17 @@
-import { api_request, getCoordsFromPlace } from "$lib";
+import { api_request, getCoordsFromPlace, getPlaceFromCoords } from "$lib";
 import type { Actions } from "@sveltejs/kit";
 import { fail } from "@sveltejs/kit";
 
 const createNewPersonObj = async (formData: FormData) => {
-	const place = formData.get("coordinateOrSearch");
+	let place = formData.get("coordinateOrSearch");
 	let coordinate;
 	try {
 		coordinate = JSON.parse(place as string) as Coordinate;
+		const placeNameOrFail = await getPlaceFromCoords(coordinate);
+		if (placeNameOrFail && !placeNameOrFail.success) {
+			return placeNameOrFail;
+		}
+		place = placeNameOrFail.placeName ?? "" as String;
 	} catch {
 		const coordinateOrFail = place
 			? await getCoordsFromPlace(place as string)

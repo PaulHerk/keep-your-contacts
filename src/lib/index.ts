@@ -65,6 +65,30 @@ async function request(
 //     return id
 // }
 
+export const getPlaceFromCoords = async (coords: Coordinate) => {
+	let error = {
+		success: false,
+		placeNotFound: true,
+		message: "",
+		placeName: "",
+	};
+	try {
+		let res = await fetch(
+			`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lon}&format=jsonv2`
+		);
+		if (res.ok) {
+			let place = (await res.json());
+			if (!place) return { ...error, message: "This place was not found." };
+			let placeName = place.display_name
+			return { success: true, placeName };
+		}
+		error.message = "Error with the api: " + res.statusText;
+	} catch (e) {
+		error.message =
+			"Error with the api: " + e + "Do you have internet connection?";
+	}
+	return error;
+};
 export const getCoordsFromPlace = async (query: string) => {
 	let error = {
 		success: false,

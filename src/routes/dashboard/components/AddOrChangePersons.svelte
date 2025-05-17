@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import type { ActionData } from "../$types";
-	import { getStringFromRecord, api_request } from "$lib";
+	import { api_request } from "$lib";
 	import { error } from "@sveltejs/kit";
 	import { SquarePlus } from "@lucide/svelte";
 	import { applyAction } from "$app/forms";
@@ -33,14 +33,13 @@
 	);
 	let placeStr = $derived.by(() => {
 		if (personCoordinateToAdd)
-			return JSON.stringify(personCoordinateToAdd);
+			return JSON.stringify(personCoordinateToAdd); // maybe lazy load place string?
 
-		if (kfs) {
-			return personToUpdate?.record
-				? getStringFromRecord(personToUpdate.record)
-				: kfs.locationSearch;
-		}
+		if (personToUpdate?.record) return personToUpdate.record.search;
+
+		if (kfs) return kfs.locationSearch;
 	});
+	$inspect(personToUpdate?.record?.search);
 
 	let newSource = $state("");
 
@@ -58,16 +57,14 @@
 		).then(async (response) => {
 			if (!response.ok) error(500, await response.text());
 			let newSourceId = await response.json();
-			knownFromSources.update((oldSources) =>
-				[
-					...oldSources,
-					{
-						sourceId: newSourceId,
-						sourceName: newSource,
-						description: "",
-					} as KnownFromSource,
-				],
-			);
+			knownFromSources.update((oldSources) => [
+				...oldSources,
+				{
+					sourceId: newSourceId,
+					sourceName: newSource,
+					description: "",
+				} as KnownFromSource,
+			]);
 			selectedKfs = $knownFromSources.length - 1;
 		});
 	}
