@@ -31,6 +31,7 @@ declare global {
 		firstName: string;
 		lastName: string;
 		knownFromSourceId: number?;
+		coordinateWithSearch: CoordinateSearch?;
 		jobTitle: string;
 		company: string;
 		linkedin: string;
@@ -39,6 +40,7 @@ declare global {
 		record: PlaceRecord?;
 	}
 	interface PlaceRecord {
+		search: string;
 		lat: number;
 		lon: number;
 		name: string;
@@ -48,6 +50,12 @@ declare global {
 	}
 
 	interface Coordinate {
+		lat: number;
+		lon: number;
+	}
+
+	interface CoordinateSearch {
+		search: string;
 		lat: number;
 		lon: number;
 	}
@@ -62,7 +70,7 @@ declare global {
 	interface NewPerson {
 		name: string;
 		knownFromSourceId: number?;
-		coordinate: Coordinate?;
+		coordinateWithSearch: CoordinateSearch?;
 		jobTitle: string;
 		company: string;
 		linkedin: string;

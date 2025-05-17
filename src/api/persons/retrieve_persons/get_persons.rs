@@ -10,7 +10,9 @@ use sqlx::{Postgres, QueryBuilder};
 use crate::api::{
     auth::UserWithSettings,
     errors::Error,
-    persons::{create_person_with_record, get_record_from_coord, Person, UserResponse},
+    persons::{
+        create_person_with_record, get_record_from_coord, Person, PlaceRecord, UserResponse,
+    },
     MyState,
 };
 
@@ -86,6 +88,9 @@ pub async fn get_single_person(
         .map_err(Error::DBError)?;
 
     let geocoder = ReverseGeocoder::new();
-    let record = get_record_from_coord(&geocoder, person.coordinate_with_search.clone());
-    Ok(Json(UserResponse { person, record }))
+    let record = get_record_from_coord(&geocoder, &person.coordinate_with_search.clone());
+    Ok(Json(UserResponse {
+        person: person.clone(),
+        record: PlaceRecord::from_coord_and_record(&person.coordinate_with_search, record),
+    }))
 }

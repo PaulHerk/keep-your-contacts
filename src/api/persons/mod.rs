@@ -28,7 +28,7 @@ pub struct CoordinateSearch {
     pub lat: f64,
 }
 
-#[derive(FromRow, Default, Serialize, Deserialize, Clone)]
+#[derive(FromRow, Default, Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Person {
     pub id: i32,
@@ -46,16 +46,51 @@ pub struct Person {
 }
 
 /// needed for the coordinate record that gets appened to the response
+#[derive(Serialize, Deserialize)]
+pub struct PlaceRecord {
+    pub search: String,
+    pub lon: f64,
+    pub lat: f64,
+    pub name: String,
+    pub admin1: String,
+    pub admin2: String,
+    pub cc: String,
+}
+
+impl PlaceRecord {
+    fn from_coord_and_record(
+        coord: &Option<Json<CoordinateSearch>>,
+        record: Option<Record>,
+    ) -> Option<Self> {
+        if coord.is_none() || record.is_none() {
+            return None;
+        }
+        let coord = coord.clone().unwrap();
+        let record = record.unwrap();
+
+        Some(PlaceRecord {
+            search: coord.search.clone(),
+            lon: coord.lon,
+            lat: coord.lat,
+            name: record.name.clone(),
+            admin1: record.admin1.clone(),
+            admin2: record.admin2.clone(),
+            cc: record.cc.clone(),
+        })
+    }
+}
+
+/// needed for the coordinate record that gets appened to the response
 #[derive(Deserialize, Serialize)]
 pub struct UserResponse<Fetched> {
     #[serde(flatten)]
     pub person: Fetched,
-    pub record: Option<Record>,
+    pub record: Option<PlaceRecord>,
 }
 
 pub fn get_record_from_coord(
     geocoder: &ReverseGeocoder,
-    coord: Option<Json<CoordinateSearch>>,
+    coord: &Option<Json<CoordinateSearch>>,
 ) -> Option<Record> {
     if let Some(coord) = coord {
         Some(geocoder.search((coord.lat, coord.lon)).record).cloned()
@@ -70,11 +105,12 @@ fn create_person_with_record<Person: PersonTrait + Clone>(
     persons
         .iter()
         .map(|person| {
-            let record = get_record_from_coord(geocoder, person.get_coord());
+            let coordinate_with_search = person.get_coord();
+            let record = get_record_from_coord(geocoder, &coordinate_with_search);
             let fetched = person.clone();
             UserResponse {
                 person: fetched,
-                record,
+                record: PlaceRecord::from_coord_and_record(&coordinate_with_search, record),
             }
         })
         .collect()

@@ -16,16 +16,17 @@ const createNewPersonObj = async (formData: FormData) => {
 		}
 		coordinate = coordinateOrFail?.coordinate as Coordinate | null;
 	}
+	let coordinateWithSearch = { search: place, ...coordinate } as CoordinateSearch
 	let knownFromSourceId = formData.get("knownFromSourceId") as number | null | undefined;
 	knownFromSourceId = knownFromSourceId ? Number(knownFromSourceId) + 1 : null;
-	console.log(knownFromSourceId);
+	console.log(coordinateWithSearch);
 
 	return {
 		success: true,
 		person: {
 			name: formData.get("name") as string,
 			knownFromSourceId: knownFromSourceId, // Placeholder
-			coordinate,
+			coordinateWithSearch,
 			jobTitle: formData.get("jobTitle") as string,
 			company: formData.get("company") as string,
 			linkedin: formData.get("linkedin") as string,

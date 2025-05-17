@@ -20,7 +20,7 @@ pub async fn get_persons_with_coords(
     Extension(user): Extension<UserWithSettings>,
 ) -> Result<impl IntoResponse, Error> {
     let coordinates = sqlx::query_as!( MapContactResponse, 
-        r#"SELECT id, first_name, last_name, coordinate_with_search as "coordinate_with_search!: CoordinateSearch" FROM persons WHERE user_id = $1 AND coordinate_with_search IS NOT NULL"#,
+        r#"SELECT id, first_name, last_name, coordinate_with_search as "coordinate_with_search!: sqlx::types::Json<CoordinateSearch>" FROM persons WHERE user_id = $1 AND coordinate_with_search IS NOT NULL"#,
     user.user.id)
     .fetch_all(&state.pool)
     .await

@@ -6,7 +6,7 @@ use axum::{
 };
 use serde::Deserialize;
 
-use crate::api::{auth::UserWithSettings, errors::Error, MyState};
+use crate::api::{auth::UserWithSettings, errors::Error, persons::PlaceRecord, MyState};
 
 use super::{CoordinateSearch, Person};
 use reverse_geocoder::ReverseGeocoder;
@@ -19,7 +19,7 @@ use crate::api::persons::{get_record_from_coord, UserResponse};
 pub struct PersonNew {
     pub name: String,
     pub known_from_source_id: Option<i32>,
-    pub coordinate: Option<CoordinateSearch>,
+    pub coordinate_with_search: Option<CoordinateSearch>,
     #[serde(default)]
     pub job_title: String,
     #[serde(default)]
@@ -43,15 +43,13 @@ pub async fn create_person(
     let first_name = names.next().unwrap_or_default();
     let last_name: String = names.collect::<Vec<&str>>().join(" ");
 
-    dbg!(&data.coordinate);
-
     let mut field_separator = query_builder.separated(", ");
     field_separator
         .push_bind(user.user.id)
         .push_bind(first_name.trim())
         .push_bind(last_name.trim())
         .push_bind(data.known_from_source_id)
-        .push_bind(data.coordinate.map(|c| serde_json::json!(c)))
+        .push_bind(data.coordinate_with_search.map(|c| serde_json::json!(c)))
         .push_bind(data.job_title)
         .push_bind(data.company)
         .push_bind(data.linkedin)
@@ -65,8 +63,11 @@ pub async fn create_person(
     {
         Ok(person) => {
             let geocoder = ReverseGeocoder::new();
-            let record = get_record_from_coord(&geocoder, person.coordinate_with_search.clone());
-            Ok(Json(UserResponse { person, record }))
+            let record = get_record_from_coord(&geocoder, &person.coordinate_with_search);
+            Ok(Json(UserResponse {
+                person: person.clone(),
+                record: PlaceRecord::from_coord_and_record(&person.coordinate_with_search, record),
+            }))
         }
         Err(e) => Err(Error::DBError(e)),
     }
@@ -88,7 +89,7 @@ pub async fn update_person(
         .bind(first_name)
         .bind(last_name)
         .bind(data.known_from_source_id)
-        .bind(data.coordinate.map(|coord| serde_json::json!(coord)))
+        .bind(data.coordinate_with_search.map(|coord| serde_json::json!(coord)))
         .bind(data.job_title)
         .bind(data.company)
         .bind(data.linkedin)
