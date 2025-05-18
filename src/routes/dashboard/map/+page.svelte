@@ -15,32 +15,36 @@
 	let userLocation: { lat: number; lng: number } | null = $state(null);
 	let personPlaceToAdd: CoordinateSearch | undefined = $state();
 
-	let contactWithLocations = $state(
-		$persons
-			.filter((p) => p.record)
-			.map((p) => {
-				return {
-					id: p.id,
-					coordinate: {
-						lat: p.record?.lat,
-						lng: p.record?.lon,
-					}, //how tf is p.record possibly null?????????
-					firstName: p.firstName,
-					lastName: p.lastName,
-				};
-			}),
-	);
-
-	onMount(async () => {
-		if ($persons.length === data.personCount) return;
-		api_request(fetch, "/persons/coordinates", {}, $authToken).then(
-			async (response) => {
-				if (!response.ok)
-					error(500, await response.text());
-				contactWithLocations = await response.json();
-			},
-		);
-	}); // TODO: put in load function? Idk
+	let contactWithLocations = $derived.by(async () => {
+		if ($persons.length === data.personCount)
+			return $persons
+				.filter((p) => p.record)
+				.map((p) => {
+					return {
+						id: p.id,
+						coordinateWithSearch: {
+							search: p.record
+								?.search,
+							lat: p.record?.lat,
+							lng: p.record?.lon,
+						}, //how tf is p.record possibly null?????????
+						firstName: p.firstName,
+						lastName: p.lastName,
+					};
+				});
+		else {
+			const response = await api_request(
+				fetch,
+				"/persons/coordinates",
+				{},
+				$authToken,
+			);
+			if (!response.ok) error(500, await response.text());
+			const locs = await response.json();
+			console.log(locs);
+			return [...locs];
+		} // TODO: don't refetch all coords
+	});
 
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(
@@ -77,7 +81,6 @@
 			openState = true;
 		}
 	} // TODO: edit person on click at marker, add person when clicking anywhere on map
-	$inspect(personPlaceToAdd);
 </script>
 
 {#key userLocation}
@@ -106,10 +109,10 @@
 					/>
 				</Marker>
 			{/if}
-			{#each contactWithLocations as contact}
-				{#if contact.coordinate}
+			{#await contactWithLocations then contacts}
+				{#each contacts as contact}
 					<Marker
-						latLng={contact.coordinate}
+						latLng={contact.coordinateWithSearch}
 						onclick={onMapClick}
 					>
 						<DivIcon
@@ -136,8 +139,8 @@
 							/>
 						</DivIcon>
 					</Marker>
-				{/if}
-			{/each}
+				{/each}
+			{/await}
 		</Map>
 		<Modal
 			open={openState}

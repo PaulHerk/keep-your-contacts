@@ -31,7 +31,6 @@ declare global {
 		firstName: string;
 		lastName: string;
 		knownFromSourceId: number?;
-		coordinateWithSearch: CoordinateSearch?;
 		jobTitle: string;
 		company: string;
 		linkedin: string;

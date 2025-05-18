@@ -45,7 +45,6 @@ export const actions = {
 		const parsedFormData = await createNewPersonObj(data);
 		if (!parsedFormData.success) return fail(500, parsedFormData);
 		const personToAdd = (parsedFormData as any).person as NewPerson; // this works since if personToAdd only exists if it succeeded
-		// console.log("sr", JSON.stringify(personToAdd))
 
 		const response = await api_request(fetch, "/persons", {
 			method: "POST",
