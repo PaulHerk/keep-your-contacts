@@ -9,18 +9,19 @@
 		knownFromSources,
 		persons,
 		prevQueryParams,
-		settings
+		settings,
 	} from "./store";
 	import SearchBar from "./components/SearchBar.svelte";
 	import { error } from "@sveltejs/kit";
-	import { onMount, untrack } from "svelte";
+	import { untrack } from "svelte";
 	import { Modal } from "@skeletonlabs/skeleton-svelte";
 	import AddOrChangePersons from "./components/AddOrChangePersons.svelte";
 	import EditKfs from "./components/EditKFS.svelte";
 
 	let { data, form }: PageProps = $props();
 	authToken.set(data.token);
-	settings.set(data.loggedInUser.settings)
+	settings.set(data.loggedInUser.settings);
+	knownFromSources.set(data.knownFromSources);
 
 	let windowInnerWidth = $state(0);
 	let page = $state(0);
@@ -29,8 +30,6 @@
 	let filterTerm = $state("");
 
 	let openStateAddP = $state(false);
-
-	onMount(() => ($knownFromSources = data.knownFromSources));
 
 	$effect(() => {
 		const queryParams = `/persons?page=${page}&per_page=${perPage}&detailed=true${filterTerm}`;

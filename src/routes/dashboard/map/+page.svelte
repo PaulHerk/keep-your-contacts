@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Map, TileLayer, Marker, Tooltip, DivIcon } from "sveaflet";
-	import { authToken, persons } from "../store";
-	import { onMount } from "svelte";
+	import { authToken, knownFromSources, persons } from "../store";
 	import { api_request, getPlaceFromCoords } from "$lib";
 	import { error } from "@sveltejs/kit";
 	import { MapPin } from "@lucide/svelte";
@@ -10,10 +9,13 @@
 	import AddOrChangePersons from "../components/AddOrChangePersons.svelte";
 
 	let { data, form }: PageProps = $props();
+	if ($knownFromSources.length === 0) knownFromSources.set(data.knownFromSources);
 
 	let openState = $state(false);
 	let userLocation: { lat: number; lng: number } | null = $state(null);
 	let personPlaceToAdd: CoordinateSearch | undefined = $state();
+
+	console.log(data.knownFromSources)
 
 	let contactWithLocations = $derived.by(async () => {
 		if ($persons.length === data.personCount)
