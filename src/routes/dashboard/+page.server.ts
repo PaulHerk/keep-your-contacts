@@ -3,21 +3,23 @@ import type { Actions } from "@sveltejs/kit";
 import { fail } from "@sveltejs/kit";
 
 const createNewPersonObj = async (formData: FormData) => {
-	const place = formData.get("place");
+	const place = (formData.get("place") as string).trim();
 	let coordinateWithSearch: CoordinateSearch | null = null;
 	try {
-		coordinateWithSearch = JSON.parse(place as string);
+		coordinateWithSearch = JSON.parse(place);
 	}
 	catch {
 
 		const coordinateOrFail = place
-			? await getCoordsFromPlace(place as string)
+			? await getCoordsFromPlace(place)
 			: null;
 		if (coordinateOrFail && !coordinateOrFail.success) {
 			return coordinateOrFail;
 		}
-		const coordinate = coordinateOrFail?.coordinate as Coordinate | null;
-		coordinateWithSearch = { search: place, ...coordinate } as CoordinateSearch
+		if (coordinateOrFail?.coordinate && place !== "") {
+			const coordinate = coordinateOrFail?.coordinate as Coordinate | null;
+			coordinateWithSearch = { search: place, ...coordinate } as CoordinateSearch
+		}
 	}
 	let formKFSId = formData.get("knownFromSourceId");
 	// knownFromSourceId is a string or null; convert to number or null

@@ -89,7 +89,7 @@
 				(p) => p.id === personToUpdate?.personId,
 			);
 			oldPersons.splice(idx, 1, newPerson);
-			return oldPersons;
+			return oldPersons; // TODO: on place change does not update
 		});
 		openState = false;
 	}
