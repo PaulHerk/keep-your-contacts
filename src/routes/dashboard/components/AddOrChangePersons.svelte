@@ -12,7 +12,7 @@
 	let {
 		form,
 		personToUpdate = undefined,
-		personCoordinateToAdd,
+		personPlaceToAdd,
 		openState = $bindable(false),
 	}: {
 		form: ActionData;
@@ -21,7 +21,7 @@
 			personId: number;
 			record?: PlaceRecord;
 		};
-		personCoordinateToAdd?: Coordinate;
+		personPlaceToAdd?: CoordinateSearch;
 		openState: boolean;
 	} = $props();
 
@@ -32,8 +32,7 @@
 		selectedKfs !== null ? $knownFromSources[selectedKfs] : null,
 	);
 	let placeStr = $derived.by(() => {
-		if (personCoordinateToAdd)
-			return JSON.stringify(personCoordinateToAdd); // maybe lazy load place string?
+		if (personPlaceToAdd) return personPlaceToAdd.search; // maybe lazy load place string?
 
 		if (personToUpdate?.record) return personToUpdate.record.search;
 
@@ -125,6 +124,8 @@
 				"personId",
 				personToUpdate.personId.toString(),
 			);
+		if (personPlaceToAdd)
+			formData.set("place", JSON.stringify(personPlaceToAdd));
 
 		if (selectedKfs === $knownFromSources.length)
 			selectedKfs = null;
@@ -214,7 +215,7 @@
 				class="input"
 				type="text"
 				placeholder="Place:"
-				name="coordinateOrSearch"
+				name="place"
 				value={placeStr}
 			/>
 		</label>

@@ -1,36 +1,34 @@
-import { api_request, getCoordsFromPlace, getPlaceFromCoords } from "$lib";
+import { api_request, getCoordsFromPlace } from "$lib";
 import type { Actions } from "@sveltejs/kit";
 import { fail } from "@sveltejs/kit";
 
 const createNewPersonObj = async (formData: FormData) => {
-	let place = formData.get("coordinateOrSearch");
-	let coordinate;
+	const place = formData.get("place");
+	let coordinateWithSearch: CoordinateSearch | null = null;
 	try {
-		coordinate = JSON.parse(place as string) as Coordinate;
-		const placeNameOrFail = await getPlaceFromCoords(coordinate);
-		if (placeNameOrFail && !placeNameOrFail.success) {
-			return placeNameOrFail;
-		}
-		place = placeNameOrFail.placeName ?? "" as String;
-	} catch {
+		coordinateWithSearch = JSON.parse(place as string);
+	}
+	catch {
+
 		const coordinateOrFail = place
 			? await getCoordsFromPlace(place as string)
 			: null;
 		if (coordinateOrFail && !coordinateOrFail.success) {
 			return coordinateOrFail;
 		}
-		coordinate = coordinateOrFail?.coordinate as Coordinate | null;
+		const coordinate = coordinateOrFail?.coordinate as Coordinate | null;
+		coordinateWithSearch = { search: place, ...coordinate } as CoordinateSearch
 	}
-	let coordinateWithSearch = { search: place, ...coordinate } as CoordinateSearch
-	let knownFromSourceId = formData.get("knownFromSourceId") as number | null | undefined;
-	knownFromSourceId = knownFromSourceId ? Number(knownFromSourceId) + 1 : null;
+	let formKFSId = formData.get("knownFromSourceId");
+	// knownFromSourceId is a string or null; convert to number or null
+	let knownFromSourceId = formKFSId ? Number(formKFSId) : null;
 	console.log(coordinateWithSearch);
 
 	return {
 		success: true,
 		person: {
 			name: formData.get("name") as string,
-			knownFromSourceId: knownFromSourceId, // Placeholder
+			knownFromSourceId,
 			coordinateWithSearch,
 			jobTitle: formData.get("jobTitle") as string,
 			company: formData.get("company") as string,
@@ -46,7 +44,8 @@ export const actions = {
 
 		const parsedFormData = await createNewPersonObj(data);
 		if (!parsedFormData.success) return fail(500, parsedFormData);
-		const personToAdd = (parsedFormData as any).person; // this works since if personToAdd only exists if it succeeded
+		const personToAdd = (parsedFormData as any).person as NewPerson; // this works since if personToAdd only exists if it succeeded
+		// console.log("sr", JSON.stringify(personToAdd))
 
 		const response = await api_request(fetch, "/persons", {
 			method: "POST",

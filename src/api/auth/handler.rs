@@ -153,7 +153,7 @@ pub async fn get_me_handler(
 /// Updates the authenticated user's settings.
 pub async fn update_settings(
     State(data): State<MyState>,
-    Extension(user): Extension<UserWithSettings>,
+    Extension(mut user): Extension<UserWithSettings>,
     Json(new_settings): Json<UserSettings>,
 ) -> Result<impl IntoResponse, Error> {
     sqlx::query!(
@@ -165,5 +165,6 @@ pub async fn update_settings(
     .await
     .map_err(Error::DBError)?;
 
+    user.settings = new_settings;
     Ok(StatusCode::OK)
 }

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, first_name, last_name, coordinate_with_search as \"coordinate_with_search!: CoordinateSearch\" FROM persons WHERE user_id = $1 AND coordinate_with_search IS NOT NULL",
+  "query": "SELECT id, first_name, last_name, coordinate_with_search as \"coordinate_with_search!: sqlx::types::Json<CoordinateSearch>\" FROM persons WHERE user_id = $1 AND coordinate_with_search IS NOT NULL",
   "describe": {
     "columns": [
       {
@@ -20,7 +20,7 @@
       },
       {
         "ordinal": 3,
-        "name": "coordinate_with_search!: CoordinateSearch",
+        "name": "coordinate_with_search!: sqlx::types::Json<CoordinateSearch>",
         "type_info": "Jsonb"
       }
     ],
@@ -36,5 +36,5 @@
       true
     ]
   },
-  "hash": "bb72bf229e73e01dbe75124f9873359fafca8d83646df015461e1d9263053a70"
+  "hash": "8be3ef1f8c264aff846382356afe9418d90659095fb4c5cbff5eef231b24b857"
 }
