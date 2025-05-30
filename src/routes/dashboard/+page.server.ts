@@ -1,6 +1,22 @@
 import { api_request, getCoordsFromPlace } from "$lib";
 import type { Actions } from "@sveltejs/kit";
-import { fail } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
+import type { PageServerLoad } from "./$types";
+
+export const load: PageServerLoad = async ({ fetch }) => { 
+  const kfsResponse = await api_request(fetch, "/known-from-sources");
+  if (!kfsResponse.ok) error(500, await kfsResponse.text());
+  const knownFromSources: KnownFromSource[] = await kfsResponse.json();
+
+  const pcResponse = await api_request(fetch, "/persons/count");
+  if (!pcResponse.ok) error(500, await pcResponse.text());
+  const personCount = parseInt(await pcResponse.text()); // api will return number.
+
+  return { 
+    personCount,
+    knownFromSources,
+  }
+}
 
 const createNewPersonObj = async (formData: FormData) => {
 	const place = (formData.get("place") as string).trim();
