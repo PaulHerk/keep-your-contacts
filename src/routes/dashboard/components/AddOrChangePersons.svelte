@@ -8,6 +8,7 @@
 	import { authToken, knownFromSources, persons } from "../store";
 	import { invalidate } from "$app/navigation";
 	import EditKfs from "./EditKFS.svelte";
+	import type { HTMLInputTypeAttribute } from "svelte/elements";
 
 	let {
 		form,
@@ -95,12 +96,17 @@
 	}
 </script>
 
-{#snippet input(label: string, key: keyof NewPerson, required = false)}
+{#snippet input(
+	label: string,
+	key: keyof NewPerson,
+	required = false,
+	type: HTMLInputTypeAttribute = "text",
+)}
 	<label class="label">
 		<span class="label-text">{label}</span>
 		<input
 			class="input"
-			type="text"
+			{type}
 			placeholder={label}
 			name={key}
 			value={personToUpdate ? personToUpdate.person[key] : ""}
@@ -222,7 +228,7 @@
 
 		{@render input("Job Title:", "jobTitle")}
 		{@render input("Company:", "company")}
-		{@render input("", "linkedin")}
+		{@render input("LinkedIn-URL", "linkedin", false, "url")}
 		{@render input("Notes:", "notes")}
 	</article>
 	<footer class="flex justify-end gap-4">
