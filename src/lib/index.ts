@@ -109,7 +109,7 @@ export const getCoordsFromPlace = async (query: string) => {
 			};
 			return { success: true, coordinate: coordinate };
 		}
-		error.message = "Error with the api: " + res.statusText;
+		error.message = "Error with the api: '" + res.statusText + "' maybe check the input query for this place again.";
 	} catch (e) {
 		error.message =
 			"Error with the api: " + e + "Do you have internet connection?";
