@@ -90,7 +90,9 @@
 							<article>
 								<Settings
 									bind:settingsDrawerState
-									personCount={page.data.personCount}
+									personCount={page
+										.data
+										.personCount}
 								/>
 							</article>
 							<footer>

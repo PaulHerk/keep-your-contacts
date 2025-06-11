@@ -3,10 +3,12 @@
 	import { error } from "@sveltejs/kit";
 	import { authToken, settings } from "../../store";
 	import { get } from "svelte/store";
+	import { goto } from "$app/navigation";
 
 	let {
-		settingsDrawerState = $bindable(), personCount
-	}: { settingsDrawerState: boolean; personCount: number} = $props();
+		settingsDrawerState = $bindable(),
+		personCount,
+	}: { settingsDrawerState: boolean; personCount: number } = $props();
 
 	let newSettings = get(settings);
 
@@ -26,6 +28,14 @@
 			settings.update((_oldSettings) => newSettings);
 			settingsDrawerState = false;
 		});
+	}
+
+	function logout() {
+		api_request(fetch, "/auth/logout", {}, $authToken).then(
+			async (response) => {
+				if (response.ok) goto("/login");
+			},
+		);
 	}
 </script>
 
@@ -61,4 +71,7 @@
 	>
 		Update
 	</button>
+	<button type="submit" class="btn preset-tonal-tertiary" onclick={logout}
+		>Logout</button
+	>
 </div>

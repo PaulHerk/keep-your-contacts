@@ -8,7 +8,7 @@
 	if (form2?.success && browser) goto("/dashboard");
 </script>
 
-<form method="POST" action="?/login" use:enhance>
+<form method="POST" action="?/login" use:enhance class="h-full m-10 flex flex-col md:flex-row gap-10 content-center justify-center align-middle">
 	{#if form2?.wrongCredentials}
 		<p class="error">Wrong credentials!</p>
 	{/if}
@@ -18,18 +18,18 @@
 		<p class="error">This user already exists!</p>{/if}
 	<label>
 		Name
-		<input name="name" type="text" required />
+		<input name="name" type="text" class="input" required />
 	</label>
 	<label>
 		Email
-		<input name="email" type="email" />
+		<input name="email" type="email" class="input"/>
 	</label>
 	<label>
 		Password
-		<input name="password" type="password" required />
+		<input name="password" type="password" class="input" required />
 	</label>
-	<button>Log in</button>
-	<button formaction="?/register">Register</button>
+	<button class="btn preset-tonal-primary">Log in</button>
+	<button class="btn preset-tonal-secondary" formaction="?/register">Register</button>
 </form>
 
 {#if form2 && !form2.success}
