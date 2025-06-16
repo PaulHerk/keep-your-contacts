@@ -65,7 +65,7 @@ Response:
       "last_name": "Doe",
       "job_title": "Software Engineer",
       "company": "Tech Corp",
-      "linkedin": "john-doe",
+      "website": "john-doe",
       "notes": "Met at conference",
       "record": {
         "name": "San Francisco",
@@ -149,7 +149,7 @@ Query Parameters:
 - `detailed` (optional, boolean): When true, returns additional fields:
   - job_title
   - company
-  - linkedin
+  - website
   - notes
   - created_at
 - `global_search` (optional, string): Searches across all text fields
@@ -196,7 +196,7 @@ Detailed response (detailed=true):
       "last_name": "Doe",
       "job_title": "Software Engineer",
       "company": "Tech Corp",
-      "linkedin": "john-doe",
+      "website": "john-doe",
       "notes": "Met at conference",
       "created_at": "2024-01-20T15:00:00Z",
       "record": {

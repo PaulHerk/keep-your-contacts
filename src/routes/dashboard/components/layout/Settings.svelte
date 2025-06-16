@@ -33,7 +33,10 @@
 	function logout() {
 		api_request(fetch, "/auth/logout", {}, $authToken).then(
 			async (response) => {
-				if (response.ok) goto("/login");
+				if (!response.ok) return;
+
+				authToken.set(null);
+				goto("/login");
 			},
 		);
 	}

@@ -33,8 +33,9 @@ declare global {
 		knownFromSourceId: number?;
 		jobTitle: string;
 		company: string;
-		linkedin: string;
+		website: string;
 		notes: string;
+		birthday: Date;
 		createdAt: string;
 		record: PlaceRecord?;
 	}
@@ -72,7 +73,8 @@ declare global {
 		coordinateWithSearch: CoordinateSearch?;
 		jobTitle: string;
 		company: string;
-		linkedin: string;
+		website: string;
+		birthday: string?;
 		notes: string;
 	}
 }

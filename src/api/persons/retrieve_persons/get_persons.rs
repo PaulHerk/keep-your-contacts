@@ -32,7 +32,7 @@ pub async fn retrieve(
     };
     let geocoder = ReverseGeocoder::new();
     let mut sql_query: QueryBuilder<Postgres> = QueryBuilder::new(match view {
-        UserView::Simple => "SELECT id, first_name, last_name, coordinate_with_search",
+        UserView::Simple => "SELECT id, first_name, last_name, birthday, coordinate_with_search",
         UserView::Detailed => "SELECT *",
     });
     sql_query

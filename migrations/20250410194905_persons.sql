@@ -55,7 +55,9 @@ CREATE TABLE IF NOT EXISTS Persons (
     -- === Job Information ===
     job_title VARCHAR(150) NOT NULL,
     company VARCHAR(150) NOT NULL,
-    linkedin VARCHAR(150) NOT NULL,
+    website VARCHAR(150) NOT NULL,
+
+    birthday DATE,
 
     -- === Extra Notes ===
     notes TEXT NOT NULL,
@@ -78,7 +80,7 @@ CREATE TABLE IF NOT EXISTS Persons (
 
 ALTER TABLE Persons
     ADD COLUMN IF NOT EXISTS searchable tsvector
-        GENERATED ALWAYS AS (to_tsvector('english', first_name || ' ' || last_name || ' ' || job_title || ' ' || company || ' ' || linkedin || ' ' || notes || ' ' || coordinate_with_search::jsonb)) STORED;
+        GENERATED ALWAYS AS (to_tsvector('english', first_name || ' ' || last_name || ' ' || job_title || ' ' || company || ' ' || website || ' ' || notes || ' ' || coordinate_with_search::jsonb)) STORED;
 
 -- === Indexes for Performance ===
 CREATE INDEX IF NOT EXISTS idx_persons_lastname ON Persons(last_name);

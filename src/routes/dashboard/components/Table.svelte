@@ -71,66 +71,28 @@
 				<thead>
 					<tr>
 						<th>
-							{@render sortingH1(
-								"Added First",
-								"createdAt",
-							)}
+							{@render sortingH1("Added First", "createdAt")}
 						</th>
-						<th
-							>{@render sortingH1(
-								"First Name",
-								"firstName",
-							)}</th
-						>
-						<th
-							>{@render sortingH1(
-								"Last Name",
-								"lastName",
-							)}</th
-						>
+						<th>{@render sortingH1("First Name", "firstName")}</th>
+						<th>{@render sortingH1("Last Name", "lastName")}</th>
 						{#if detailed}
-							<th
-								>{@render sortingH1(
-									"City",
-									"company",
-								)}</th
-							>
-							<th
-								>{@render sortingH1(
-									"Job",
-									"jobTitle",
-								)}</th
-							>
-							<th
-								>{@render sortingH1(
-									"Notes",
-									"notes",
-								)}</th
-							>
+							<th>{@render sortingH1("City", "company")}</th>
+							<th>{@render sortingH1("Job", "jobTitle")}</th>
+							<th>{@render sortingH1("Notes", "notes")}</th>
 						{/if}
-						<th
-							>{@render sortingH1(
-								"Record",
-								"record",
-							)}</th
-						>
+						<th>{@render sortingH1("Record", "record")}</th>
 					</tr>
 				</thead>
-				<tbody
-					class="[&>tr]:hover:preset-tonal-primary"
-				>
+				<tbody class="[&>tr]:hover:preset-tonal-primary">
 					{#each $persons as person}
 						<tr>
 							<td>
-								{@render editPersonModal(
-									person,
-								)}
+								{@render editPersonModal(person)}
 							</td>
 							<td
 								><a
-									href={person.linkedin !==
-									""
-										? person.linkedin
+									href={person.website !== ""
+										? person.website
 										: null}
 									target="_blank"
 									class="text-wrap"
@@ -140,9 +102,8 @@
 							>
 							<td
 								><a
-									href={person.linkedin !==
-									""
-										? person.linkedin
+									href={person.website !== ""
+										? person.website
 										: null}
 									target="_blank"
 									class="text-wrap"
@@ -152,34 +113,24 @@
 							>
 							{#if detailed}
 								<td
-									><p
-										class="text-wrap"
-									>
+									><p class="text-wrap">
 										{person.company}
 									</p></td
 								>
 								<td
-									><p
-										class="text-wrap"
-									>
+									><p class="text-wrap">
 										{person.jobTitle}
 									</p></td
 								>
 								<td
-									><p
-										class="text-wrap"
-									>
+									><p class="text-wrap">
 										{person.notes}
 									</p></td
 								>
 							{/if}
 							<td
-								><p
-									class="text-wrap"
-								>
-									{getStringFromRecord(
-										person.record,
-									)}
+								><p class="text-wrap">
+									{getStringFromRecord(person.record)}
 								</p></td
 							>
 						</tr>
@@ -207,8 +158,7 @@
 					count={$persons.length < personCount
 						? personCount
 						: $persons.length}
-					onPageChange={(e) =>
-						(page = e.page - 1)}
+					onPageChange={(e) => (page = e.page - 1)}
 					page={page + 1}
 					pageSize={perPage}
 					onPageSizeChange={(e) => {
@@ -228,9 +178,7 @@
 					{#snippet labelFirst()}<IconFirst
 							class="size-4"
 						/>{/snippet}
-					{#snippet labelLast()}<IconLast
-							class="size-4"
-						/>{/snippet}
+					{#snippet labelLast()}<IconLast class="size-4" />{/snippet}
 				</Pagination>
 			{/key}
 		</footer>

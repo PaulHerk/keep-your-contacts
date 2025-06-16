@@ -39,7 +39,7 @@
 
 		if (kfs) return kfs.locationSearch;
 	});
-	$inspect(personToUpdate?.record?.search);
+	let kfsLen = $derived($knownFromSources ? $knownFromSources.length : 0);
 
 	let newSource = $state("");
 
@@ -123,7 +123,7 @@
 		: "/dashboard?/addPerson"}
 	use:enhance={({ formData, formElement, cancel }) => {
 		if (formElement.id === "cancel") cancel();
-		if (selectedKfs === $knownFromSources.length)
+		if (selectedKfs === kfsLen)
 			formData.delete("knownFromSourceId"); // ensures that user cannot set the KFSID to the "add new" value
 		if (personToUpdate)
 			formData.append(
@@ -133,8 +133,7 @@
 		if (personPlaceToAdd)
 			formData.set("place", JSON.stringify(personPlaceToAdd));
 
-		if (selectedKfs === $knownFromSources.length)
-			selectedKfs = null;
+		if (selectedKfs === kfsLen) selectedKfs = null;
 		if (selectedKfs !== null) {
 			formData.set(
 				"knownFromSources",
@@ -188,11 +187,9 @@
 							>{source.sourceName}</option
 						>
 					{/each}
-					<option value={$knownFromSources.length}
-						>add new</option
-					>
+					<option value={kfsLen}>add new</option>
 				</select>
-				{#if selectedKfs === $knownFromSources.length}
+				{#if selectedKfs === kfsLen}
 					<input
 						class="input"
 						type="text"
@@ -228,7 +225,8 @@
 
 		{@render input("Job Title:", "jobTitle")}
 		{@render input("Company:", "company")}
-		{@render input("LinkedIn-URL", "linkedin", false, "url")}
+		{@render input("Website", "website", false, "url")}
+		{@render input("Birthday", "birthday", false, "date")}
 		{@render input("Notes:", "notes")}
 	</article>
 	<footer class="flex justify-end gap-4">

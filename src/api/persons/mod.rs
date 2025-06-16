@@ -6,7 +6,7 @@ use axum::{
     routing::{get, put},
     Router,
 };
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, NaiveDate};
 use get_coordinates::get_persons_with_coords;
 use retrieve_persons::{
     get_person_count::get_person_count,
@@ -40,7 +40,8 @@ pub struct Person {
     pub coordinate_with_search: Option<sqlx::types::Json<CoordinateSearch>>,
     pub job_title: String,
     pub company: String,
-    pub linkedin: String,
+    pub website: String,
+    pub birthday: Option<NaiveDate>,
     pub notes: String,
     pub created_at: DateTime<Local>, // pub born: String,
 }

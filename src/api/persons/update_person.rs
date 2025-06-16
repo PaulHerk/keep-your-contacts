@@ -14,7 +14,7 @@ use sqlx::{Postgres, QueryBuilder};
 
 use crate::api::persons::{get_record_from_coord, UserResponse};
 
-#[derive(Deserialize, Default)]
+#[derive(Deserialize, Default, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct PersonNew {
     pub name: String,
@@ -25,7 +25,8 @@ pub struct PersonNew {
     #[serde(default)]
     pub company: String,
     #[serde(default)]
-    pub linkedin: String,
+    pub website: String,
+    pub birthday: Option<chrono::NaiveDate>,
     #[serde(default)]
     pub notes: String,
 }
@@ -36,13 +37,14 @@ pub async fn create_person(
     Json(data): Json<PersonNew>,
 ) -> Result<impl IntoResponse, impl IntoResponse> {
     let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-        "INSERT INTO persons (user_id, first_name, last_name, known_from_source_id, coordinate_with_search, job_title, company, linkedin, notes) VALUES (",
+        "INSERT INTO persons (user_id, first_name, last_name, known_from_source_id, coordinate_with_search, job_title, company, website, birthday, notes) VALUES (",
     );
 
     let mut names = data.name.trim().split_ascii_whitespace();
     let first_name = names.next().unwrap_or_default();
     let last_name: String = names.collect::<Vec<&str>>().join(" ");
 
+    dbg!(&data);
     let mut field_separator = query_builder.separated(", ");
     field_separator
         .push_bind(user.user.id)
@@ -52,7 +54,8 @@ pub async fn create_person(
         .push_bind(data.coordinate_with_search.map(|c| serde_json::json!(c)))
         .push_bind(data.job_title)
         .push_bind(data.company)
-        .push_bind(data.linkedin)
+        .push_bind(data.website)
+        .push_bind(data.birthday)
         .push_bind(data.notes);
     field_separator.push_unseparated(") RETURNING *;");
 
@@ -83,7 +86,7 @@ pub async fn update_person(
     let first_name = names.next().unwrap_or_default();
     let last_name: String = names.collect::<Vec<&str>>().join(" ");
 
-    let person: Person = sqlx::query_as("UPDATE Persons SET (first_name, last_name, known_from_source_id, coordinate_with_search, job_title, company, linkedin, notes) = ($3, $4, $5, $6, $7, $8, $9, $10)  WHERE user_id = $1 AND id = $2 RETURNING *")
+    let person: Person = sqlx::query_as("UPDATE Persons SET (first_name, last_name, known_from_source_id, coordinate_with_search, job_title, company, website, birthday, notes) = ($3, $4, $5, $6, $7, $8, $9, $10, $11)  WHERE user_id = $1 AND id = $2 RETURNING *")
         .bind(user.user.id)
         .bind(person_id)
         .bind(first_name)
@@ -92,7 +95,8 @@ pub async fn update_person(
         .bind(data.coordinate_with_search.map(|coord| serde_json::json!(coord)))
         .bind(data.job_title)
         .bind(data.company)
-        .bind(data.linkedin)
+        .bind(data.website)
+        .bind(data.birthday)
         .bind(data.notes).fetch_one(&state.pool).await.map_err(Error::DBError)?;
     Ok((StatusCode::CREATED, Json(person)))
 }

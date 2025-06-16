@@ -2,7 +2,7 @@
   import { Modal } from "@skeletonlabs/skeleton-svelte";
   import AddOrChangePersons from "./AddOrChangePersons.svelte";
   import type { ActionData } from "../$types";
-  import { api_request, api_url } from "$lib";
+  import { api_request } from "$lib";
   import { error } from "@sveltejs/kit";
   import { authToken, persons } from "../store";
   import { invalidate } from "$app/navigation";
@@ -20,15 +20,16 @@
   const newP: NewPerson = {
     name: `${personToUpdate.firstName} ${personToUpdate.lastName}`,
     knownFromSourceId: personToUpdate.knownFromSourceId,
-    coordinate: personToUpdate.record
+    coordinateWithSearch: personToUpdate.record
       ? ({
+	  search: personToUpdate.record.search,
           lat: personToUpdate.record.lat,
           lon: personToUpdate.record.lon,
-        } as Coordinate)
+        } as CoordinateSearch)
       : null,
     jobTitle: personToUpdate.jobTitle,
     company: personToUpdate.company,
-    linkedin: personToUpdate.linkedin,
+    website: personToUpdate.website,
     notes: personToUpdate.notes,
   };
   const personId = personToUpdate.id;
@@ -40,7 +41,7 @@
       {
         method: "DELETE",
       },
-      $authToken
+      $authToken,
     );
     if (!response.ok)
       error(500, "Something went wrong: " + (await response.text()));
@@ -69,7 +70,11 @@
   {#snippet content()}
     <AddOrChangePersons
       {form}
-      personToUpdate={{ person: newP, personId , record: personToUpdate.record ?? undefined}}
+      personToUpdate={{
+        person: newP,
+        personId,
+        record: personToUpdate.record ?? undefined,
+      }}
       bind:openState
     />
     <button

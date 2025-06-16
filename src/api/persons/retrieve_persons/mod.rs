@@ -34,6 +34,7 @@ pub struct SimplePerson {
     first_name: String,
     #[sqlx(default)]
     last_name: Option<String>,
+    birthday: Option<chrono::NaiveDate>,
     #[serde(skip_serializing)]
     coordinate_with_search: Option<Json<CoordinateSearch>>,
 }
